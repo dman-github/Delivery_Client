@@ -27,7 +27,7 @@ class SecondScreenFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_second_screen, container, false)
         val next = view.findViewById<TextView>(R.id.second_screen_next)
         next.setOnClickListener {
-            findNavController().navigate(R.id.action_viewPagerFragment_to_homeFragment)
+            findNavController().navigate(R.id.action_viewPagerFragment_to_loginFragment)
         }
         return view
     }

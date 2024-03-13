@@ -31,5 +31,10 @@
         <item name="colorSurfaceInverse">@color/md_theme_dark_inverseSurface</item>
         <item name="colorPrimaryInverse">@color/md_theme_dark_inversePrimary</item>
     </style>
-
+    <style name="Theme.Okada.Fullscreen" parent="Theme.Okada">
+        <item name="android:windowFullscreen">true</item>
+    </style>
+    <style name="Theme.Splash" parent="Theme.Okada">
+        <item name="android:windowBackground">@color/black</item>
+    </style>
 </resources>
