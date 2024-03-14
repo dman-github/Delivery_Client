@@ -10,7 +10,8 @@
 
 
     <color name="seed">#D7CA36</color>
-    <color name="md_theme_light_primary">#676000</color>
+    <color name="md_theme_light_primary">#ccbe00</color>
+    <color name="md_theme_light_primary_original">#676000</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
     <color name="md_theme_light_primaryContainer">#F4E650</color>
     <color name="md_theme_light_onPrimaryContainer">#1F1C00</color>

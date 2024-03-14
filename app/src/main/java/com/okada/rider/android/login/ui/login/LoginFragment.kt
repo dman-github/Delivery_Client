@@ -43,8 +43,8 @@ class LoginFragment : Fragment() {
         loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
             .get(LoginViewModel::class.java)
 
-        val usernameEditText = binding.username
-        val passwordEditText = binding.password
+        val usernameEditText = binding.emailInput
+        val passwordEditText = binding.passInput
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
@@ -58,7 +58,7 @@ class LoginFragment : Fragment() {
                     usernameEditText.error = getString(it)
                 }
                 loginFormState.passwordError?.let {
-                    passwordEditText.error = getString(it)
+                    //passwordEditText.error = getString(it)
                 }
             })
 

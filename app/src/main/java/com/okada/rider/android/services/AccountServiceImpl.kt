@@ -21,6 +21,7 @@ class AccountServiceImpl: AccountService {
     }
 
     override fun logout(completion: (Result<Unit>) -> Unit) {
+        FirebaseAuth.getInstance().signOut()
         completion(Result.success(Unit))
     }
 }
