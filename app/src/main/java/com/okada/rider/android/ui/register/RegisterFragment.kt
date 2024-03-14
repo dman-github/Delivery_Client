@@ -1,4 +1,4 @@
-package com.okada.rider.android.login.ui.login
+package com.okada.rider.android.ui.register
 
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
@@ -11,17 +11,15 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
-import android.widget.Button
-import android.widget.EditText
-import android.widget.ProgressBar
 import android.widget.Toast
-import com.okada.rider.android.databinding.FragmentLoginBinding
+import com.okada.rider.android.databinding.FragmentRegisterBinding
+
 import com.okada.rider.android.R
 
-class LoginFragment : Fragment() {
+class RegisterFragment : Fragment() {
 
-    private lateinit var loginViewModel: LoginViewModel
-    private var _binding: FragmentLoginBinding? = null
+    private lateinit var loginViewModel: RegisterViewModel
+    private var _binding: FragmentRegisterBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -33,18 +31,18 @@ class LoginFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
 
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
         return binding.root
 
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
+        loginViewModel = ViewModelProvider(this, RegisterViewModelFactory())
+            .get(RegisterViewModel::class.java)
 
-        val usernameEditText = binding.emailInput
-        val passwordEditText = binding.passInput
+        val usernameEditText = binding.username
+        val passwordEditText = binding.password
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
 
@@ -58,7 +56,7 @@ class LoginFragment : Fragment() {
                     usernameEditText.error = getString(it)
                 }
                 loginFormState.passwordError?.let {
-                    //passwordEditText.error = getString(it)
+                    passwordEditText.error = getString(it)
                 }
             })
 
@@ -66,7 +64,7 @@ class LoginFragment : Fragment() {
             Observer { loginResult ->
                 loginResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
-                loginResult.errorMsg?.let {
+                loginResult.error?.let {
                     showLoginFailed(it)
                 }
                 loginResult.success?.let {
@@ -111,14 +109,14 @@ class LoginFragment : Fragment() {
         }
     }
 
-    private fun updateUiWithUser(model: LoggedInUserView) {
+    private fun updateUiWithUser(model: RegisteredUserView) {
         val welcome = getString(R.string.welcome) + model.displayName
         // TODO : initiate successful logged in experience
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLoginFailed(errorString: String) {
+    private fun showLoginFailed(@StringRes errorString: Int) {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
     }

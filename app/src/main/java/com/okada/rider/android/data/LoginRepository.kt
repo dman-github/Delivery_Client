@@ -1,6 +1,6 @@
-package com.okada.rider.android.login.data
+package com.okada.rider.android.data
 
-import com.okada.rider.android.login.data.model.LoggedInUser
+import com.okada.rider.android.data.model.LoggedInUser
 import com.okada.rider.android.services.AccountService
 
 /**

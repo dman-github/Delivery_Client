@@ -1,4 +1,4 @@
-package com.okada.rider.android.login.data
+package com.okada.rider.android.data
 
 /**
  * A generic class that holds a value with its loading status.

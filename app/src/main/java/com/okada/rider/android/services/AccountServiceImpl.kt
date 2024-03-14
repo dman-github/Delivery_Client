@@ -1,7 +1,7 @@
 package com.okada.rider.android.services
 
 import com.google.firebase.auth.FirebaseAuth
-import com.okada.rider.android.login.data.model.LoggedInUser
+import com.okada.rider.android.data.model.LoggedInUser
 
 class AccountServiceImpl: AccountService {
 
@@ -17,6 +17,14 @@ class AccountServiceImpl: AccountService {
                     completion(Result.failure(Exception("Network Error")))
                 }
             }
+        }
+    }
+
+    override fun isUserLoggedIn(completion: (Result<Boolean>) -> Unit) {
+        FirebaseAuth.getInstance().currentUser?.also {
+            completion(Result.success(true))
+        }?:run {
+            completion(Result.success(false))
         }
     }
 

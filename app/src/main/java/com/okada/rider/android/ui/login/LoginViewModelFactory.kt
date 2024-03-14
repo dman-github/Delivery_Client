@@ -1,8 +1,8 @@
-package com.okada.rider.android.login.ui.login
+package com.okada.rider.android.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.okada.rider.android.login.data.LoginRepository
+import com.okada.rider.android.data.LoginRepository
 import com.okada.rider.android.services.AccountServiceImpl
 
 /**

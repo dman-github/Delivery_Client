@@ -1,4 +1,4 @@
-package com.okada.rider.android.login.ui.login
+package com.okada.rider.android.ui.login
 
 /**
  * User details post authentication that is exposed to the UI
