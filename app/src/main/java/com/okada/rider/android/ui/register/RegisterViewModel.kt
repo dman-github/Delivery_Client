@@ -22,6 +22,7 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
             result.fold(onSuccess = {user->
                 _registerForm.value =
                     RegisterFormState(emailAddress = user.email)
+                registerRepository.checkProfileExists()
 
             },onFailure = {
                 _registerResult.value = RegisterResult(errorMsg = it.message)
@@ -32,7 +33,21 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
                  lastname: String,
                  biometricId: String) {
 
-        registerRepository
+        if (!registerRepository.isProfileExists) {
+            // Profile does not exist in DB so we can create one
+            registerRepository.createUserInfo(firstname,lastname,biometricId) {result ->
+                result.fold(onSuccess = {
+                    _registerResult.value =
+                        RegisterResult(stringResource = R.string.profile_created)
+
+                },onFailure = {
+                    _registerResult.value = RegisterResult(errorMsg = it.message)
+                })
+            }
+
+        } else {
+            _registerResult.value = RegisterResult(stringResource = R.string.user_profile_exists)
+        }
         // can be launched in a separate asynchronous job
        // val result = registerRepository.login(username, password)
 
@@ -47,7 +62,7 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
     fun dataChanged(firstname: String, surname: String) {
         if (!isStringValid(firstname)) {
             _registerForm.value = RegisterFormState(firstNameError = R.string.invalid_string)
-        } else if (!isPasswordValid(surname)) {
+        } else if (!isStringValid(surname)) {
             _registerForm.value = RegisterFormState(surnameError = R.string.invalid_string)
         } else {
             _registerForm.value = RegisterFormState(isDataValid = true)

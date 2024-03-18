@@ -8,9 +8,9 @@ import com.okada.rider.android.data.model.UserInfo
 
 class DataServiceImpl: DataService {
     private val databaseRefUser = FirebaseDatabase.getInstance().getReference("UserInfo")
-    override fun checkIfUserInfoExists(listener: ValueEventListener) {
+    override fun checkIfUserInfoExists(uid: String, listener: ValueEventListener) {
         // Set up Firebase listener
-        databaseRefUser.addListenerForSingleValueEvent(listener)
+        databaseRefUser.child(uid).addListenerForSingleValueEvent(listener)
     }
 
     override fun createUserInfo(uid: String, userInfo: UserInfo,

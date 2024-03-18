@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import com.okada.rider.android.databinding.FragmentLoginBinding
 import com.okada.rider.android.R
 
@@ -43,6 +44,7 @@ class LoginFragment : Fragment() {
         val passwordEditText = binding.passInput
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
+        val textViewRegister = binding.textViewRegister
 
         loginViewModel.loginFormState.observe(viewLifecycleOwner,
             Observer { loginFormState ->
@@ -104,6 +106,10 @@ class LoginFragment : Fragment() {
                 usernameEditText.text.toString(),
                 passwordEditText.text.toString()
             )
+        }
+
+        textViewRegister.setOnClickListener {
+            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
 

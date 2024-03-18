@@ -1,14 +1,13 @@
 package com.okada.rider.android.data
 
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.getValue
 import com.okada.rider.android.data.model.LoggedInUser
 import com.okada.rider.android.data.model.UserInfo
 import com.okada.rider.android.services.AccountService
 import com.okada.rider.android.services.DataService
-import com.okada.rider.android.ui.login.LoggedInUserView
-import com.okada.rider.android.ui.login.LoginResult
 import kotlin.Result
 
 /**
@@ -20,9 +19,13 @@ class RegisterRepository(val accountService: AccountService, val dataService: Da
 
     // in-memory cache of the loggedInUser object
     private var loggedInUser: LoggedInUser? = null
+    private var profileExists: Boolean = false
 
     val isLoggedIn: Boolean
         get() = loggedInUser != null
+
+    val isProfileExists: Boolean
+        get() = profileExists
 
     fun fetchEmailAddress(completion: (Result<LoggedInUser>) -> Unit) {
         accountService.getLoggedInUser {result ->
@@ -31,6 +34,23 @@ class RegisterRepository(val accountService: AccountService, val dataService: Da
                     user.email)
                 completion(Result.success(loggedInUser!!))
             }
+        }
+    }
+
+    fun checkProfileExists() {
+        loggedInUser?.let {
+            dataService.checkIfUserInfoExists(it.userId, object : ValueEventListener {
+                override fun onDataChange (dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    val userInfo = dataSnapshot.getValue<UserInfo>()
+                    profileExists = userInfo != null
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    profileExists = false
+                }
+
+            })
         }
     }
 

@@ -44,6 +44,7 @@ class RegisterFragment : Fragment() {
         val firstnameEditText = binding.editFirstName
         val lastNameEditText = binding.editLastName
         val emailEditText = binding.emailAddress
+        val biomEditText = binding.idNumber
         val profileButton = binding.createProfile
         val loadingProgressBar = binding.loading
         registerViewModel.fetchUserData()
@@ -69,10 +70,13 @@ class RegisterFragment : Fragment() {
                 loginResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
                 loginResult.errorMsg?.let {
-                    showLoginFailed(it)
+                    showApiFailed(it)
                 }
                 loginResult.success?.let {
-                    updateUiWithUser(it)
+                    showApiMessage(it)
+                }
+                loginResult.stringResource?.let{
+                    showApiMessage(it)
                 }
             })
 
@@ -92,15 +96,17 @@ class RegisterFragment : Fragment() {
                 )
             }
         }
+
         firstnameEditText.addTextChangedListener(afterTextChangedListener)
         lastNameEditText.addTextChangedListener(afterTextChangedListener)
 
         profileButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
-            /*registerViewModel.login(
+            registerViewModel.register(
                 firstnameEditText.text.toString(),
-                lastNameEditText.text.toString()
-            )*/
+                lastNameEditText.text.toString(),
+                biomEditText.text.toString()
+            )
         }
     }
 
@@ -111,9 +117,14 @@ class RegisterFragment : Fragment() {
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLoginFailed(errorString: String) {
+    private fun showApiFailed(errorString: String) {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
+    }
+
+    private fun showApiMessage(@StringRes messageString: Int) {
+        val appContext = context?.applicationContext ?: return
+        Toast.makeText(appContext, messageString, Toast.LENGTH_LONG).show()
     }
 
     override fun onDestroyView() {
