@@ -48,15 +48,6 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
         } else {
             _registerResult.value = RegisterResult(stringResource = R.string.user_profile_exists)
         }
-        // can be launched in a separate asynchronous job
-       // val result = registerRepository.login(username, password)
-
-       /* if (result is Result.Success) {
-            _loginResult.value =
-                RegisterResult(success = RegisteredUserView(displayName = result.data.displayName))
-        } else {
-            _loginResult.value = RegisterResult(error = R.string.login_failed)
-        }*/
     }
 
     fun dataChanged(firstname: String, surname: String) {
