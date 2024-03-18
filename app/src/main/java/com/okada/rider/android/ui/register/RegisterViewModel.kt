@@ -3,20 +3,36 @@ package com.okada.rider.android.ui.register
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import android.util.Patterns
 import com.okada.rider.android.data.RegisterRepository
 
 import com.okada.rider.android.R
+import com.okada.rider.android.ui.login.LoggedInUserView
+import com.okada.rider.android.ui.login.LoginResult
 
 class RegisterViewModel(private val registerRepository: RegisterRepository) : ViewModel() {
 
-    private val _loginForm = MutableLiveData<RegisterFormState>()
-    val loginFormState: LiveData<RegisterFormState> = _loginForm
+    private val _registerForm = MutableLiveData<RegisterFormState>()
+    val registerFormState: LiveData<RegisterFormState> = _registerForm
 
-    private val _loginResult = MutableLiveData<RegisterResult>()
-    val loginResult: LiveData<RegisterResult> = _loginResult
+    private val _registerResult = MutableLiveData<RegisterResult>()
+    val registerResult: LiveData<RegisterResult> = _registerResult
 
-    fun login(username: String, password: String) {
+    fun fetchUserData() {
+        registerRepository.fetchEmailAddress {result ->
+            result.fold(onSuccess = {user->
+                _registerForm.value =
+                    RegisterFormState(emailAddress = user.email)
+
+            },onFailure = {
+                _registerResult.value = RegisterResult(errorMsg = it.message)
+            })
+        }
+    }
+    fun register(firstname: String,
+                 lastname: String,
+                 biometricId: String) {
+
+        registerRepository
         // can be launched in a separate asynchronous job
        // val result = registerRepository.login(username, password)
 
@@ -28,23 +44,25 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
         }*/
     }
 
-    fun loginDataChanged(username: String, password: String) {
-        if (!isUserNameValid(username)) {
-            _loginForm.value = RegisterFormState(usernameError = R.string.invalid_username)
-        } else if (!isPasswordValid(password)) {
-            _loginForm.value = RegisterFormState(passwordError = R.string.invalid_password)
+    fun dataChanged(firstname: String, surname: String) {
+        if (!isStringValid(firstname)) {
+            _registerForm.value = RegisterFormState(firstNameError = R.string.invalid_string)
+        } else if (!isPasswordValid(surname)) {
+            _registerForm.value = RegisterFormState(surnameError = R.string.invalid_string)
         } else {
-            _loginForm.value = RegisterFormState(isDataValid = true)
+            _registerForm.value = RegisterFormState(isDataValid = true)
         }
     }
 
-    // A placeholder username validation check
-    private fun isUserNameValid(username: String): Boolean {
-        return if (username.contains("@")) {
-            Patterns.EMAIL_ADDRESS.matcher(username).matches()
-        } else {
-            username.isNotBlank()
+    // A placeholder string validation check
+    private fun isStringValid(str: String): Boolean {
+        if (str.isNotBlank()) {
+            if (!str.matches(Regex(".*\\d.*"))) {
+                // has no number characters
+                return true
+            }
         }
+        return false
     }
 
     // A placeholder password validation check

@@ -18,7 +18,7 @@ import com.okada.rider.android.R
 
 class RegisterFragment : Fragment() {
 
-    private lateinit var loginViewModel: RegisterViewModel
+    private lateinit var registerViewModel: RegisterViewModel
     private var _binding: FragmentRegisterBinding? = null
 
     // This property is only valid between onCreateView and
@@ -38,33 +38,37 @@ class RegisterFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = ViewModelProvider(this, RegisterViewModelFactory())
+        registerViewModel = ViewModelProvider(this, RegisterViewModelFactory())
             .get(RegisterViewModel::class.java)
 
-        val usernameEditText = binding.username
-        val passwordEditText = binding.password
-        val loginButton = binding.login
+        val firstnameEditText = binding.editFirstName
+        val lastNameEditText = binding.editLastName
+        val emailEditText = binding.emailAddress
+        val profileButton = binding.createProfile
         val loadingProgressBar = binding.loading
-
-        loginViewModel.loginFormState.observe(viewLifecycleOwner,
+        registerViewModel.fetchUserData()
+        registerViewModel.registerFormState.observe(viewLifecycleOwner,
             Observer { loginFormState ->
                 if (loginFormState == null) {
                     return@Observer
                 }
-                loginButton.isEnabled = loginFormState.isDataValid
-                loginFormState.usernameError?.let {
-                    usernameEditText.error = getString(it)
+                profileButton.isEnabled = loginFormState.isDataValid
+                loginFormState.firstNameError?.let {
+                    firstnameEditText.error = getString(it)
                 }
-                loginFormState.passwordError?.let {
-                    passwordEditText.error = getString(it)
+                loginFormState.surnameError?.let {
+                    lastNameEditText.error = getString(it)
+                }
+                if (loginFormState.emailAddress.isNotEmpty()) {
+                    emailEditText.setText(loginFormState.emailAddress)
                 }
             })
 
-        loginViewModel.loginResult.observe(viewLifecycleOwner,
+        registerViewModel.registerResult.observe(viewLifecycleOwner,
             Observer { loginResult ->
                 loginResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
-                loginResult.error?.let {
+                loginResult.errorMsg?.let {
                     showLoginFailed(it)
                 }
                 loginResult.success?.let {
@@ -82,41 +86,32 @@ class RegisterFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable) {
-                loginViewModel.loginDataChanged(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString()
+                registerViewModel.dataChanged(
+                    firstnameEditText.text.toString(),
+                    lastNameEditText.text.toString()
                 )
             }
         }
-        usernameEditText.addTextChangedListener(afterTextChangedListener)
-        passwordEditText.addTextChangedListener(afterTextChangedListener)
-        passwordEditText.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
-                loginViewModel.login(
-                    usernameEditText.text.toString(),
-                    passwordEditText.text.toString()
-                )
-            }
-            false
-        }
+        firstnameEditText.addTextChangedListener(afterTextChangedListener)
+        lastNameEditText.addTextChangedListener(afterTextChangedListener)
 
-        loginButton.setOnClickListener {
+        profileButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
-            loginViewModel.login(
-                usernameEditText.text.toString(),
-                passwordEditText.text.toString()
-            )
+            /*registerViewModel.login(
+                firstnameEditText.text.toString(),
+                lastNameEditText.text.toString()
+            )*/
         }
     }
 
     private fun updateUiWithUser(model: RegisteredUserView) {
-        val welcome = getString(R.string.welcome) + model.displayName
+        val welcome = getString(R.string.welcome) + model.uid
         // TODO : initiate successful logged in experience
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, welcome, Toast.LENGTH_LONG).show()
     }
 
-    private fun showLoginFailed(@StringRes errorString: Int) {
+    private fun showLoginFailed(errorString: String) {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
     }

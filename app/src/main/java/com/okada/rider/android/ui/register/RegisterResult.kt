@@ -5,5 +5,5 @@ package com.okada.rider.android.ui.register
  */
 data class RegisterResult(
     val success: RegisteredUserView? = null,
-    val error: Int? = null
+    val errorMsg: String? = null
 )

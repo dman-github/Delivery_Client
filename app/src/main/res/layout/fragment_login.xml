@@ -11,7 +11,7 @@
         android:id="@+id/cons_layout_logo"
         android:layout_width="match_parent"
         android:layout_height="200dp"
-        android:background="@color/black"
+        android:background="@drawable/curved_rectangle_all_sides"
         app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
@@ -54,8 +54,8 @@
         android:layout_marginStart="24dp"
         android:layout_marginEnd="24dp"
         android:layout_marginTop="24dp"
-        app:boxStrokeColor="?colorPrimary"
-        app:hintTextColor="?colorPrimary"
+        app:boxStrokeColor="@color/text_input_box_stroke"
+        app:hintTextColor="@color/text_input_box_stroke"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/emailLayout"
@@ -90,13 +90,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginStart="32dp"
-        android:layout_marginTop="64dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginBottom="64dp"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="@+id/passwordLayout"
         app:layout_constraintStart_toStartOf="@+id/passwordLayout"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/login"
         app:layout_constraintVertical_bias="0.3" />
 </androidx.constraintlayout.widget.ConstraintLayout>

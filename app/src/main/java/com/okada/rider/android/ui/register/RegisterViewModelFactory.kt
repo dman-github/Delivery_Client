@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.okada.rider.android.data.RegisterRepository
 import com.okada.rider.android.services.AccountServiceImpl
+import com.okada.rider.android.services.DataServiceImpl
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
@@ -16,7 +17,8 @@ class RegisterViewModelFactory : ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
             return RegisterViewModel(
                 registerRepository = RegisterRepository(
-                    accountService = AccountServiceImpl()
+                    accountService = AccountServiceImpl(),
+                    dataService = DataServiceImpl()
                 )
             ) as T
         }

@@ -16,4 +16,12 @@
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
     <string name="login_failed">"Login failed"</string>
+    <!-- Strings related to register -->
+    <string name="create_profile">"Create Profile"</string>
+    <string name="register_message">Let\'s start with creating your account</string>
+    <string name="firstname_message">Firstname</string>
+    <string name="lastname_message">Lastname</string>
+    <string name="email_address_message">Email Address</string>
+    <string name="id_num_message">Biometric ID</string>
+    <string name="invalid_string">Must not contain numeric characters</string>
 </resources>
