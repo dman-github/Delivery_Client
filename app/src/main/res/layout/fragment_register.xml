@@ -128,7 +128,8 @@
             android:id="@+id/password_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/editText_bottom_margin">
+            android:layout_marginBottom="@dimen/editText_bottom_margin"
+            app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edit_set_password"
@@ -136,6 +137,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginEnd="4dp"
                 android:hint="@string/prompt_password"
+                android:inputType="textPassword"
                 android:maxLines="1"
                 app:boxStrokeColor="@color/text_input_box_stroke"
                 app:hintTextColor="@color/text_input_box_stroke">
@@ -147,15 +149,17 @@
             android:id="@+id/re_enter_password_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/editText_bottom_margin">
+            android:layout_marginBottom="@dimen/editText_bottom_margin"
+            app:passwordToggleEnabled="true">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/edit_reenter_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/prompt_re_enter_password"
-                android:maxLines="1"
                 android:layout_marginEnd="4dp"
+                android:hint="@string/prompt_re_enter_password"
+                android:inputType="textPassword"
+                android:maxLines="1"
                 app:boxStrokeColor="@color/text_input_box_stroke"
                 app:hintTextColor="@color/text_input_box_stroke">
 
