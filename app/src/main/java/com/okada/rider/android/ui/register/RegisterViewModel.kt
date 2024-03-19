@@ -20,8 +20,8 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
     fun fetchUserData() {
         registerRepository.fetchEmailAddress {result ->
             result.fold(onSuccess = {user->
-                _registerForm.value =
-                    RegisterFormState(emailAddress = user.email)
+                /*_registerForm.value =
+                    RegisterFormState(emailAddress = user.email)*/
                 registerRepository.checkProfileExists()
 
             },onFailure = {
@@ -31,22 +31,28 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
     }
     fun register(firstname: String,
                  lastname: String,
-                 biometricId: String) {
+                 biometricId: String,
+                 username: String,
+                 password: String) {
+        registerRepository.createUserAuthentication(username, password){result ->
+            result.fold(onSuccess = {
+                if (!registerRepository.isProfileExists) {
+                    // Profile does not exist in DB so we can create one
+                    registerRepository.createUserInfo(firstname,lastname,biometricId) {result ->
+                        result.fold(onSuccess = {
+                            _registerResult.value =
+                                RegisterResult(stringResource = R.string.profile_created)
 
-        if (!registerRepository.isProfileExists) {
-            // Profile does not exist in DB so we can create one
-            registerRepository.createUserInfo(firstname,lastname,biometricId) {result ->
-                result.fold(onSuccess = {
-                    _registerResult.value =
-                        RegisterResult(stringResource = R.string.profile_created)
-
-                },onFailure = {
-                    _registerResult.value = RegisterResult(errorMsg = it.message)
-                })
-            }
-
-        } else {
-            _registerResult.value = RegisterResult(stringResource = R.string.user_profile_exists)
+                        },onFailure = {
+                            _registerResult.value = RegisterResult(errorMsg = it.message)
+                        })
+                    }
+                } else {
+                    _registerResult.value = RegisterResult(stringResource = R.string.user_profile_exists)
+                }
+            },onFailure = {
+                _registerResult.value = RegisterResult(errorMsg = it.message)
+            })
         }
     }
 
@@ -65,16 +71,16 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
             if (retryPassword.isNotBlank() && !arePasswordsIdentical(password,retryPassword)) {
                     _registerForm.value =
                         RegisterFormState(passwordMatchingError = R.string.invalid_matching_password)
+            } else {
+                if (firstname.isNotBlank() &&
+                    surname.isNotBlank() &&
+                    password.isNotBlank() &&
+                    retryPassword.isNotBlank()) {
+                    _registerForm.value = RegisterFormState(isDataValid = true)
+                } else {
+                    _registerForm.value = RegisterFormState(isDataValid = false)
+                }
             }
-        }
-
-        if (firstname.isNotBlank() &&
-            surname.isNotBlank() &&
-            password.isNotBlank() &&
-            retryPassword.isNotBlank()) {
-            _registerForm.value = RegisterFormState(isDataValid = true)
-        } else {
-            _registerForm.value = RegisterFormState(isDataValid = false)
         }
     }
 

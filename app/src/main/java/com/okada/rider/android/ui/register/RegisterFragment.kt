@@ -44,6 +44,7 @@ class RegisterFragment : Fragment() {
         val firstnameEditText = binding.editFirstName
         val lastNameEditText = binding.editLastName
         val emailEditText = binding.emailAddress
+        emailEditText.isEnabled = true
         val biomEditText = binding.idNumber
         val passwordEditText = binding.editSetPassword
         val reEnterPasswordEditText = binding.editReenterPassword
@@ -117,7 +118,9 @@ class RegisterFragment : Fragment() {
             registerViewModel.register(
                 firstnameEditText.text.toString(),
                 lastNameEditText.text.toString(),
-                biomEditText.text.toString()
+                biomEditText.text.toString(),
+                emailEditText.text.toString(),
+                passwordEditText.text.toString()
             )
         }
     }

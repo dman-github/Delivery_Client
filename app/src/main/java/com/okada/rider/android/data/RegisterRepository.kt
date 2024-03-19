@@ -55,6 +55,21 @@ class RegisterRepository(val accountService: AccountService, val dataService: Da
     }
 
 
+    fun createUserAuthentication(email: String,
+                       password: String,
+                       completion: (Result<Unit>) -> Unit) {
+        accountService.createUser(email, password) {result ->
+            result.fold(onSuccess = {user->
+                loggedInUser = LoggedInUser(user.userId,
+                    user.email)
+                completion(Result.success(Unit))
+            },onFailure = {
+                completion(Result.failure(it))
+            })
+        }
+
+    }
+
     fun createUserInfo(firstname: String,
                        lastname: String,
                        biometricId: String,
