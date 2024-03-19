@@ -45,6 +45,8 @@ class RegisterFragment : Fragment() {
         val lastNameEditText = binding.editLastName
         val emailEditText = binding.emailAddress
         val biomEditText = binding.idNumber
+        val passwordEditText = binding.editSetPassword
+        val reEnterPasswordEditText = binding.editReenterPassword
         val profileButton = binding.createProfile
         val loadingProgressBar = binding.loading
         registerViewModel.fetchUserData()
@@ -60,22 +62,28 @@ class RegisterFragment : Fragment() {
                 loginFormState.surnameError?.let {
                     lastNameEditText.error = getString(it)
                 }
+                loginFormState.passwordError?.let {
+                    passwordEditText.error = getString(it)
+                }
+                loginFormState.passwordMatchingError?.let {
+                    reEnterPasswordEditText.error = getString(it)
+                }
                 if (loginFormState.emailAddress.isNotEmpty()) {
                     emailEditText.setText(loginFormState.emailAddress)
                 }
             })
 
         registerViewModel.registerResult.observe(viewLifecycleOwner,
-            Observer { loginResult ->
-                loginResult ?: return@Observer
+            Observer { registerResult ->
+                registerResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
-                loginResult.errorMsg?.let {
+                registerResult.errorMsg?.let {
                     showApiFailed(it)
                 }
-                loginResult.success?.let {
+                registerResult.success?.let {
                     showApiMessage(it)
                 }
-                loginResult.stringResource?.let{
+                registerResult.stringResource?.let{
                     showApiMessage(it)
                 }
             })
@@ -92,13 +100,17 @@ class RegisterFragment : Fragment() {
             override fun afterTextChanged(s: Editable) {
                 registerViewModel.dataChanged(
                     firstnameEditText.text.toString(),
-                    lastNameEditText.text.toString()
+                    lastNameEditText.text.toString(),
+                    passwordEditText.text.toString(),
+                    reEnterPasswordEditText.text.toString()
                 )
             }
         }
 
         firstnameEditText.addTextChangedListener(afterTextChangedListener)
         lastNameEditText.addTextChangedListener(afterTextChangedListener)
+        passwordEditText.addTextChangedListener(afterTextChangedListener)
+        reEnterPasswordEditText.addTextChangedListener(afterTextChangedListener)
 
         profileButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE

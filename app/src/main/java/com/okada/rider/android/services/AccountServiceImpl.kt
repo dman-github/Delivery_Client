@@ -36,6 +36,8 @@ class AccountServiceImpl: AccountService {
         }
     }
 
+
+
     override fun isUserLoggedIn(completion: (Result<Boolean>) -> Unit) {
         FirebaseAuth.getInstance().currentUser?.also {
             completion(Result.success(true))

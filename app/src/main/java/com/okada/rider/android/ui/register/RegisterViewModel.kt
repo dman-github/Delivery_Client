@@ -50,13 +50,31 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
         }
     }
 
-    fun dataChanged(firstname: String, surname: String) {
+    fun dataChanged(firstname: String, surname: String, password: String, retryPassword:String) {
         if (!isStringValid(firstname)) {
             _registerForm.value = RegisterFormState(firstNameError = R.string.invalid_string)
-        } else if (!isStringValid(surname)) {
+        }
+        if (!isStringValid(surname)) {
             _registerForm.value = RegisterFormState(surnameError = R.string.invalid_string)
+        }
+
+        if (password.isNotBlank() && !isPasswordValid(password)) {
+            _registerForm.value = RegisterFormState(passwordError = R.string.invalid_password)
         } else {
+            //Password is valid, now check the retryPassword
+            if (retryPassword.isNotBlank() && !arePasswordsIdentical(password,retryPassword)) {
+                    _registerForm.value =
+                        RegisterFormState(passwordMatchingError = R.string.invalid_matching_password)
+            }
+        }
+
+        if (firstname.isNotBlank() &&
+            surname.isNotBlank() &&
+            password.isNotBlank() &&
+            retryPassword.isNotBlank()) {
             _registerForm.value = RegisterFormState(isDataValid = true)
+        } else {
+            _registerForm.value = RegisterFormState(isDataValid = false)
         }
     }
 
@@ -66,13 +84,20 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
             if (!str.matches(Regex(".*\\d.*"))) {
                 // has no number characters
                 return true
+            } else {
+                // contains number characters
+                return false
             }
         }
-        return false
+        return true
     }
 
     // A placeholder password validation check
     private fun isPasswordValid(password: String): Boolean {
         return password.length > 5
+    }
+
+    private fun arePasswordsIdentical(password: String, retryPassword: String): Boolean {
+        return password == retryPassword
     }
 }

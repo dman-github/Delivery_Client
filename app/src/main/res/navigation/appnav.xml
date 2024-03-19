@@ -21,7 +21,9 @@
         tools:layout="@layout/fragment_view_pager" >
         <action
             android:id="@+id/action_viewPagerFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            app:destination="@id/loginFragment"
+            app:popUpTo="@id/splashFragment"
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/loginFragment"

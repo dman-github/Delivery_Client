@@ -43,7 +43,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:layout_marginBottom="20dp"
+            android:layout_marginBottom="@dimen/editText_bottom_margin"
             android:baselineAligned="false"
             android:orientation="horizontal"
             android:weightSum="2">
@@ -89,7 +89,7 @@
         <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="@dimen/editText_bottom_margin">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/email_address"
@@ -109,7 +109,7 @@
             android:id="@+id/id_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp">
+            android:layout_marginBottom="@dimen/editText_bottom_margin">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/id_number"
@@ -123,6 +123,46 @@
             </com.google.android.material.textfield.TextInputEditText>
 
         </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/password_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/editText_bottom_margin">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_set_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:hint="@string/prompt_password"
+                android:maxLines="1"
+                app:boxStrokeColor="@color/text_input_box_stroke"
+                app:hintTextColor="@color/text_input_box_stroke">
+
+            </com.google.android.material.textfield.TextInputEditText>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/re_enter_password_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/editText_bottom_margin">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/edit_reenter_password"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/prompt_re_enter_password"
+                android:maxLines="1"
+                android:layout_marginEnd="4dp"
+                app:boxStrokeColor="@color/text_input_box_stroke"
+                app:hintTextColor="@color/text_input_box_stroke">
+
+            </com.google.android.material.textfield.TextInputEditText>
+
+        </com.google.android.material.textfield.TextInputLayout>
+
     </LinearLayout>
 
     <Button

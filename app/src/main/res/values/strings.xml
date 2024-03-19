@@ -26,6 +26,7 @@
     <string name="login_failed">"Login failed"</string>
     <string name="invalid_username">Not a valid username</string>
     <string name="invalid_password">Password must be >5 characters</string>
+    <string name="invalid_matching_password">Passwords must match</string>
     <string name="user_profile_exists">"A user profile already exists for this user"</string>
     <string name="profile_created">"Profile has been created"</string>
 </resources>
