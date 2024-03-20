@@ -29,7 +29,7 @@
         android:id="@+id/textViewlbl"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/login_message"
+        android:text="@string/signup_message"
         android:textSize="22sp"
         android:maxLines="2"
         android:textAlignment="center"
@@ -90,7 +90,7 @@
         android:layout_marginTop="@dimen/editText_top_margin"
         android:layout_marginBottom="64dp"
         android:enabled="false"
-        android:text="@string/action_sign_in"
+        android:text="@string/action_sign_up"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -98,10 +98,10 @@
         app:layout_constraintVertical_bias="0.2" />
 
     <TextView
-        android:id="@+id/textViewSignup"
+        android:id="@+id/textViewRegister"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/action_have_sign_up"
+        android:text="@string/action_already_signed_up"
         android:textSize="14sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

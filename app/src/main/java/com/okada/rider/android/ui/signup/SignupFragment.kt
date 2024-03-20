@@ -1,91 +1,75 @@
-package com.okada.rider.android.ui.login
+package com.okada.rider.android.ui.signup
 
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.fragment.app.Fragment
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import com.google.android.material.textfield.TextInputEditText
-import com.okada.rider.android.databinding.FragmentLoginBinding
 import com.okada.rider.android.R
+import com.okada.rider.android.databinding.FragmentSignupBinding
+import com.okada.rider.android.ui.login.LoggedInUserView
+import com.okada.rider.android.ui.login.LoginViewModel
+import com.okada.rider.android.ui.login.LoginViewModelFactory
 
-class LoginFragment : Fragment() {
-
-    private lateinit var loginViewModel: LoginViewModel
-    private var _binding: FragmentLoginBinding? = null
+class SignupFragment : Fragment() {
+    private lateinit var signupViewModel: SignupViewModel
+    private var _binding: FragmentSignupBinding? = null
 
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentSignupBinding.inflate(inflater, container, false)
         return binding.root
-
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        loginViewModel = ViewModelProvider(this, LoginViewModelFactory())
-            .get(LoginViewModel::class.java)
+        signupViewModel = ViewModelProvider(this, SignupViewModelFactory())
+            .get(SignupViewModel::class.java)
 
         val usernameEditText = binding.emailInput
         val passwordEditText = binding.passInput
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
-        val textViewSignup = binding.textViewSignup
-        usernameEditText.isSaveEnabled = false
-        passwordEditText.isSaveEnabled = false
+        val textViewRegister = binding.textViewRegister
 
-        Log.i("okadaapp LoginFragment:", "onViewCreated")
-        loginViewModel.loginFormState.observe(viewLifecycleOwner,
-            Observer { loginFormState ->
-                if (loginFormState == null) {
+        signupViewModel.signupFormState.observe(viewLifecycleOwner,
+            Observer { signupFormState ->
+                if (signupFormState == null) {
                     return@Observer
                 }
-                loginButton.isEnabled = loginFormState.isDataValid
-                loginFormState.usernameError?.let {
+                loginButton.isEnabled = signupFormState.isDataValid
+                signupFormState.usernameError?.let {
                     usernameEditText.error = getString(it)
                 }
-                loginFormState.passwordError?.let {
-                    //passwordEditText.error = getString(it)
+                signupFormState.passwordError?.let {
+                    passwordEditText.error = getString(it)
                 }
             })
 
-        loginViewModel.loginResult.observe(viewLifecycleOwner,
-            Observer { loginResult ->
-                loginResult ?: return@Observer
+        signupViewModel.signupResult.observe(viewLifecycleOwner,
+            Observer { signupResult ->
+                signupResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
-                loginResult.errorMsg?.let {
+                signupResult.errorMsg?.let {
                     showLoginFailed(it)
                 }
-                loginResult.success?.let {
+                signupResult.success?.let {
                     updateUiWithUser(it)
-                }
-                loginResult.navigateToRegister?.let {
-                    if (it) {
-                        // we have logged in successfully but the user does not have a profile
-                        navigateToRegisterScreen()
-                    }
-                }
-                loginResult.navigateToHome?.let {
-                    if (it) {
-                        // we have logged in successfully AND the user has a profile
-                        navigateToHomeScreen()
-                    }
                 }
             })
 
@@ -99,7 +83,7 @@ class LoginFragment : Fragment() {
             }
 
             override fun afterTextChanged(s: Editable) {
-                loginViewModel.loginDataChanged(
+                signupViewModel.dataChanged(
                     usernameEditText.text.toString(),
                     passwordEditText.text.toString()
                 )
@@ -109,7 +93,7 @@ class LoginFragment : Fragment() {
         passwordEditText.addTextChangedListener(afterTextChangedListener)
         passwordEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
-                loginViewModel.login(
+                signupViewModel.signup(
                     usernameEditText.text.toString(),
                     passwordEditText.text.toString()
                 )
@@ -119,30 +103,16 @@ class LoginFragment : Fragment() {
 
         loginButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
-            loginViewModel.login(
+            signupViewModel.signup(
                 usernameEditText.text.toString(),
                 passwordEditText.text.toString()
             )
         }
 
-        textViewSignup.setOnClickListener {
-            navigateToSignupScreen()
+        textViewRegister.setOnClickListener {
+           // findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
-
-
-    private fun navigateToRegisterScreen () {
-        findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
-    }
-
-    private fun navigateToHomeScreen () {
-        findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
-    }
-
-    private fun navigateToSignupScreen () {
-        findNavController().navigate(R.id.action_loginFragment_to_signupFragment)
-    }
-
 
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome) + model.displayName
@@ -159,6 +129,6 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        Log.i("okadaapp LoginFragment:", "onDestroyView")
     }
+
 }

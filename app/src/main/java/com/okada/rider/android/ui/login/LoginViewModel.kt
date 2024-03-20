@@ -1,5 +1,6 @@
 package com.okada.rider.android.ui.login
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -18,10 +19,14 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
 
     fun login(username: String, password: String) {
         loginRepository.login(username, password) {result ->
-            result.fold(onSuccess = {user->
-                _loginResult.value =
-                    LoginResult(success = LoggedInUserView(displayName = user.userId))
-
+            result.fold(onSuccess = {
+                if (loginRepository.profileExists) {
+                    _loginResult.value =
+                        LoginResult(navigateToHome = true)
+                } else {
+                    _loginResult.value =
+                        LoginResult(navigateToRegister = true)
+                }
             },onFailure = {
                 _loginResult.value = LoginResult(errorMsg = it.message)
             })
@@ -29,6 +34,7 @@ class LoginViewModel(private val loginRepository: LoginRepository) : ViewModel()
     }
 
     fun loginDataChanged(username: String, password: String) {
+        Log.i("okadaapp LoginViewModel:", "username: $username, password: $password")
         if (!isUserNameValid(username)) {
             _loginForm.value = LoginFormState(usernameError = R.string.invalid_username)
         } else if (!isPasswordValid(password)) {

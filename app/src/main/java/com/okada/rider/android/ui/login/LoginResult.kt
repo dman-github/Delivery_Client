@@ -5,5 +5,7 @@ package com.okada.rider.android.ui.login
  */
 data class LoginResult(
     val success: LoggedInUserView? = null,
+    val navigateToRegister: Boolean? = false,
+    val navigateToHome: Boolean? = false,
     val errorMsg: String? = null
 )

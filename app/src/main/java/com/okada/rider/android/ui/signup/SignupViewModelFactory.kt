@@ -1,24 +1,27 @@
-package com.okada.rider.android.ui.login
+package com.okada.rider.android.ui.signup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.okada.rider.android.data.LoginRepository
+import com.okada.rider.android.data.RegisterRepository
+import com.okada.rider.android.data.SignupRepository
 import com.okada.rider.android.services.AccountServiceImpl
 import com.okada.rider.android.services.DataServiceImpl
+import com.okada.rider.android.ui.register.RegisterViewModel
+
+
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
  * Required given LoginViewModel has a non-empty constructor
  */
-class LoginViewModelFactory : ViewModelProvider.Factory {
+class SignupViewModelFactory : ViewModelProvider.Factory {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
-        if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
-            return LoginViewModel(
-                loginRepository = LoginRepository(
-                    accountService = AccountServiceImpl(),
-                    dataService = DataServiceImpl()
+        if (modelClass.isAssignableFrom(SignupViewModel::class.java)) {
+            return SignupViewModel(
+                signupRepository = SignupRepository(
+                    accountService = AccountServiceImpl()
                 )
             ) as T
         }
