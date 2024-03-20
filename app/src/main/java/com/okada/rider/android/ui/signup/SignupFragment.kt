@@ -71,6 +71,11 @@ class SignupFragment : Fragment() {
                 signupResult.success?.let {
                     updateUiWithUser(it)
                 }
+                signupResult.navigateToRegister?.let {
+                    if (it){
+                        navigateToRegisterScreen()
+                    }
+                }
             })
 
         val afterTextChangedListener = object : TextWatcher {
@@ -110,9 +115,13 @@ class SignupFragment : Fragment() {
         }
 
         textViewRegister.setOnClickListener {
-           // findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
         }
     }
+
+    private fun navigateToRegisterScreen () {
+        findNavController().navigate(R.id.action_signupFragment_to_registerFragment)
+    }
+
 
     private fun updateUiWithUser(model: LoggedInUserView) {
         val welcome = getString(R.string.welcome) + model.displayName

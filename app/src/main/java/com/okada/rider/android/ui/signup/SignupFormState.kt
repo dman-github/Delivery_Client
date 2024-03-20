@@ -2,7 +2,7 @@ package com.okada.rider.android.ui.signup
 
 
 data class SignupFormState(
-    val usernameError: Int? = null,
-    val passwordError: Int? = null,
-    val isDataValid: Boolean = false
+    var usernameError: Int? = null,
+    var passwordError: Int? = null,
+    var isDataValid: Boolean = false
 )

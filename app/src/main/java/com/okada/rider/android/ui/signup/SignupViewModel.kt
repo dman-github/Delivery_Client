@@ -22,9 +22,9 @@ class SignupViewModel(private val signupRepository: SignupRepository) : ViewMode
 
     fun signup(username: String, password: String) {
         signupRepository.createUser(username, password) {result ->
-            result.fold(onSuccess = {user->
+            result.fold(onSuccess = {
                 _signupResult.value =
-                    SignupResult(success = LoggedInUserView(displayName = user.userId))
+                    SignupResult(navigateToRegister = true)
 
             },onFailure = {
                 _signupResult.value = SignupResult(errorMsg = it.message)
@@ -33,22 +33,30 @@ class SignupViewModel(private val signupRepository: SignupRepository) : ViewMode
     }
 
     fun dataChanged(username: String, password: String) {
-        if (!isUserNameValid(username)) {
-            _signupForm.value = SignupFormState(usernameError = R.string.invalid_username)
-        } else if (!isPasswordValid(password)) {
-            _signupForm.value = SignupFormState(passwordError = R.string.invalid_password)
-        } else {
-            _signupForm.value = SignupFormState(isDataValid = true)
+        var formState = SignupFormState()
+        var valid = true
+        if (username.isNotBlank() && !isUserNameValid(username)) {
+            formState.usernameError = R.string.invalid_username
+            valid = false
+           // _signupForm.value = SignupFormState(usernameError = R.string.invalid_username)
         }
+        if (password.isNotBlank() && !isPasswordValid(password)) {
+            //_signupForm.value = SignupFormState(passwordError = R.string.invalid_password)
+            formState.passwordError = R.string.invalid_password
+            valid = false
+        }
+
+        if (valid && username.isNotBlank() && password.isNotBlank()) {
+            formState.isDataValid = true
+        }
+        _signupForm.value = formState
     }
 
     // A placeholder username validation check
     private fun isUserNameValid(username: String): Boolean {
         return if (username.contains("@")) {
             Patterns.EMAIL_ADDRESS.matcher(username).matches()
-        } else {
-            username.isNotBlank()
-        }
+        } else return false
     }
 
     // A placeholder password validation check

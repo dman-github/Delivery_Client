@@ -47,10 +47,7 @@ class LoginFragment : Fragment() {
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
         val textViewSignup = binding.textViewSignup
-        usernameEditText.isSaveEnabled = false
-        passwordEditText.isSaveEnabled = false
 
-        Log.i("okadaapp LoginFragment:", "onViewCreated")
         loginViewModel.loginFormState.observe(viewLifecycleOwner,
             Observer { loginFormState ->
                 if (loginFormState == null) {
@@ -159,6 +156,5 @@ class LoginFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
-        Log.i("okadaapp LoginFragment:", "onDestroyView")
     }
 }
