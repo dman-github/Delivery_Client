@@ -15,8 +15,6 @@ import androidx.navigation.fragment.findNavController
  * create an instance of this fragment.
  */
 class SplashFragment : Fragment() {
-
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -29,7 +27,7 @@ class SplashFragment : Fragment() {
 
         Handler(Looper.getMainLooper()).postDelayed({
             findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
-        }, 5000)
+        }, 3000)
 
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_splash, container, false)
