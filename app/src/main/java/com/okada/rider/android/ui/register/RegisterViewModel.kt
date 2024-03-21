@@ -18,92 +18,59 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
     val registerResult: LiveData<RegisterResult> = _registerResult
 
     fun fetchUserData() {
-        registerRepository.fetchEmailAddress {result ->
-            result.fold(onSuccess = {user->
-                /*_registerForm.value =
-                    RegisterFormState(emailAddress = user.email)*/
+        registerRepository.fetchEmailAddress { result ->
+            result.fold(onSuccess = { user ->
+                _registerForm.value =
+                    RegisterFormState(emailAddress = user.email)
                 registerRepository.checkProfileExists()
 
-            },onFailure = {
+            }, onFailure = {
                 _registerResult.value = RegisterResult(errorMsg = it.message)
             })
         }
     }
-    fun register(firstname: String,
-                 lastname: String,
-                 biometricId: String,
-                 username: String,
-                 password: String) {
-        registerRepository.createUserAuthentication(username, password){result ->
+
+    fun register(
+        firstname: String,
+        lastname: String,
+        biometricId: String
+    ) {
+        registerRepository.createUserInfo(firstname, lastname, biometricId) { result ->
             result.fold(onSuccess = {
-                if (!registerRepository.isProfileExists) {
-                    // Profile does not exist in DB so we can create one
-                    registerRepository.createUserInfo(firstname,lastname,biometricId) {result ->
-                        result.fold(onSuccess = {
-                            _registerResult.value =
-                                RegisterResult(stringResource = R.string.profile_created)
+                _registerResult.value =
+                    RegisterResult(stringResource = R.string.profile_created)
 
-                        },onFailure = {
-                            _registerResult.value = RegisterResult(errorMsg = it.message)
-                        })
-                    }
-                } else {
-                    _registerResult.value = RegisterResult(stringResource = R.string.user_profile_exists)
-                }
-            },onFailure = {
+            }, onFailure = {
                 _registerResult.value = RegisterResult(errorMsg = it.message)
             })
         }
+
     }
 
-    fun dataChanged(firstname: String, surname: String, password: String, retryPassword:String) {
+    fun dataChanged(firstname: String, surname: String) {
+        var formState = RegisterFormState()
+        var valid = true
         if (!isStringValid(firstname)) {
-            _registerForm.value = RegisterFormState(firstNameError = R.string.invalid_string)
+            formState.firstNameError = R.string.invalid_string
+            valid = false
         }
         if (!isStringValid(surname)) {
-            _registerForm.value = RegisterFormState(surnameError = R.string.invalid_string)
+            formState.surnameError = R.string.invalid_string
+            valid = false
         }
-
-        if (password.isNotBlank() && !isPasswordValid(password)) {
-            _registerForm.value = RegisterFormState(passwordError = R.string.invalid_password)
-        } else {
-            //Password is valid, now check the retryPassword
-            if (retryPassword.isNotBlank() && !arePasswordsIdentical(password,retryPassword)) {
-                    _registerForm.value =
-                        RegisterFormState(passwordMatchingError = R.string.invalid_matching_password)
-            } else {
-                if (firstname.isNotBlank() &&
-                    surname.isNotBlank() &&
-                    password.isNotBlank() &&
-                    retryPassword.isNotBlank()) {
-                    _registerForm.value = RegisterFormState(isDataValid = true)
-                } else {
-                    _registerForm.value = RegisterFormState(isDataValid = false)
-                }
-            }
+        if (firstname.isNotBlank() &&
+            surname.isNotBlank() && valid
+        ) {
+            formState.isDataValid = true
         }
+        _registerForm.value = formState
     }
+
 
     // A placeholder string validation check
     private fun isStringValid(str: String): Boolean {
-        if (str.isNotBlank()) {
-            if (!str.matches(Regex(".*\\d.*"))) {
-                // has no number characters
-                return true
-            } else {
-                // contains number characters
-                return false
-            }
-        }
-        return true
-    }
-
-    // A placeholder password validation check
-    private fun isPasswordValid(password: String): Boolean {
-        return password.length > 5
-    }
-
-    private fun arePasswordsIdentical(password: String, retryPassword: String): Boolean {
-        return password == retryPassword
+        // has no number characters
+        return !str.matches(Regex(".*\\d.*"))
+        // contains number characters
     }
 }

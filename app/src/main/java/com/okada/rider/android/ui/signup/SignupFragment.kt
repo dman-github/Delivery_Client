@@ -42,7 +42,9 @@ class SignupFragment : Fragment() {
             .get(SignupViewModel::class.java)
 
         val usernameEditText = binding.emailInput
+        val usernameLayout = binding.layoutEmail
         val passwordEditText = binding.passInput
+        val passwordLayout = binding.layoutPassword
         val loginButton = binding.login
         val loadingProgressBar = binding.loading
         val textViewRegister = binding.textViewRegister
@@ -54,10 +56,14 @@ class SignupFragment : Fragment() {
                 }
                 loginButton.isEnabled = signupFormState.isDataValid
                 signupFormState.usernameError?.let {
-                    usernameEditText.error = getString(it)
+                    usernameLayout.error = getString(it)
+                } ?: run {
+                    usernameLayout.error = null
                 }
                 signupFormState.passwordError?.let {
-                    passwordEditText.error = getString(it)
+                    passwordLayout.error = getString(it)
+                } ?: run {
+                    passwordLayout.error = null
                 }
             })
 
@@ -72,7 +78,7 @@ class SignupFragment : Fragment() {
                     updateUiWithUser(it)
                 }
                 signupResult.navigateToRegister?.let {
-                    if (it){
+                    if (it) {
                         navigateToRegisterScreen()
                     }
                 }
@@ -98,6 +104,7 @@ class SignupFragment : Fragment() {
         passwordEditText.addTextChangedListener(afterTextChangedListener)
         passwordEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
+                loadingProgressBar.visibility = View.VISIBLE
                 signupViewModel.signup(
                     usernameEditText.text.toString(),
                     passwordEditText.text.toString()
@@ -118,7 +125,7 @@ class SignupFragment : Fragment() {
         }
     }
 
-    private fun navigateToRegisterScreen () {
+    private fun navigateToRegisterScreen() {
         findNavController().navigate(R.id.action_signupFragment_to_registerFragment)
     }
 

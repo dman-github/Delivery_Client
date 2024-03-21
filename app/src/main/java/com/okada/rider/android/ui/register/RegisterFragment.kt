@@ -42,12 +42,11 @@ class RegisterFragment : Fragment() {
             .get(RegisterViewModel::class.java)
 
         val firstnameEditText = binding.editFirstName
+        val firstnameLayout = binding.layoutFirstname
         val lastNameEditText = binding.editLastName
+        val lastnameLayout = binding.layoutLastname
         val emailEditText = binding.emailAddress
-        emailEditText.isEnabled = true
         val biomEditText = binding.idNumber
-        val passwordEditText = binding.editSetPassword
-        val reEnterPasswordEditText = binding.editReenterPassword
         val profileButton = binding.createProfile
         val loadingProgressBar = binding.loading
         registerViewModel.fetchUserData()
@@ -58,16 +57,10 @@ class RegisterFragment : Fragment() {
                 }
                 profileButton.isEnabled = loginFormState.isDataValid
                 loginFormState.firstNameError?.let {
-                    firstnameEditText.error = getString(it)
+                    firstnameLayout.error = getString(it)
                 }
                 loginFormState.surnameError?.let {
-                    lastNameEditText.error = getString(it)
-                }
-                loginFormState.passwordError?.let {
-                    passwordEditText.error = getString(it)
-                }
-                loginFormState.passwordMatchingError?.let {
-                    reEnterPasswordEditText.error = getString(it)
+                    lastnameLayout.error = getString(it)
                 }
                 if (loginFormState.emailAddress.isNotEmpty()) {
                     emailEditText.setText(loginFormState.emailAddress)
@@ -101,26 +94,20 @@ class RegisterFragment : Fragment() {
             override fun afterTextChanged(s: Editable) {
                 registerViewModel.dataChanged(
                     firstnameEditText.text.toString(),
-                    lastNameEditText.text.toString(),
-                    passwordEditText.text.toString(),
-                    reEnterPasswordEditText.text.toString()
+                    lastNameEditText.text.toString()
                 )
             }
         }
 
         firstnameEditText.addTextChangedListener(afterTextChangedListener)
         lastNameEditText.addTextChangedListener(afterTextChangedListener)
-        passwordEditText.addTextChangedListener(afterTextChangedListener)
-        reEnterPasswordEditText.addTextChangedListener(afterTextChangedListener)
 
         profileButton.setOnClickListener {
             loadingProgressBar.visibility = View.VISIBLE
             registerViewModel.register(
                 firstnameEditText.text.toString(),
                 lastNameEditText.text.toString(),
-                biomEditText.text.toString(),
-                emailEditText.text.toString(),
-                passwordEditText.text.toString()
+                biomEditText.text.toString()
             )
         }
     }

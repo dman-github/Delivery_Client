@@ -37,8 +37,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:maxLines="2"
-            android:textAlignment="center"
             android:text="@string/register_message"
+            android:textAlignment="center"
             android:textSize="22sp" />
 
         <LinearLayout
@@ -51,6 +51,7 @@
             android:weightSum="2">
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_firstname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
@@ -62,6 +63,7 @@
                     android:layout_marginEnd="4dp"
                     android:hint="@string/firstname_message"
                     android:maxLines="1"
+                    android:saveEnabled="false"
                     app:boxStrokeColor="@color/text_input_box_stroke"
                     app:hintTextColor="@color/text_input_box_stroke">
 
@@ -70,6 +72,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/layout_lastname"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1">
@@ -80,6 +83,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/lastname_message"
                     android:maxLines="1"
+                    android:saveEnabled="false"
                     app:boxStrokeColor="@color/text_input_box_stroke"
                     app:hintTextColor="@color/text_input_box_stroke">
 
@@ -100,6 +104,7 @@
                 android:enabled="false"
                 android:hint="@string/email_address_message"
                 android:maxLines="1"
+                android:saveEnabled="false"
                 app:boxStrokeColor="@color/text_input_box_stroke"
                 app:hintTextColor="@color/text_input_box_stroke">
 
@@ -119,49 +124,7 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/id_num_message"
                 android:maxLines="1"
-                app:boxStrokeColor="@color/text_input_box_stroke"
-                app:hintTextColor="@color/text_input_box_stroke">
-
-            </com.google.android.material.textfield.TextInputEditText>
-
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/password_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/editText_bottom_margin"
-            app:passwordToggleEnabled="true">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_set_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:hint="@string/prompt_password"
-                android:inputType="textPassword"
-                android:maxLines="1"
-                app:boxStrokeColor="@color/text_input_box_stroke"
-                app:hintTextColor="@color/text_input_box_stroke">
-
-            </com.google.android.material.textfield.TextInputEditText>
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/re_enter_password_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="@dimen/editText_bottom_margin"
-            app:passwordToggleEnabled="true">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/edit_reenter_password"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"
-                android:hint="@string/prompt_re_enter_password"
-                android:inputType="textPassword"
-                android:maxLines="1"
+                android:saveEnabled="false"
                 app:boxStrokeColor="@color/text_input_box_stroke"
                 app:hintTextColor="@color/text_input_box_stroke">
 
