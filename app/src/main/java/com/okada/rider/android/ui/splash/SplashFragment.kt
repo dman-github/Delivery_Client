@@ -43,7 +43,7 @@ class SplashFragment : Fragment() {
         val loadingProgressBar = binding.loading
 
 
-        splashViewModel.signupResult.observe(viewLifecycleOwner,
+        /*splashViewModel.signupResult.observe(viewLifecycleOwner,
             Observer { signupResult ->
                 signupResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
@@ -55,7 +55,7 @@ class SplashFragment : Fragment() {
                         navigateToRegisterScreen()
                     }
                 }
-            })
+            })*/
     }
 
     private fun navigateToRegisterScreen() {

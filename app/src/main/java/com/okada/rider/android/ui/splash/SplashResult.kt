@@ -1,9 +1,7 @@
 package com.okada.rider.android.ui.splash
 
-import com.okada.rider.android.ui.login.LoggedInUserView
 
-
-data class SignupResult(
+data class SplashResult(
     var navigateToOnBoarding: Boolean? = false,
     var navigateToLogin: Boolean? = false,
     var navigateToRegister: Boolean? = false,
