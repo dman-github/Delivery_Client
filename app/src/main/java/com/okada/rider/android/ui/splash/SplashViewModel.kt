@@ -2,6 +2,7 @@ package com.okada.rider.android.ui.splash
 
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
@@ -24,8 +25,10 @@ class SplashViewModel(
 
     val liveDataMerger = MediatorLiveData<SplashResult>()
     fun startSplashTimer() {
+        Log.i("okada Log","startSplashTimer")
         Handler(Looper.getMainLooper()).postDelayed({
             _animationDone.value = true
+            Log.i("okada Log","Time 3s done!")
         }, 3000)
         checkUserStatus()
         liveDataMerger.addSource(splashResult) { _ ->
@@ -43,6 +46,7 @@ class SplashViewModel(
         animationDone.value?.let { done ->
             splashResult.value?.let { result ->
                 if (done) {
+                    Log.i("okada Log","combineLatestData DONE!")
                     return result
                 }
             }
@@ -62,9 +66,11 @@ class SplashViewModel(
                         //check if the logged in user has a profile
                         if (exists) {
                             //-> Goto home screen
+                            Log.i("okada Log","Goto home screen!")
                             _splashResult.value = SplashResult(navigateToHome = true)
                         } else {
                             // No-> goto register screen
+                            Log.i("okada Log","Goto register screen!")
                             _splashResult.value = SplashResult(navigateToRegister = true)
                         }
                     }, onFailure = {
@@ -74,6 +80,7 @@ class SplashViewModel(
                 }
             }, onFailure = {
                 // No -> goto login screen
+                Log.i("okada Log","Goto Login screen!")
                 _splashResult.value = SplashResult(navigateToLogin = true)
             })
         }
