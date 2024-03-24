@@ -39,7 +39,7 @@ class RegisterViewModel(private val accountUsecase: AccountUsecase,
             profileUsecase.createUserInfo(firstname, lastname, biometricId, it) { result ->
                 result.fold(onSuccess = {
                     _registerResult.value =
-                        RegisterResult(stringResource = R.string.profile_created)
+                        RegisterResult(navigateToHome = true)
 
                 }, onFailure = {
                     _registerResult.value = RegisterResult(errorMsg = it.message)

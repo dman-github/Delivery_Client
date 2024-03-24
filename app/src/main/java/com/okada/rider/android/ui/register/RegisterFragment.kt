@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
+import androidx.navigation.fragment.findNavController
 import com.okada.rider.android.databinding.FragmentRegisterBinding
 
 import com.okada.rider.android.R
@@ -74,8 +75,8 @@ class RegisterFragment : Fragment() {
                 registerResult.errorMsg?.let {
                     showApiFailed(it)
                 }
-                registerResult.success?.let {
-                    showApiMessage(it)
+                registerResult.navigateToHome?.let {
+                    navigateToHomeScreen()
                 }
                 registerResult.stringResource?.let{
                     showApiMessage(it)
@@ -110,6 +111,10 @@ class RegisterFragment : Fragment() {
                 biomEditText.text.toString()
             )
         }
+    }
+
+    private fun navigateToHomeScreen () {
+        findNavController().navigate(R.id.action_registerFragment_to_homeFragment)
     }
 
     private fun updateUiWithUser(model: RegisteredUserView) {
