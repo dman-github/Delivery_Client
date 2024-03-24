@@ -2,7 +2,7 @@ package com.okada.rider.android.ui.login
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.okada.rider.android.data.LoginRepository
+import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.services.AccountServiceImpl
 import com.okada.rider.android.services.DataServiceImpl
 
@@ -16,7 +16,7 @@ class LoginViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(LoginViewModel::class.java)) {
             return LoginViewModel(
-                loginRepository = LoginRepository(
+                loginRepository = AccountUsecase(
                     accountService = AccountServiceImpl(),
                     dataService = DataServiceImpl()
                 )

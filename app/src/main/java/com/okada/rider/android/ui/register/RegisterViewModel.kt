@@ -3,13 +3,13 @@ package com.okada.rider.android.ui.register
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.okada.rider.android.data.RegisterRepository
+import com.okada.rider.android.data.ProfileUsecase
 
 import com.okada.rider.android.R
-import com.okada.rider.android.ui.login.LoggedInUserView
-import com.okada.rider.android.ui.login.LoginResult
+import com.okada.rider.android.data.AccountUsecase
 
-class RegisterViewModel(private val registerRepository: RegisterRepository) : ViewModel() {
+class RegisterViewModel(private val accountUsecase: AccountUsecase,
+                        private val profileUsecase: ProfileUsecase) : ViewModel() {
 
     private val _registerForm = MutableLiveData<RegisterFormState>()
     val registerFormState: LiveData<RegisterFormState> = _registerForm
@@ -18,11 +18,11 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
     val registerResult: LiveData<RegisterResult> = _registerResult
 
     fun fetchUserData() {
-        registerRepository.fetchEmailAddress { result ->
+        accountUsecase.getLoggedInUser { result ->
             result.fold(onSuccess = { user ->
                 _registerForm.value =
                     RegisterFormState(emailAddress = user.email)
-                registerRepository.checkProfileExists()
+                //profileUsecase.
 
             }, onFailure = {
                 _registerResult.value = RegisterResult(errorMsg = it.message)
@@ -35,14 +35,16 @@ class RegisterViewModel(private val registerRepository: RegisterRepository) : Vi
         lastname: String,
         biometricId: String
     ) {
-        registerRepository.createUserInfo(firstname, lastname, biometricId) { result ->
-            result.fold(onSuccess = {
-                _registerResult.value =
-                    RegisterResult(stringResource = R.string.profile_created)
+        accountUsecase.loggedInUser?.let {
+            profileUsecase.createUserInfo(firstname, lastname, biometricId, it) { result ->
+                result.fold(onSuccess = {
+                    _registerResult.value =
+                        RegisterResult(stringResource = R.string.profile_created)
 
-            }, onFailure = {
-                _registerResult.value = RegisterResult(errorMsg = it.message)
-            })
+                }, onFailure = {
+                    _registerResult.value = RegisterResult(errorMsg = it.message)
+                })
+            }
         }
 
     }

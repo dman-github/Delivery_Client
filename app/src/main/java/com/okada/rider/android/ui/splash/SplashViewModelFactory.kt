@@ -2,8 +2,11 @@ package com.okada.rider.android.ui.splash
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.okada.rider.android.data.SignupRepository
+import com.okada.rider.android.data.AccountUsecase
+import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.data.SignupUsecase
 import com.okada.rider.android.services.AccountServiceImpl
+import com.okada.rider.android.services.DataServiceImpl
 
 
 /**
@@ -16,8 +19,12 @@ class SplashViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SplashViewModel::class.java)) {
             return SplashViewModel(
-                signupRepository = SignupRepository(
-                    accountService = AccountServiceImpl()
+                accUsecase = AccountUsecase(
+                    accountService = AccountServiceImpl(),
+                    dataService = DataServiceImpl()
+                ),
+                profileUsecase = ProfileUsecase(
+                    dataService = DataServiceImpl()
                 )
             ) as T
         }

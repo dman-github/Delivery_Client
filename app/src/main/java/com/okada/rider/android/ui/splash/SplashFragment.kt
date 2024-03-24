@@ -42,8 +42,7 @@ class SplashFragment : Fragment() {
 
         val loadingProgressBar = binding.loading
 
-
-        /*splashViewModel.signupResult.observe(viewLifecycleOwner,
+        splashViewModel.liveDataMerger.observe(viewLifecycleOwner,
             Observer { signupResult ->
                 signupResult ?: return@Observer
                 loadingProgressBar.visibility = View.GONE
@@ -55,11 +54,39 @@ class SplashFragment : Fragment() {
                         navigateToRegisterScreen()
                     }
                 }
-            })*/
+                signupResult.navigateToHome?.let {
+                    if (it) {
+                        navigateToHomeScreen()
+                    }
+                }
+                signupResult.navigateToLogin?.let {
+                    if (it) {
+                        navigateToLoginScreen()
+                    }
+                }
+                signupResult.navigateToOnBoarding?.let {
+                    if (it) {
+                        navigateToOnboarding()
+                    }
+                }
+            })
+        splashViewModel.startSplashTimer()
     }
 
     private fun navigateToRegisterScreen() {
-        findNavController().navigate(R.id.action_signupFragment_to_registerFragment)
+        findNavController().navigate(R.id.action_splashFragment_to_registerFragment)
+    }
+
+    private fun navigateToLoginScreen() {
+        findNavController().navigate(R.id.action_splashFragment_to_loginFragment)
+    }
+
+    private fun navigateToHomeScreen() {
+        findNavController().navigate(R.id.action_splashFragment_to_homeFragment)
+    }
+
+    private fun navigateToOnboarding() {
+        findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
     }
 
     private fun showLoginFailed(errorString: String) {

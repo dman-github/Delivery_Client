@@ -2,12 +2,8 @@ package com.okada.rider.android.ui.signup
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.okada.rider.android.data.RegisterRepository
-import com.okada.rider.android.data.SignupRepository
+import com.okada.rider.android.data.SignupUsecase
 import com.okada.rider.android.services.AccountServiceImpl
-import com.okada.rider.android.services.DataServiceImpl
-import com.okada.rider.android.ui.register.RegisterViewModel
-
 
 
 /**
@@ -20,7 +16,7 @@ class SignupViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(SignupViewModel::class.java)) {
             return SignupViewModel(
-                signupRepository = SignupRepository(
+                signupRepository = SignupUsecase(
                     accountService = AccountServiceImpl()
                 )
             ) as T

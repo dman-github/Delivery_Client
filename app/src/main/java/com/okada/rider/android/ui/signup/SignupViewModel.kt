@@ -5,14 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.okada.rider.android.R
-import com.okada.rider.android.data.SignupRepository
-import com.okada.rider.android.ui.login.LoggedInUserView
-import com.okada.rider.android.ui.login.LoginFormState
-import com.okada.rider.android.ui.login.LoginResult
-import com.okada.rider.android.ui.register.RegisterFormState
-import com.okada.rider.android.ui.register.RegisterResult
+import com.okada.rider.android.data.SignupUsecase
 
-class SignupViewModel(private val signupRepository: SignupRepository) : ViewModel() {
+class SignupViewModel(private val signupRepository: SignupUsecase) : ViewModel() {
 
     private val _signupForm = MutableLiveData<SignupFormState>()
     val signupFormState: LiveData<SignupFormState> = _signupForm

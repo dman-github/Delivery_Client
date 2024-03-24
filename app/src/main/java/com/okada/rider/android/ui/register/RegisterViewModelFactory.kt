@@ -2,7 +2,8 @@ package com.okada.rider.android.ui.register
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.okada.rider.android.data.RegisterRepository
+import com.okada.rider.android.data.AccountUsecase
+import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.services.AccountServiceImpl
 import com.okada.rider.android.services.DataServiceImpl
 
@@ -16,8 +17,11 @@ class RegisterViewModelFactory : ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         if (modelClass.isAssignableFrom(RegisterViewModel::class.java)) {
             return RegisterViewModel(
-                registerRepository = RegisterRepository(
+                accountUsecase = AccountUsecase(
                     accountService = AccountServiceImpl(),
+                    dataService = DataServiceImpl()
+                ),
+                profileUsecase = ProfileUsecase(
                     dataService = DataServiceImpl()
                 )
             ) as T

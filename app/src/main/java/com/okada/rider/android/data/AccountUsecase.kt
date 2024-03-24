@@ -8,19 +8,16 @@ import com.okada.rider.android.data.model.LoggedInUser
 import com.okada.rider.android.data.model.UserInfo
 import com.okada.rider.android.services.AccountService
 import com.okada.rider.android.services.DataService
-import com.okada.rider.android.ui.login.LoggedInUserView
-import com.okada.rider.android.ui.login.LoginResult
 
 /**
  * Class that requests authentication and user information from the remote data source and
  * maintains an in-memory cache of login status and user credentials information.
  */
 
-class LoginRepository(val accountService: AccountService, val dataService: DataService) {
+class AccountUsecase (val accountService: AccountService, val dataService: DataService) {
 
     // in-memory cache of the loggedInUser object
-    private var loggedInUser: LoggedInUser? = null
-        private set
+    var loggedInUser: LoggedInUser?
 
     val isLoggedIn: Boolean
         get() = loggedInUser != null
@@ -35,6 +32,19 @@ class LoginRepository(val accountService: AccountService, val dataService: DataS
 
     fun logout(completion: (kotlin.Result<Unit>) -> Unit) {
         accountService.logout(completion)
+    }
+
+    fun getLoggedInUser(completion: (Result<LoggedInUser>) -> Unit) {
+        accountService.getLoggedInUser {result ->
+            result.onSuccess {user->
+                loggedInUser = LoggedInUser(user.userId,
+                    user.email)
+                completion(Result.success(loggedInUser!!))
+            }
+            result.onFailure {
+                completion(Result.failure(it))
+            }
+        }
     }
 
     fun login(username: String, password: String, completion: (Result<Unit>) -> Unit) {

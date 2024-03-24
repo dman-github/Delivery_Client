@@ -4,7 +4,7 @@ import com.okada.rider.android.data.model.LoggedInUser
 import com.okada.rider.android.services.AccountService
 import kotlin.Result
 
-class SignupRepository(val accountService: AccountService) {
+class SignupUsecase(val accountService: AccountService) {
 
     // in-memory cache of the loggedInUser object
     private var loggedInUser: LoggedInUser? = null
