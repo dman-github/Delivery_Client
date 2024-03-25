@@ -37,7 +37,8 @@
             app:enterAnim="@anim/nav_app_enter_anim"
             app:exitAnim="@anim/nav_app_exit_anim"
             app:popEnterAnim="@anim/nav_app_pop_enter_anim"
-            app:popExitAnim="@anim/nav_app_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_app_pop_exit_anim"
+            app:popUpTo="@id/splashFragment" />
     </fragment>
     <fragment
         android:id="@+id/viewPagerFragment"
@@ -80,7 +81,8 @@
             app:enterAnim="@anim/nav_app_enter_anim"
             app:exitAnim="@anim/nav_app_exit_anim"
             app:popEnterAnim="@anim/nav_app_pop_enter_anim"
-            app:popExitAnim="@anim/nav_app_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_app_pop_exit_anim"
+            app:popUpTo="@id/splashFragment" />
     </fragment>
     <fragment
         android:id="@+id/registerFragment"
@@ -93,7 +95,8 @@
             app:enterAnim="@anim/nav_app_enter_anim"
             app:exitAnim="@anim/nav_app_exit_anim"
             app:popEnterAnim="@anim/nav_app_pop_enter_anim"
-            app:popExitAnim="@anim/nav_app_pop_exit_anim" />
+            app:popExitAnim="@anim/nav_app_pop_exit_anim"
+            app:popUpTo="@id/splashFragment" />
     </fragment>
     <fragment
         android:id="@+id/signupFragment"

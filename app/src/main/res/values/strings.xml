@@ -33,4 +33,8 @@
     <string name="invalid_matching_password">Passwords must match</string>
     <string name="user_profile_exists">"A user profile already exists for this user"</string>
     <string name="profile_created">"Profile has been created"</string>
+    <string name="onboarding_pg1_title">"Trustworthy and reliable"</string>
+    <string name="onboarding_pg1_desc">"All our drivers have been thoroughly vetted to ensure their reliability"</string>
+    <string name="onboarding_pg2_title">"Your pickup"</string>
+    <string name="onboarding_pg2_desc">"Drivers can pick up anything from documents, medicine and even groceries"</string>
 </resources>

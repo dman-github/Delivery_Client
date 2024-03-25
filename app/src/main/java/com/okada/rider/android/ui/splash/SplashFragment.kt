@@ -1,5 +1,6 @@
 package com.okada.rider.android.ui.splash
 
+import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -65,7 +66,11 @@ class SplashFragment : Fragment() {
                     }
                 }
             })
-        splashViewModel.startSplashTimer()
+        if (onBoardingFinishedCheck()) {
+            splashViewModel.startSplashTimer()
+        } else {
+            navigateToOnboarding()
+        }
     }
 
     private fun navigateToRegisterScreen() {
@@ -84,6 +89,10 @@ class SplashFragment : Fragment() {
         findNavController().navigate(R.id.action_splashFragment_to_viewPagerFragment)
     }
 
+    private fun onBoardingFinishedCheck(): Boolean {
+        val sharedPref = requireActivity().getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
+        return sharedPref.getBoolean("finished", false)
+    }
     private fun showLoginFailed(errorString: String) {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()

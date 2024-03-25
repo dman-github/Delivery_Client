@@ -1,5 +1,6 @@
 package com.okada.rider.android.onboarding.screens
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -28,8 +29,16 @@ class SecondScreenFragment : Fragment() {
         val next = view.findViewById<TextView>(R.id.second_screen_next)
         next.setOnClickListener {
             findNavController().navigate(R.id.action_viewPagerFragment_to_loginFragment)
+            onBoardingFinished()
         }
         return view
+    }
+
+    private fun onBoardingFinished() {
+        val sharedPref = requireActivity().getSharedPreferences("onBoarding", Context.MODE_PRIVATE)
+        val editor = sharedPref.edit()
+        editor.putBoolean("finished", true)
+        editor.apply()
     }
 
 }
