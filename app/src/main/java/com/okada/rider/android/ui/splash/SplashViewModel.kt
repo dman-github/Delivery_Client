@@ -24,6 +24,13 @@ class SplashViewModel(
 
 
     val liveDataMerger = MediatorLiveData<SplashResult>()
+
+    fun removeLiveDataSources() {
+        liveDataMerger.removeSource(splashResult)
+        liveDataMerger.removeSource(animationDone)
+        _animationDone.value = false
+
+    }
     fun startSplashTimer() {
         Log.i("okada Log","startSplashTimer")
         Handler(Looper.getMainLooper()).postDelayed({

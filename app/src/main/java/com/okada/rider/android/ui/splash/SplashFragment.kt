@@ -2,20 +2,15 @@ package com.okada.rider.android.ui.splash
 
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextWatcher
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import com.okada.rider.android.R
-import com.okada.rider.android.databinding.FragmentSignupBinding
 import com.okada.rider.android.databinding.FragmentSplashBinding
-import com.okada.rider.android.ui.login.LoggedInUserView
 
 class SplashFragment : Fragment() {
     private lateinit var splashViewModel: SplashViewModel
@@ -97,6 +92,7 @@ class SplashFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+        splashViewModel.removeLiveDataSources()
     }
 
 }
