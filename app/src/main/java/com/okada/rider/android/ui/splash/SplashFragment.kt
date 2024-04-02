@@ -82,7 +82,7 @@ class SplashFragment : Fragment() {
     }
 
     private fun navigateToHomeScreen() {
-        findNavController().navigate(R.id.action_splashFragment_to_homeFragment)
+        findNavController().navigate(R.id.action_splashFragment_to_mainActivity)
     }
 
     private fun navigateToOnboarding() {

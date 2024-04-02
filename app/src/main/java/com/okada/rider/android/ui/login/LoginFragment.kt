@@ -134,7 +134,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun navigateToHomeScreen () {
-        findNavController().navigate(R.id.action_loginFragment_to_homeFragment)
+        findNavController().navigate(R.id.action_loginFragment_to_mainActivity)
     }
 
     private fun navigateToSignupScreen () {

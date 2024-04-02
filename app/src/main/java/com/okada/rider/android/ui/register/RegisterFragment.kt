@@ -114,7 +114,7 @@ class RegisterFragment : Fragment() {
     }
 
     private fun navigateToHomeScreen () {
-        findNavController().navigate(R.id.action_registerFragment_to_homeFragment)
+        findNavController().navigate(R.id.action_registerFragment_to_mainActivity)
     }
 
     private fun updateUiWithUser(model: RegisteredUserView) {

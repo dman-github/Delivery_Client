@@ -32,13 +32,8 @@
             app:popEnterAnim="@anim/nav_app_pop_enter_anim"
             app:popExitAnim="@anim/nav_app_pop_exit_anim" />
         <action
-            android:id="@+id/action_splashFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:enterAnim="@anim/nav_app_enter_anim"
-            app:exitAnim="@anim/nav_app_exit_anim"
-            app:popEnterAnim="@anim/nav_app_pop_enter_anim"
-            app:popExitAnim="@anim/nav_app_pop_exit_anim"
-            app:popUpTo="@id/splashFragment" />
+            android:id="@+id/action_splashFragment_to_mainActivity"
+            app:destination="@id/mainActivity" />
     </fragment>
     <fragment
         android:id="@+id/viewPagerFragment"
@@ -76,13 +71,8 @@
             app:popExitAnim="@anim/nav_app_pop_exit_anim"
             app:popUpTo="@id/splashFragment" />
         <action
-            android:id="@+id/action_loginFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:enterAnim="@anim/nav_app_enter_anim"
-            app:exitAnim="@anim/nav_app_exit_anim"
-            app:popEnterAnim="@anim/nav_app_pop_enter_anim"
-            app:popExitAnim="@anim/nav_app_pop_exit_anim"
-            app:popUpTo="@id/splashFragment" />
+            android:id="@+id/action_loginFragment_to_mainActivity"
+            app:destination="@id/mainActivity" />
     </fragment>
     <fragment
         android:id="@+id/registerFragment"
@@ -90,13 +80,8 @@
         android:label="RegisterFragment"
         tools:layout="@layout/fragment_register">
         <action
-            android:id="@+id/action_registerFragment_to_homeFragment"
-            app:destination="@id/homeFragment"
-            app:enterAnim="@anim/nav_app_enter_anim"
-            app:exitAnim="@anim/nav_app_exit_anim"
-            app:popEnterAnim="@anim/nav_app_pop_enter_anim"
-            app:popExitAnim="@anim/nav_app_pop_exit_anim"
-            app:popUpTo="@id/splashFragment" />
+            android:id="@+id/action_registerFragment_to_mainActivity"
+            app:destination="@id/mainActivity" />
     </fragment>
     <fragment
         android:id="@+id/signupFragment"
@@ -112,9 +97,8 @@
             app:popExitAnim="@anim/nav_app_pop_exit_anim"
             app:popUpTo="@id/splashFragment" />
     </fragment>
-    <fragment
-        android:id="@+id/homeFragment"
-        android:name="com.okada.rider.android.HomeFragment"
-        android:label="fragment_home"
-        tools:layout="@layout/fragment_home" />
+    <activity
+        android:id="@+id/mainActivity"
+        android:name="com.okada.rider.android.MainActivity"
+        android:label="MainActivity" />
 </navigation>

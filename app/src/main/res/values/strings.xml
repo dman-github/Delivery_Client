@@ -37,4 +37,8 @@
     <string name="onboarding_pg1_desc">"All our drivers have been thoroughly vetted to ensure their reliability"</string>
     <string name="onboarding_pg2_title">"Your pickup"</string>
     <string name="onboarding_pg2_desc">"Drivers can pick up anything from documents, medicine and even groceries"</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
 </resources>
