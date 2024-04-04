@@ -41,4 +41,8 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="rationale_message_for_location">App requires Location permissions to function</string>
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="returned_from_app_settings_to_activity" formatted="true">Returned from Phone Settings: %s</string>
 </resources>
