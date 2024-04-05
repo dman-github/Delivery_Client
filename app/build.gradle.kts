@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
@@ -19,6 +21,14 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
+        // Load the apiKeys.properties file which contains keys
+        val apiKeysProperties = Properties()
+        val apiKeysFile = rootProject.file("apiKeys.properties")
+        if (apiKeysFile.exists()) {
+            apiKeysFile.inputStream().use { apiKeysProperties.load(it) }
+        }
+        // Set your Google Maps API key as a build configuration field
+        resValue("string", "GOOGLE_MAPS_API_KEY", "\"${apiKeysProperties.getProperty("GOOGLE_MAPS_API_KEY")}\"")
     }
 
     buildTypes {
@@ -94,5 +104,8 @@ dependencies {
 
     //Geofire
     implementation("com.firebase:geofire-android:3.2.0")
+
+    //Maps
+    implementation("com.google.android.gms:play-services-maps:18.2.0")
 
 }
