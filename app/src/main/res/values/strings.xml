@@ -41,10 +41,12 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="title_my_account">My Account</string>
     <string name="rationale_message_for_location">App requires Location permissions to function</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="returned_from_app_settings_to_activity" formatted="true">Returned from Phone Settings: %s</string>
     <string name="no_logged_in_user">No logged in user</string>
+    <string name="nav_header_rating">Nav header rating</string>
 
 </resources>

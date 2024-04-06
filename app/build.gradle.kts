@@ -86,6 +86,7 @@ dependencies {
     debugImplementation("androidx.compose.ui:ui-tooling")
     debugImplementation("androidx.compose.ui:ui-test-manifest")
     implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation("androidx.cardview:cardview:1.0.0")
 
     //Material
     implementation("com.google.android.material:material:1.11.0")
@@ -107,5 +108,13 @@ dependencies {
 
     //Maps
     implementation("com.google.android.gms:play-services-maps:18.2.0")
+
+
+    //Circular image view
+    implementation ("de.hdodenhof:circleimageview:3.1.0")
+
+    // Glide for loading images
+    implementation ("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
 }
