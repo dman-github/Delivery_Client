@@ -47,6 +47,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         setSupportActionBar(binding.appBarHome.toolbar)
         setupActionBarWithNavController(navController, appBarConfiguration)
         navView.setupWithNavController(navController)
+        supportActionBar?.hide()
 
         /* if we do not want the Action bar then we have to use code below */
         //setupWithNavController(navView,navController)
