@@ -3,6 +3,7 @@ package com.okada.rider.android.ui.splash
 import android.content.Context
 import androidx.lifecycle.ViewModelProvider
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -66,11 +67,29 @@ class SplashFragment : Fragment() {
                     }
                 }
             })
+    }
+
+
+    override fun onResume() {
+        super.onResume()
+        Log.i("App_Info", "SplashFragment onResume")
         if (onBoardingFinishedCheck()) {
             splashViewModel.startSplashTimer()
         } else {
             navigateToOnboarding()
         }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("App_Info", "SplashFragment onPause")
+        splashViewModel.removeLiveDataSources()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+        splashViewModel.removeLiveDataSources()
     }
 
     private fun navigateToRegisterScreen() {
@@ -96,12 +115,6 @@ class SplashFragment : Fragment() {
     private fun showLoginFailed(errorString: String) {
         val appContext = context?.applicationContext ?: return
         Toast.makeText(appContext, errorString, Toast.LENGTH_LONG).show()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-        splashViewModel.removeLiveDataSources()
     }
 
 }
