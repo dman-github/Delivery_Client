@@ -48,5 +48,7 @@
     <string name="returned_from_app_settings_to_activity" formatted="true">Returned from Phone Settings: %s</string>
     <string name="no_logged_in_user">No logged in user</string>
     <string name="nav_header_rating">Nav header rating</string>
+    <string name="menu_logout">Sign out</string>
+    <string name="menu_profile">Profile</string>
 
 </resources>
