@@ -3,11 +3,11 @@ package com.okada.rider.android.ui.account
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.okada.rider.android.data.AccountUsecase
 
-class AccountViewModel : ViewModel() {
+class AccountViewModel(private val accountUsecase: AccountUsecase) : ViewModel() {
 
-    private val _text = MutableLiveData<String>().apply {
-        value = "This is notifications Fragment"
+    fun logoutUser() {
+        accountUsecase.logout{}
     }
-    val text: LiveData<String> = _text
 }

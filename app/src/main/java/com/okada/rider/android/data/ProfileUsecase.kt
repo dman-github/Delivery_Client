@@ -23,14 +23,14 @@ class ProfileUsecase(val dataService: DataService) {
     val isProfileExists: Boolean
         get() = profileExists
 
-    fun checkProfileExists(user: LoggedInUser, completion: (Result<Boolean>) -> Unit) {
+    fun checkProfileExists(user: LoggedInUser, completion: (Result<UserInfo?>) -> Unit) {
 
         dataService.checkIfUserInfoExists(user.userId, object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
                 // Get Post object and use the values to update the UI
                 val userInfo = dataSnapshot.getValue<UserInfo>()
                 profileExists = userInfo != null
-                completion(Result.success(profileExists))
+                completion(Result.success(userInfo))
             }
 
             override fun onCancelled(databaseError: DatabaseError) {

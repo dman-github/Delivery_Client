@@ -20,8 +20,7 @@ class SplashViewModelFactory : ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(SplashViewModel::class.java)) {
             return SplashViewModel(
                 accUsecase = AccountUsecase(
-                    accountService = AccountServiceImpl(),
-                    dataService = DataServiceImpl()
+                    accountService = AccountServiceImpl()
                 ),
                 profileUsecase = ProfileUsecase(
                     dataService = DataServiceImpl()

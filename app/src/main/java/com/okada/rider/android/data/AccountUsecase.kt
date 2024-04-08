@@ -14,7 +14,7 @@ import com.okada.rider.android.services.DataService
  * maintains an in-memory cache of login status and user credentials information.
  */
 
-class AccountUsecase (val accountService: AccountService, val dataService: DataService) {
+class AccountUsecase (val accountService: AccountService) {
 
     // in-memory cache of the loggedInUser object
     var loggedInUser: LoggedInUser?
@@ -30,7 +30,7 @@ class AccountUsecase (val accountService: AccountService, val dataService: DataS
         loggedInUser = null
     }
 
-    fun logout(completion: (kotlin.Result<Unit>) -> Unit) {
+    fun logout(completion: (Result<Unit>) -> Unit) {
         accountService.logout(completion)
     }
 
@@ -47,25 +47,12 @@ class AccountUsecase (val accountService: AccountService, val dataService: DataS
         }
     }
 
-    fun login(username: String, password: String, completion: (Result<Unit>) -> Unit) {
+    fun login(username: String, password: String, completion: (Result<LoggedInUser>) -> Unit) {
         // handle login
         accountService.authenticate(username, password) {result->
             result.fold(onSuccess = {user->
                 loggedInUser = LoggedInUser(user.userId,user.email)
-                // Now check if we have a corresponding entry in the userInfo table
-                dataService.checkIfUserInfoExists(user.userId, object : ValueEventListener {
-                    override fun onDataChange (dataSnapshot: DataSnapshot) {
-                        // Get Post object and use the values to update the UI
-                        val userInfo = dataSnapshot.getValue<UserInfo>()
-                        profileExists = userInfo != null
-                        completion(Result.success(Unit))
-                    }
-
-                    override fun onCancelled(databaseError: DatabaseError) {
-                        profileExists = false
-                        completion(Result.success(Unit))
-                    }
-                })
+                completion(Result.success(loggedInUser!!))
             },onFailure = {
                 completion(Result.failure(it))
             })

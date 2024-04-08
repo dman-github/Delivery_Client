@@ -5,11 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import android.util.Patterns
+import com.okada.rider.android.Common
 import com.okada.rider.android.data.AccountUsecase
 
 import com.okada.rider.android.R
+import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.ui.splash.SplashResult
 
-class LoginViewModel(private val loginRepository: AccountUsecase) : ViewModel() {
+class LoginViewModel(private val accountUsecase: AccountUsecase, private val profileUsecase: ProfileUsecase) : ViewModel() {
 
     private val _loginForm = MutableLiveData<LoginFormState>()
     val loginFormState: LiveData<LoginFormState> = _loginForm
@@ -18,14 +21,29 @@ class LoginViewModel(private val loginRepository: AccountUsecase) : ViewModel() 
     val loginResult: LiveData<LoginResult> = _loginResult
 
     fun login(username: String, password: String) {
-        loginRepository.login(username, password) {result ->
-            result.fold(onSuccess = {
-                if (loginRepository.profileExists) {
-                    _loginResult.value =
-                        LoginResult(navigateToHome = true)
-                } else {
-                    _loginResult.value =
-                        LoginResult(navigateToRegister = true)
+        accountUsecase.login(username, password) { result ->
+            result.fold(onSuccess = {user->
+                //check if the logged in user has a profile
+                profileUsecase.checkProfileExists(user) {result ->
+                    result.fold(onSuccess = { profile ->
+                        //check if the logged in user has a profile
+                        Log.i("okada Log","LoginViewModel profile rxed ! ${profile!=null}")
+                        profile?.also {user->
+                            //-> Goto home screen
+                            Log.i("okada Log","LoginViewModel Goto home screen!")
+                            Common.currentUser = user
+                            _loginResult.value =
+                                LoginResult(navigateToHome = true)
+                        } ?: run {
+                            // No-> goto register screen
+                            Log.i("okada Log","LoginViewModel Goto register screen!")
+                            _loginResult.value =
+                                LoginResult(navigateToRegister = true)
+                        }
+                    }, onFailure = {
+                        // Error occurred
+                        _loginResult.value = LoginResult(errorMsg = it.message)
+                    })
                 }
             },onFailure = {
                 _loginResult.value = LoginResult(errorMsg = it.message)

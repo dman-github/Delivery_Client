@@ -19,8 +19,7 @@ class HomeViewModelFactory : ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(HomeViewModel::class.java)) {
             return HomeViewModel(
                 accountUsecase = AccountUsecase(
-                    accountService = AccountServiceImpl(),
-                    dataService = DataServiceImpl()
+                    accountService = AccountServiceImpl()
                 ),
                 locationUsecase = LocationUsecase(
                     locationService = LocationServiceImpl()
