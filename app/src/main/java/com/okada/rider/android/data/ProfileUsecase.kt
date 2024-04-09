@@ -5,6 +5,7 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
 import com.okada.rider.android.data.model.LoggedInUser
+import com.okada.rider.android.data.model.TokenModel
 import com.okada.rider.android.data.model.UserInfo
 import com.okada.rider.android.services.AccountService
 import com.okada.rider.android.services.DataService
@@ -59,6 +60,10 @@ class ProfileUsecase(val dataService: DataService) {
                 completion(Result.success(Unit))
             })
 
+    }
+
+    fun sendPushNotificationToken(uid: String, tokenM: TokenModel, completion: (Result<Unit>) -> Unit) {
+        dataService.updatePushMessagingToken(uid, tokenM, completion)
     }
 
 }

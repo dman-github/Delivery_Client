@@ -58,4 +58,8 @@ class AccountUsecase (val accountService: AccountService) {
             })
         }
     }
+
+    fun fetchPushNotificationToken(completion: (Result<String>) -> Unit) {
+        accountService.getPushNotificationToken(completion)
+    }
 }

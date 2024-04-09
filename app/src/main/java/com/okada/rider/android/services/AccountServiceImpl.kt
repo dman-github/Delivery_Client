@@ -1,10 +1,12 @@
 package com.okada.rider.android.services
 
+import android.widget.Toast
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.okada.rider.android.data.model.LoggedInUser
 
 class AccountServiceImpl: AccountService {
@@ -54,13 +56,18 @@ class AccountServiceImpl: AccountService {
         }
     }
 
+    override fun getPushNotificationToken(completion: (Result<String>) -> Unit) {
+        FirebaseMessaging.getInstance().token
+            .addOnFailureListener {e ->
+                completion(Result.failure(e))
+            }.addOnSuccessListener {token->
+                completion(Result.success(token))
+            }
+    }
+
     override fun logout(completion: (Result<Unit>) -> Unit) {
         FirebaseAuth.getInstance().signOut()
         completion(Result.success(Unit))
     }
-
-
-
-
 
 }

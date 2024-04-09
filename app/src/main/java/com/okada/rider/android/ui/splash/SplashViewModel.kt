@@ -11,6 +11,7 @@ import com.okada.rider.android.Common
 import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.data.SignupUsecase
+import com.okada.rider.android.data.model.TokenModel
 import com.okada.rider.android.ui.login.LoginResult
 
 class SplashViewModel(
@@ -69,6 +70,8 @@ class SplashViewModel(
         //check if there is a logged in user
         accUsecase.getLoggedInUser { result ->
             result.fold(onSuccess = { user ->
+                //Get the firebase notification token
+                sendFirebaseToken(user.userId)
                 //check if the logged in user has a profile
                 profileUsecase.checkProfileExists(user) {result ->
                     result.fold(onSuccess = { profile ->
@@ -95,6 +98,23 @@ class SplashViewModel(
                 // No -> goto login screen
                 Log.i("okada Log","Goto Login screen!")
                 _splashResult.value = SplashResult(navigateToLogin = true)
+            })
+        }
+    }
+
+    private fun sendFirebaseToken(uid: String) {
+        accUsecase.fetchPushNotificationToken {result->
+            result.fold(onSuccess = { token ->
+                val model = TokenModel()
+                model.token = token
+                profileUsecase.sendPushNotificationToken(uid, model) {result->
+                    result.fold(onSuccess = {
+                        //check if the logged in user has a profile
+                        Log.i("App_info","sendFirebaseToken, Token sent: $token")
+                    }, onFailure = {
+                    })
+                }
+            }, onFailure = {
             })
         }
     }
