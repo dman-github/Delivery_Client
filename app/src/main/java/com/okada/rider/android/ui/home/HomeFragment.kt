@@ -27,10 +27,27 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptor
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.material.snackbar.Snackbar
 import com.okada.rider.android.R
+import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.databinding.FragmentHomeBinding
+
+interface FirebaseDriverInfoListener {
+    fun onDriverInfoLoadSuccess(driverGeoModel: DriverGeoModel?) {
+
+    }
+}
+
+interface FirebaseDriverFailedListener {
+    fun onFirebaseFailed(message: String) {
+
+    }
+}
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentHomeBinding? = null
@@ -44,7 +61,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-
+    lateinit var iFirebaseDriverInfoListener: FirebaseDriverInfoListener
+    lateinit var iFirebaseDriverFailedListener: FirebaseDriverFailedListener
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -64,6 +82,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun init() {
+        // Create the observer which updates the UI.
         homeViewModel.showSnackbarMessage.observe(viewLifecycleOwner,
             Observer { newMessage ->
                 newMessage?.let { message ->
@@ -78,6 +97,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPos, 18f));
             })
 
+        homeViewModel.updateMapDriver.observe(viewLifecycleOwner,
+            Observer { newMarker ->
+                mMap.addMarker(MarkerOptions()
+                    .position(LatLng(newMarker.driverLat, newMarker.driverLong))
+                    .flat(true)
+                    .title(newMarker.getMarkerTitle())
+                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)))
+            })
+
         // The google map builder
         locationRequest = LocationRequest.Builder(5000)
             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
@@ -88,7 +116,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult) {
                 super.onLocationResult(locationResult)
-                homeViewModel.updateLocation(locationResult.lastLocation)
+                homeViewModel.updateLocation(locationResult.lastLocation, requireContext())
             }
         }
         fusedLocationProviderClient =
@@ -187,7 +215,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         "Error: $e", Toast.LENGTH_SHORT
                     ).show();
                 }.addOnSuccessListener { lastLocation ->
-                    homeViewModel.updateLocation(lastLocation)
+                    homeViewModel.updateLocation(lastLocation, requireContext())
                 }
         }
     }

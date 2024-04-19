@@ -10,14 +10,20 @@ import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.data.model.TokenModel
 import java.util.Random
 
-class FirebaseMessagingIdService: FirebaseMessagingService() {
+class FirebaseMessagingIdService : FirebaseMessagingService() {
 
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
         val data = message.data
         data.let {
-            Common.showNotification(this, Random().nextInt(), data[Common.NOTI_TITLE], data[Common.NOTI_BODY],null)
+            Common.showNotification(
+                this,
+                Random().nextInt(),
+                data[Common.NOTI_TITLE],
+                data[Common.NOTI_BODY],
+                null
+            )
         }
     }
 
@@ -25,14 +31,16 @@ class FirebaseMessagingIdService: FirebaseMessagingService() {
         super.onNewToken(token)
         val model = TokenModel()
         model.token = token
-        FirebaseAuth.getInstance().currentUser?.let {user->
-            DataServiceImpl().updatePushMessagingToken(user.uid,model){result->
+        FirebaseAuth.getInstance().currentUser?.let { user ->
+            DataServiceImpl().updatePushMessagingToken(user.uid, model) { result ->
                 result.fold(onSuccess = {
                     //check if the logged in user has a profile
-                    Log.i("App_info","FirebaseMessagingIdService, Token sent: $token")
+                    Log.i("App_info", "FirebaseMessagingIdService, Token sent: $token")
                 }, onFailure = {
                 })
             }
         }
     }
+
+
 }

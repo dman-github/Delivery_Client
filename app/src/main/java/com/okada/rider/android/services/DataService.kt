@@ -13,4 +13,6 @@ interface DataService {
                                 successListener: OnSuccessListener<Void>)
 
     fun updatePushMessagingToken(uid: String, tokenModel: TokenModel, completion: (Result<Unit>) -> Unit)
+
+    fun fetchDriverInfo(uid: String, listener: ValueEventListener)
 }

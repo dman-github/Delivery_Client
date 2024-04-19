@@ -1,9 +1,12 @@
 package com.okada.rider.android.data
 
+import com.firebase.geofire.GeoFire
+import com.firebase.geofire.GeoLocation
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.getValue
+import com.okada.rider.android.data.model.DriverInfo
 import com.okada.rider.android.data.model.LoggedInUser
 import com.okada.rider.android.data.model.TokenModel
 import com.okada.rider.android.data.model.UserInfo
@@ -62,8 +65,33 @@ class ProfileUsecase(val dataService: DataService) {
 
     }
 
-    fun sendPushNotificationToken(uid: String, tokenM: TokenModel, completion: (Result<Unit>) -> Unit) {
+    fun sendPushNotificationToken(
+        uid: String,
+        tokenM: TokenModel,
+        completion: (Result<Unit>) -> Unit
+    ) {
         dataService.updatePushMessagingToken(uid, tokenM, completion)
     }
+
+    fun fetchDriverInfo(userId: String, completion: (Result<DriverInfo>) -> Unit) {
+        dataService.fetchDriverInfo(userId, object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                val driverInfo = dataSnapshot.getValue<DriverInfo>()
+                driverInfo?.let {
+                    completion(Result.success(driverInfo))
+                } ?: run {
+                    completion(Result.failure(Exception("Cannot find driver information")))
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                completion(Result.failure(databaseError.toException()))
+            }
+
+        })
+    }
+
 
 }

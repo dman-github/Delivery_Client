@@ -9,6 +9,7 @@ import com.okada.rider.android.data.model.UserInfo
 
 class DataServiceImpl: DataService {
     private val databaseRefUser = FirebaseDatabase.getInstance().getReference("UserInfo")
+    private val databaseRefDriverInfo = FirebaseDatabase.getInstance().getReference("DriverInfo")
     private val pushTokenRef = FirebaseDatabase.getInstance().getReference("PushTokens")
     override fun checkIfUserInfoExists(uid: String, listener: ValueEventListener) {
         // Set up Firebase listener
@@ -32,6 +33,11 @@ class DataServiceImpl: DataService {
             }.addOnSuccessListener {
                 completion(Result.success(Unit))
             }
+    }
+
+    override fun fetchDriverInfo(uid: String, listener: ValueEventListener) {
+        // Set up Firebase listener
+        databaseRefDriverInfo.child(uid).addListenerForSingleValueEvent(listener)
     }
 
 

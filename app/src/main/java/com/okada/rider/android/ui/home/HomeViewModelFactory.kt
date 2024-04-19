@@ -1,8 +1,8 @@
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.data.LocationUsecase
+import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.services.AccountServiceImpl
 import com.okada.rider.android.services.DataServiceImpl
 import com.okada.rider.android.services.LocationServiceImpl
@@ -23,6 +23,9 @@ class HomeViewModelFactory : ViewModelProvider.Factory {
                 ),
                 locationUsecase = LocationUsecase(
                     locationService = LocationServiceImpl()
+                ),
+                profileUsecase = ProfileUsecase(
+                    dataService = DataServiceImpl()
                 )
             ) as T
         }
