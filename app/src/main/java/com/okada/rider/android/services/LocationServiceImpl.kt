@@ -7,6 +7,7 @@ import android.location.Location
 import android.os.Build
 import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
+import com.firebase.geofire.GeoQuery
 import com.firebase.geofire.GeoQueryEventListener
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
@@ -28,6 +29,7 @@ class LocationServiceImpl : LocationService {
     private lateinit var currentUserLocationRef: DatabaseReference
     private lateinit var geoFireUserRef: GeoFire
     private lateinit var geoFireDriverRef: GeoFire
+    private var geoQuery: GeoQuery? = null
     override fun setupDatabase(uid: String) {
         // Setting up Driver location DB
         onlineRef = FirebaseDatabase.getInstance().reference.child(".info/connected")
@@ -112,12 +114,13 @@ class LocationServiceImpl : LocationService {
             val geocodeLocation =
                 getCountryCodeComponent(address) + "_" + getGeocodeComponent(address)
             geoFireDriverRef = GeoFire(databaseRefDriverLocations.child(geocodeLocation))
-            val query = geoFireDriverRef.queryAtLocation(
+            // There should ony be one query instance and remove all listeners before adding new ones
+            geoQuery?.removeAllListeners()
+            geoQuery = geoFireDriverRef.queryAtLocation(
                 GeoLocation(location.latitude, location.longitude),
                 distance
             )
-            query.removeAllListeners()
-            query.addGeoQueryEventListener(geoQueryEventListener)
+            geoQuery?.addGeoQueryEventListener(geoQueryEventListener)
             //databaseRefDriverLocations.addChildEventListener(childEventListener)
         } ?: run {
             completion(Result.failure(Exception("Cannot find address from Geocode")))
