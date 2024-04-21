@@ -99,11 +99,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         homeViewModel.updateMapDriver.observe(viewLifecycleOwner,
             Observer { newMarker ->
-                mMap.addMarker(MarkerOptions()
-                    .position(LatLng(newMarker.driverLat, newMarker.driverLong))
-                    .flat(true)
-                    .title(newMarker.getMarkerTitle())
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.car)))
+                val marker = mMap.addMarker(
+                    MarkerOptions()
+                        .position(LatLng(newMarker.driverLat, newMarker.driverLong))
+                        .flat(true)
+                        .title(newMarker.getMarkerTitle())
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car))
+                )
+                marker?.let { homeViewModel.saveMapMarker(newMarker.uid, it) }
+            })
+        homeViewModel.removeMarker.observe(viewLifecycleOwner,
+            Observer { marker ->
+                marker.remove()
             })
 
         // The google map builder

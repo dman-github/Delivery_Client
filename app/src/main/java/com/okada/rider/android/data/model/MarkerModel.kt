@@ -9,7 +9,8 @@ class MarkerModel (
     var surname: String,
     var driverLat: Double,
     var driverLong: Double,
-    var rating: Double
+    var rating: Double,
+    var uid: String
 ) {
 
     fun getMarkerTitle(): String {

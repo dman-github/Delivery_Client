@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQueryEventListener
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.Marker
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -35,6 +36,8 @@ class HomeViewModel(
     private val _updateMapDriver = MutableLiveData<MarkerModel>()
     val updateMapDriver: LiveData<MarkerModel> = _updateMapDriver
 
+    private val _removeMarker = MutableLiveData<Marker>()
+    val removeMarker: LiveData<Marker> = _removeMarker
 
     //Model
     private val _model = HomeModel()
@@ -63,6 +66,7 @@ class HomeViewModel(
     }
 
     fun updateLocation(loc: Location?, context: Context) {
+
         loc?.let { location ->
             _model.uid?.also { uid ->
                 locationUsecase.updateLocation(uid, location) { result ->
@@ -71,84 +75,7 @@ class HomeViewModel(
                         _updateMap.value = LatLng(location.latitude, location.longitude)
                         _showSnackbarMessage.value =
                             "Location updated\nLat: ${location.latitude}, Lon: ${location.longitude}}"
-                        locationUsecase.fetchNearestDrivers(
-                            location,
-                            _model.distance,
-                            context,
-                            completion = { it ->
-                                it.onFailure { _showSnackbarMessage.value = it.message }
-                            },
-                            object : GeoQueryEventListener {
-                                override fun onKeyEntered(key: String?, location: GeoLocation?) {
-                                    Log.i("App_Info", "GeoQueryEventListener, key Entered")
-                                    _model.nearestDrivers.add(DriverGeoModel(key, location))
-                                }
-
-                                override fun onKeyExited(key: String?) {
-                                    Log.i("App_Info", "GeoQueryEventListener, key Exit")
-                                }
-
-                                override fun onKeyMoved(key: String?, location: GeoLocation?) {}
-
-                                override fun onGeoQueryReady() {
-                                    if (_model.distance <= _model.range_limit) {
-                                        _model.distance++
-                                        loadAvailableDrivers()
-                                        Log.i("App_Info", "Inc Distance + loadAvailableDrivers")
-                                    } else {
-                                        _model.distance = 0.0
-                                        addDriverMarkers()
-                                        Log.i("App_Info", "Clear Distance + addDriverMarker")
-                                    }
-                                }
-
-                                override fun onGeoQueryError(error: DatabaseError?) {
-                                    error?.let { _showSnackbarMessage.value = it.message }
-                                }
-                            }, object : ChildEventListener {
-
-                                override fun onChildAdded(
-                                    snapshot: DataSnapshot,
-                                    previousChildName: String?
-                                ) {
-                                    Log.i("App_Info", "Child Listener onChildAdded")
-                                    val geoQueryModel = snapshot.getValue(GeoQueryModel::class.java)
-                                    geoQueryModel?.let { geoQueryModel ->
-                                        geoQueryModel.l?.let { l ->
-                                            val geoLocation = GeoLocation(l[0], l[1])
-                                            val driverGeoModel =
-                                                DriverGeoModel(snapshot.key, geoLocation)
-                                            val newDriverLocation = Location("")
-                                            newDriverLocation.latitude = geoLocation.latitude
-                                            newDriverLocation.longitude = geoLocation.longitude
-                                            val newDist =
-                                                location.distanceTo(newDriverLocation) / 1000 //Kms)
-                                            if (newDist <= _model.range_limit) {
-                                                fetchDriverInfoByKey(driverGeoModel)
-                                            }
-                                        }
-                                    }
-                                }
-
-                                override fun onChildChanged(
-                                    snapshot: DataSnapshot,
-                                    previousChildName: String?
-                                ) {
-                                }
-
-                                override fun onChildRemoved(snapshot: DataSnapshot) {}
-
-                                override fun onChildMoved(
-                                    snapshot: DataSnapshot,
-                                    previousChildName: String?
-                                ) {
-                                }
-
-                                override fun onCancelled(error: DatabaseError) {
-                                    error?.let { _showSnackbarMessage.value = it.message }
-                                }
-
-                            })
+                        loadAvailableDrivers(location, context)
                     }
                     result.onFailure {
                         _showSnackbarMessage.value = it.message
@@ -169,6 +96,11 @@ class HomeViewModel(
         }
     }
 
+    fun saveMapMarker(uid: String, marker: Marker) {
+        if (!_model.mapMarkers.containsKey(uid)) {
+            _model.mapMarkers.put(uid, marker)
+        }
+    }
 
     fun fetchDriverInfoByKey(driverGeoModel: DriverGeoModel) {
         driverGeoModel.key?.let { uid ->
@@ -186,9 +118,9 @@ class HomeViewModel(
                                                 ln,
                                                 location.latitude,
                                                 location.longitude,
-                                                r
+                                                r,
+                                                uid
                                             )
-                                        _model.mapMarkers.put(uid, mModel)
                                         _updateMapDriver.value = mModel
                                     }
                                 }
@@ -217,14 +149,103 @@ class HomeViewModel(
             _model.previousLocation?.let { previousLoc ->
                 if (previousLoc.distanceTo(currentLoc) / 1000 <= _model.range_limit) {
                     Log.i("App_Info", "loadAvailableDrivers")
-                    loadAvailableDrivers()
+                    // loadAvailableDrivers(currentLoc)
                 }
             }
         }
     }
 
-    fun loadAvailableDrivers() {
+    fun loadAvailableDrivers(location: Location, context: Context) {
+        locationUsecase.fetchNearestDrivers(
+            location,
+            _model.distance,
+            context,
+            completion = { it ->
+                it.onFailure { _showSnackbarMessage.value = it.message }
+            },
+            object : GeoQueryEventListener {
+                override fun onKeyEntered(key: String?, location: GeoLocation?) {
+                    Log.i("App_Info", "GeoQueryEventListener, key Entered $key")
+                    _model.nearestDrivers.add(DriverGeoModel(key, location))
+                }
 
+                override fun onKeyExited(key: String?) {
+                    key?.let {
+                        Log.i("App_Info", "GeoQueryEventListener, key Exit ")
+                        _model.nearestDrivers.removeIf { model -> model.key == it }
+                        val markerToRemove = _model.mapMarkers[it]
+                        markerToRemove?.let { marker ->
+                            _removeMarker.value = marker
+                            _model.mapMarkers.remove(it)
+                        }
+
+                    }
+                }
+
+                override fun onKeyMoved(key: String?, location: GeoLocation?) {}
+
+                override fun onGeoQueryReady() {
+                    if (_model.distance <= _model.range_limit) {
+                        _model.distance++
+                        loadAvailableDrivers(location, context)
+                        Log.i(
+                            "App_Info",
+                            "Inc Distance + loadAvailableDrivers  + ${_model.distance}"
+                        )
+                    } else {
+                        _model.distance = 1.0
+                        addDriverMarkers()
+                        Log.i("App_Info", "Clear Distance + addDriverMarker")
+                    }
+                }
+
+                override fun onGeoQueryError(error: DatabaseError?) {
+                    error?.let { _showSnackbarMessage.value = it.message }
+                }
+            }, object : ChildEventListener {
+
+                override fun onChildAdded(
+                    snapshot: DataSnapshot,
+                    previousChildName: String?
+                ) {
+                    Log.i("App_Info", "Child Listener onChildAdded")
+                    val geoQueryModel = snapshot.getValue(GeoQueryModel::class.java)
+                    geoQueryModel?.let { geoQueryModel ->
+                        geoQueryModel.l?.let { l ->
+                            val geoLocation = GeoLocation(l[0], l[1])
+                            val driverGeoModel =
+                                DriverGeoModel(snapshot.key, geoLocation)
+                            val newDriverLocation = Location("")
+                            newDriverLocation.latitude = geoLocation.latitude
+                            newDriverLocation.longitude = geoLocation.longitude
+                            val newDist =
+                                location.distanceTo(newDriverLocation) / 1000 //Kms)
+                            if (newDist <= _model.range_limit) {
+                                fetchDriverInfoByKey(driverGeoModel)
+                            }
+                        }
+                    }
+                }
+
+                override fun onChildChanged(
+                    snapshot: DataSnapshot,
+                    previousChildName: String?
+                ) {
+                }
+
+                override fun onChildRemoved(snapshot: DataSnapshot) {}
+
+                override fun onChildMoved(
+                    snapshot: DataSnapshot,
+                    previousChildName: String?
+                ) {
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    error?.let { _showSnackbarMessage.value = it.message }
+                }
+
+            })
     }
 
 
