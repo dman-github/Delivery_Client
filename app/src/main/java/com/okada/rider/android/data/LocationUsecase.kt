@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import com.firebase.geofire.GeoQueryEventListener
 import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.services.LocationService
 
 class LocationUsecase(val locationService: LocationService) {
@@ -27,7 +28,7 @@ class LocationUsecase(val locationService: LocationService) {
         location: Location,
         distance: Double,
         context: Context,
-        completion: (Result<Unit>) -> Unit,
+        completion: (Result<String>) -> Unit,
         geoQueryEventListener: GeoQueryEventListener,
         childEventListener: ChildEventListener
     ) {
@@ -39,5 +40,13 @@ class LocationUsecase(val locationService: LocationService) {
             geoQueryEventListener,
             childEventListener
         )
+    }
+
+    fun addDriverListener(uid: String, subdomain: String, listener: ValueEventListener) {
+        locationService.addDriverListener(uid,subdomain,listener)
+    }
+
+    fun removeAllListeners(subdomain: String) {
+        locationService.removeAllListeners(subdomain)
     }
 }

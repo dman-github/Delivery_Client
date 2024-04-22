@@ -4,6 +4,7 @@ import android.content.Context
 import android.location.Location
 import com.firebase.geofire.GeoQueryEventListener
 import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.ValueEventListener
 
 interface LocationService {
 
@@ -20,8 +21,12 @@ interface LocationService {
         location: Location,
         distance: Double,
         context: Context,
-        completion: (Result<Unit>) -> Unit,
+        completion: (Result<String>) -> Unit,
         geoQueryEventListener: GeoQueryEventListener,
         childEventListener: ChildEventListener
     )
+
+    fun addDriverListener(uid: String, subdomain: String, listener: ValueEventListener)
+
+    fun removeAllListeners(subdomain: String)
 }

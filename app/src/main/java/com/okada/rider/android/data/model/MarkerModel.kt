@@ -21,6 +21,6 @@ class MarkerModel (
     }
 
     fun getRating(): String {
-        return "$rating"
+        return "Rating: $rating"
     }
 }

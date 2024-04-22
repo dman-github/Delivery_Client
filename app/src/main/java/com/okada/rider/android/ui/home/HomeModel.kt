@@ -12,6 +12,7 @@ class HomeModel {
     var currentLocation: Location? = null
     var previousLocation: Location? = null
     var firstTime: Boolean = true
+    var domain: String? = null
     var nearestDrivers: MutableSet<DriverGeoModel>  =  HashSet()
     var mapMarkers: MutableMap<String, Marker> = HashMap()
 }

@@ -13,6 +13,7 @@ import com.google.android.gms.maps.model.Marker
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.data.LocationUsecase
 import com.okada.rider.android.data.ProfileUsecase
@@ -122,6 +123,8 @@ class HomeViewModel(
                                                 uid
                                             )
                                         _updateMapDriver.value = mModel
+                                        // Add a listener to remove the driver
+                                        addDriverRemoveListener(uid)
                                     }
                                 }
                             }
@@ -155,23 +158,54 @@ class HomeViewModel(
         }
     }
 
+    private fun addDriverRemoveListener(uid: String) {
+        _model.domain?.let { domain ->
+            locationUsecase.addDriverListener(uid, domain, object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (!snapshot.hasChildren()) {
+                        _model.nearestDrivers.removeIf { model -> model.key == uid }
+                        val markerToRemove = _model.mapMarkers[uid]
+                        markerToRemove?.let { marker ->
+                            _removeMarker.value = marker
+                            _model.mapMarkers.remove(uid)
+                        }
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    _showSnackbarMessage.value = "Removing Driver ${error.message}"
+                }
+
+            })
+        }
+    }
+
     fun loadAvailableDrivers(location: Location, context: Context) {
         locationUsecase.fetchNearestDrivers(
             location,
             _model.distance,
             context,
             completion = { it ->
+                it.onSuccess { domain -> _model.domain = domain }
                 it.onFailure { _showSnackbarMessage.value = it.message }
             },
             object : GeoQueryEventListener {
                 override fun onKeyEntered(key: String?, location: GeoLocation?) {
-                    Log.i("App_Info", "GeoQueryEventListener, key Entered $key Thread : ${Thread.currentThread().name}")
-                    _model.nearestDrivers.add(DriverGeoModel(key, location))
+                    Log.i(
+                        "App_Info",
+                        "GeoQueryEventListener, key Entered $key Thread : ${Thread.currentThread().name}"
+                    )
+                    val geoModel = DriverGeoModel(key, location)
+                    _model.nearestDrivers.add(geoModel)
+                    fetchDriverInfoByKey(geoModel)
                 }
 
                 override fun onKeyExited(key: String?) {
                     key?.let {
-                        Log.i("App_Info", "GeoQueryEventListener, key Exit Thread: ${Thread.currentThread().name}\"")
+                        Log.i(
+                            "App_Info",
+                            "GeoQueryEventListener, key Exit Thread: ${Thread.currentThread().name}\""
+                        )
                         _model.nearestDrivers.removeIf { model -> model.key == it }
                         val markerToRemove = _model.mapMarkers[it]
                         markerToRemove?.let { marker ->
@@ -208,10 +242,10 @@ class HomeViewModel(
                     snapshot: DataSnapshot,
                     previousChildName: String?
                 ) {
-                    Log.i("App_Info", "Child Listener onChildAdded")
                     val geoQueryModel = snapshot.getValue(GeoQueryModel::class.java)
                     geoQueryModel?.let { geoQueryModel ->
                         geoQueryModel.l?.let { l ->
+                            Log.i("App_Info", "Child Listener onChildAdded uid: ${snapshot.key}")
                             val geoLocation = GeoLocation(l[0], l[1])
                             val driverGeoModel =
                                 DriverGeoModel(snapshot.key, geoLocation)
@@ -221,6 +255,7 @@ class HomeViewModel(
                             val newDist =
                                 location.distanceTo(newDriverLocation) / 1000 //Kms)
                             if (newDist <= _model.range_limit) {
+                                Log.i("App_Info", "Child Listener driver on map uid: ${snapshot.key}")
                                 fetchDriverInfoByKey(driverGeoModel)
                             }
                         }
@@ -248,5 +283,10 @@ class HomeViewModel(
             })
     }
 
+    fun clearDatabase() {
+        _model.domain?.let {
+            locationUsecase.removeAllListeners(it)
+        }
+    }
 
 }

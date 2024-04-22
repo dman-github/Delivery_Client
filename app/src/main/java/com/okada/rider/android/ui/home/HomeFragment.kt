@@ -94,17 +94,19 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         homeViewModel.updateMap.observe(viewLifecycleOwner,
             Observer { newPos ->
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPos, 18f));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(newPos, 15f));
             })
 
         homeViewModel.updateMapDriver.observe(viewLifecycleOwner,
             Observer { newMarker ->
+                val moo = newMarker.getMarkerTitle()
                 val marker = mMap.addMarker(
                     MarkerOptions()
                         .position(LatLng(newMarker.driverLat, newMarker.driverLong))
                         .flat(true)
                         .title(newMarker.getMarkerTitle())
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.car))
+                        .snippet(newMarker.getRating())
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.okada_driver_marker_no_bg))
                 )
                 marker?.let { homeViewModel.saveMapMarker(newMarker.uid, it) }
             })
@@ -163,6 +165,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         super.onDestroyView()
         _binding = null
         homeViewModel.clearMessage()
+        homeViewModel.clearDatabase()
     }
 
     override fun onDestroy() {

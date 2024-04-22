@@ -9,6 +9,7 @@ import com.firebase.geofire.GeoFire
 import com.firebase.geofire.GeoLocation
 import com.firebase.geofire.GeoQuery
 import com.firebase.geofire.GeoQueryEventListener
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.tasks.OnFailureListener
 import com.google.android.gms.tasks.OnSuccessListener
 import com.google.firebase.database.ChildEventListener
@@ -30,6 +31,7 @@ class LocationServiceImpl : LocationService {
     private lateinit var geoFireUserRef: GeoFire
     private lateinit var geoFireDriverRef: GeoFire
     private var geoQuery: GeoQuery? = null
+    private var driverValueListeners: MutableMap<String, ValueEventListener> = HashMap()
     override fun setupDatabase(uid: String) {
         // Setting up Driver location DB
         onlineRef = FirebaseDatabase.getInstance().reference.child(".info/connected")
@@ -56,12 +58,31 @@ class LocationServiceImpl : LocationService {
         }
     }
 
+    override fun removeAllListeners(subdomain: String) {
+        for(listener in driverValueListeners) {
+            databaseRefDriverLocations.child(subdomain).removeEventListener(listener.value)
+        }
+    }
+
+    override fun addDriverListener(uid: String, subdomain: String, listener: ValueEventListener) {
+        if (driverValueListeners.containsKey(uid)) {
+            // remove any current listeners
+            driverValueListeners[uid]?.let {
+                databaseRefDriverLocations.child(subdomain).removeEventListener(
+                    it
+                )
+            }
+        }
+        databaseRefDriverLocations.child(subdomain).addValueEventListener(listener)
+        driverValueListeners[uid] = listener
+    }
+
     @Suppress("DEPRECATION")
     override fun fetchNearestDrivers(
         location: Location,
         distance: Double,
         context: Context,
-        completion: (Result<Unit>) -> Unit,
+        completion: (Result<String>) -> Unit,
         geoQueryEventListener: GeoQueryEventListener,
         childEventListener: ChildEventListener
     ) {
@@ -102,17 +123,19 @@ class LocationServiceImpl : LocationService {
 
     }
 
+
     private fun queryDrivers(
         location: Location,
         distance: Double,
         address: Address?,
-        completion: (Result<Unit>) -> Unit,
+        completion: (Result<String>) -> Unit,
         geoQueryEventListener: GeoQueryEventListener,
         childEventListener: ChildEventListener
     ) {
         address?.let {
             val geocodeLocation =
                 getCountryCodeComponent(address) + "_" + getGeocodeComponent(address)
+            completion(Result.success(geocodeLocation))
             geoFireDriverRef = GeoFire(databaseRefDriverLocations.child(geocodeLocation))
             // There should ony be one query instance and remove all listeners before adding new ones
             geoQuery?.removeAllListeners()
@@ -121,7 +144,7 @@ class LocationServiceImpl : LocationService {
                 distance
             )
             geoQuery?.addGeoQueryEventListener(geoQueryEventListener)
-            //databaseRefDriverLocations.addChildEventListener(childEventListener)
+            //databaseRefDriverLocations.child(geocodeLocation).addChildEventListener(childEventListener)
         } ?: run {
             completion(Result.failure(Exception("Cannot find address from Geocode")))
         }
