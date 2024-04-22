@@ -6,8 +6,8 @@ import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.data.model.MarkerModel
 
 class HomeModel {
-    var distance = 1.0
-    var range_limit = 1
+    var distance = 10.0
+    var range_limit = 10.0
     var uid: String? = null
     var currentLocation: Location? = null
     var previousLocation: Location? = null

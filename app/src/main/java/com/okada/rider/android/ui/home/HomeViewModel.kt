@@ -165,13 +165,13 @@ class HomeViewModel(
             },
             object : GeoQueryEventListener {
                 override fun onKeyEntered(key: String?, location: GeoLocation?) {
-                    Log.i("App_Info", "GeoQueryEventListener, key Entered $key")
+                    Log.i("App_Info", "GeoQueryEventListener, key Entered $key Thread : ${Thread.currentThread().name}")
                     _model.nearestDrivers.add(DriverGeoModel(key, location))
                 }
 
                 override fun onKeyExited(key: String?) {
                     key?.let {
-                        Log.i("App_Info", "GeoQueryEventListener, key Exit ")
+                        Log.i("App_Info", "GeoQueryEventListener, key Exit Thread: ${Thread.currentThread().name}\"")
                         _model.nearestDrivers.removeIf { model -> model.key == it }
                         val markerToRemove = _model.mapMarkers[it]
                         markerToRemove?.let { marker ->
@@ -185,7 +185,7 @@ class HomeViewModel(
                 override fun onKeyMoved(key: String?, location: GeoLocation?) {}
 
                 override fun onGeoQueryReady() {
-                    if (_model.distance <= _model.range_limit) {
+                    if (_model.distance < _model.range_limit) {
                         _model.distance++
                         loadAvailableDrivers(location, context)
                         Log.i(
@@ -193,7 +193,7 @@ class HomeViewModel(
                             "Inc Distance + loadAvailableDrivers  + ${_model.distance}"
                         )
                     } else {
-                        _model.distance = 1.0
+                        _model.distance = 10.0
                         addDriverMarkers()
                         Log.i("App_Info", "Clear Distance + addDriverMarker")
                     }
