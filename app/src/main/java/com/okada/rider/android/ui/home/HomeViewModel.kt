@@ -60,17 +60,6 @@ class HomeViewModel(
     val compositeDisposable = CompositeDisposable()
     lateinit var directionsService: DirectionsService
 
-    //Moving Marker
-    var polylineList: List<LatLng>? = null
-    var handler: Handler? = null
-    var index: Int = 0
-    var next: Int = 0
-    var start: LatLng? = null
-    var end: LatLng? = null
-    var v: Float = 0.0f
-    var lat: Double = 0.0
-    var lng: Double = 0.0
-
 
     init {
         accountUsecase.getLoggedInUser { result ->
@@ -92,7 +81,7 @@ class HomeViewModel(
         _model.apiKey = key
     }
 
-    fun clearDisposables() {
+    fun viewWillStop() {
         compositeDisposable.clear()
     }
 
@@ -277,36 +266,36 @@ class HomeViewModel(
                                 val poly = route.getJSONObject("overview_polyline")
                                 val polyline = poly.getString("points")
                                 //polylineList = Common.decodePoly(polyline)
-                                polylineList = PolyUtil.decode(polyline)
+                                newData.polylineList = PolyUtil.decode(polyline)
                             }
 
                             // Movement
-                            handler = Handler(Looper.getMainLooper())
-                            index = -1
-                            next = 1
+                            newData.handler = Handler(Looper.getMainLooper())
+                            newData.index = -1
+                            newData.next = 1
 
                             val runnable = object : Runnable {
                                 override fun run() {
-                                    polylineList?.let { list ->
+                                    newData.polylineList?.let { list ->
                                         // Takes 2 points at a time
                                         if (list.size > 1) {
-                                            if (index < list.size - 2) {
-                                                index++
-                                                next = index + 1
-                                                start = list[index]
-                                                end = list[next]
+                                            if (newData.index < list.size - 2) {
+                                                newData.index++
+                                                newData.next = newData.index + 1
+                                                newData.start = list[newData.index]
+                                                newData.end = list[newData.next]
                                             }
 
                                             val valueAnimator = ValueAnimator.ofInt(0, 1)
                                             valueAnimator.duration = 3000
                                             valueAnimator.interpolator = LinearInterpolator()
                                             valueAnimator.addUpdateListener { value ->
-                                                start?.let {start->
-                                                    end?.let{end->
-                                                        v = value.animatedFraction
-                                                        lat = v * end.latitude + (1 - v) * start.latitude
-                                                        lng = v * end.longitude + (1 - v) * start.longitude
-                                                        val newPos = LatLng(lat, lng)
+                                                newData.start?.let {start->
+                                                    newData.end?.let{end->
+                                                        newData.v = value.animatedFraction
+                                                        newData.lat = newData.v * end.latitude + (1 - newData.v) * start.latitude
+                                                        newData.lng = newData.v * end.longitude + (1 - newData.v) * start.longitude
+                                                        val newPos = LatLng(newData.lat, newData.lng)
                                                         marker?.position = newPos
                                                         marker?.setAnchor(0.5f,0.5f)
                                                         marker?.rotation = Common.getBearing(start, newPos)
@@ -314,22 +303,22 @@ class HomeViewModel(
                                                 }
                                             }
                                             valueAnimator.start()
-                                            if (index < list.size -2) {
+                                            if (newData.index < list.size -2) {
                                                 // Keep running a new animation after 1.5s
-                                                handler!!.postDelayed(this, 1500)
-                                            } else if (index < list.size - 1){
+                                                Log.i(
+                                                    "App_Info",
+                                                    "valueAnimator, create new  : $uid, ${newData.lat} ${newData.lng}"
+                                                )
+                                                newData.handler!!.postDelayed(this, 3500)
+                                            } else if (newData.index < list.size - 1){
                                                 newData.isRun = false
                                                 _model.driversSubscribed.put(uid, newData)
                                             }
                                         }
                                     }
                                 }
-
                             }
-
-                            handler!!.postDelayed(runnable, 1500)
-
-
+                            newData.handler!!.postDelayed(runnable, 1500)
                         } catch (e: Exception) {
                             _showSnackbarMessage.value = e.message
                         }

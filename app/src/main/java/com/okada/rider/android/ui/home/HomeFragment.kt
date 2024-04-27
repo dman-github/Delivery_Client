@@ -166,6 +166,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        homeViewModel.viewWillStop()
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
