@@ -60,7 +60,11 @@ class LocationServiceImpl : LocationService {
 
     override fun removeAllListeners(subdomain: String) {
         for(listener in driverValueListeners) {
-            databaseRefDriverLocations.child(subdomain).removeEventListener(listener.value)
+            //Ref->SubDomainAddress->Uid->  Remove here
+            databaseRefDriverLocations
+                .child(subdomain)
+                .child(listener.key)
+                .removeEventListener(listener.value)
         }
     }
 
@@ -68,12 +72,18 @@ class LocationServiceImpl : LocationService {
         if (driverValueListeners.containsKey(uid)) {
             // remove any current listeners
             driverValueListeners[uid]?.let {
-                databaseRefDriverLocations.child(subdomain).removeEventListener(
-                    it
-                )
+                //Ref->SubDomainAddress->Uid->  remove here
+                databaseRefDriverLocations
+                    .child(subdomain)
+                    .child(uid)
+                    .removeEventListener(it)
             }
         }
-        databaseRefDriverLocations.child(subdomain).addValueEventListener(listener)
+        //Ref->SubDomainAddress->Uid->  add here
+        databaseRefDriverLocations
+            .child(subdomain)
+            .child(uid)
+            .addValueEventListener(listener)
         driverValueListeners[uid] = listener
     }
 
@@ -154,7 +164,7 @@ class LocationServiceImpl : LocationService {
         //locality -> adminArea is going from narrow window to a larger address window
         // if the locality is null then select sublocality e.t.`false`
         // Normally locality is the city
-        return a.locality ?: a.subLocality ?: a.subAdminArea ?: a.adminArea
+        return a.subAdminArea ?: a.adminArea
     }
 
     private fun getCountryCodeComponent(a: Address): String {

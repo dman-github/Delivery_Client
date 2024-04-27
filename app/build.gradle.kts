@@ -117,4 +117,15 @@ dependencies {
     implementation ("com.github.bumptech.glide:glide:4.16.0")
     annotationProcessor ("com.github.bumptech.glide:compiler:4.16.0")
 
+    //retrofit
+    implementation("com.squareup.retrofit2:adapter-rxjava2:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-scalars:2.9.0")
+
+    //RxJava
+    implementation ("io.reactivex.rxjava2:rxandroid:2.1.1")
+
+    // Google maps utils
+    implementation("com.google.maps.android:android-maps-utils:3.8.2")
+
 }

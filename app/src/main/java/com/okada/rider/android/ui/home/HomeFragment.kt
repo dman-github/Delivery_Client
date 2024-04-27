@@ -58,6 +58,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var locationCallback: LocationCallback
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
 
+
+
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
@@ -82,6 +84,9 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun init() {
+        //set google map api key
+        homeViewModel.setGoogleApiKey(resources.getString(R.string.GOOGLE_MAPS_API_KEY))
+
         // Create the observer which updates the UI.
         homeViewModel.showSnackbarMessage.observe(viewLifecycleOwner,
             Observer { newMessage ->

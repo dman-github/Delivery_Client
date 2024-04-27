@@ -11,7 +11,10 @@ import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import com.google.android.gms.maps.model.LatLng
 import com.okada.rider.android.data.model.UserInfo
+import kotlin.math.abs
+import kotlin.math.atan
 
 object Common {
     var currentUser: UserInfo? = null
@@ -71,6 +74,68 @@ object Common {
         val notification = builder.build()
         notificationManager.notify(id, notification)
 
-
     }
+
+    //DECODE POLY
+    // A polynomial curve comprising of multiple lat,lon coordinates is encoded in to a base64 string
+    // This is the input to this function and the outputs is the list of lat,long coordinates that
+    // the string comprises of.
+    fun decodePoly(encoded: String): List<LatLng> {
+        val poly = mutableListOf<LatLng>()
+        var index = 0
+        val len = encoded.length
+        var lat = 0
+        var lng = 0
+        while (index < len) {
+            var b: Int
+            var shift = 0
+            var result = 0
+            do {
+                b = encoded[index++].digitToInt() - 63
+                result = result or ((b and 0x1f) shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlat = if (result and 1 != 0) -(result shr 1) else (result shr 1)
+            lat += dlat
+
+            shift = 0
+            result = 0
+            do {
+                b = encoded[index++].digitToInt() - 63
+                result = result or ((b and 0x1f) shl shift)
+                shift += 5
+            } while (b >= 0x20)
+            val dlng = if (result and 1 != 0) -(result shr 1) else (result shr 1)
+            lng += dlng
+
+            val p = LatLng((lat.toDouble() / 1E5), (lng.toDouble() / 1E5))
+            poly.add(p)
+        }
+        return poly
+    }
+
+    //GET BEARING
+    // This is the angle in degrees you begin with when travelling from Point A to Point B
+    fun getBearing(begin: LatLng, end: LatLng): Float {
+        val lat = abs(begin.latitude - end.latitude)
+        val lng = abs(begin.longitude - end.longitude)
+
+        return when {
+            begin.latitude < end.latitude && begin.longitude < end.longitude -> {
+                (Math.toDegrees(atan(lng / lat))).toFloat()
+            }
+            begin.latitude >= end.latitude && begin.longitude < end.longitude -> {
+                ((90 - Math.toDegrees(atan(lng / lat))) + 90).toFloat()
+            }
+            begin.latitude >= end.latitude && begin.longitude >= end.longitude -> {
+                (Math.toDegrees(atan(lng / lat)) + 180).toFloat()
+            }
+            begin.latitude < end.latitude && begin.longitude >= end.longitude -> {
+                ((90 - Math.toDegrees(atan(lng / lat))) + 270).toFloat()
+            }
+            else -> -1f
+        }
+    }
+
+
 }

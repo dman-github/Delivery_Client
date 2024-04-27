@@ -1,8 +1,12 @@
 package com.okada.rider.android.ui.home
 
+import android.animation.ValueAnimator
 import android.content.Context
 import android.location.Location
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
+import android.view.animation.LinearInterpolator
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -14,12 +18,22 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
+import com.google.maps.android.PolyUtil
+import com.okada.rider.android.Common
 import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.data.LocationUsecase
 import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.data.model.AnimationModel
 import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.data.model.GeoQueryModel
 import com.okada.rider.android.data.model.MarkerModel
+import com.okada.rider.android.services.DirectionsService
+import com.okada.rider.android.services.RetrofitClient
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+import org.json.JSONObject
+import retrofit2.create
 
 class HomeViewModel(
     private val accountUsecase: AccountUsecase,
@@ -43,6 +57,21 @@ class HomeViewModel(
     //Model
     private val _model = HomeModel()
 
+    val compositeDisposable = CompositeDisposable()
+    lateinit var directionsService: DirectionsService
+
+    //Moving Marker
+    var polylineList: List<LatLng>? = null
+    var handler: Handler? = null
+    var index: Int = 0
+    var next: Int = 0
+    var start: LatLng? = null
+    var end: LatLng? = null
+    var v: Float = 0.0f
+    var lat: Double = 0.0
+    var lng: Double = 0.0
+
+
     init {
         accountUsecase.getLoggedInUser { result ->
             result.fold(onSuccess = { user ->
@@ -52,10 +81,19 @@ class HomeViewModel(
                 _showSnackbarMessage.value = it.message
             })
         }
+        directionsService = RetrofitClient.instance!!.create(DirectionsService::class.java)
     }
 
     fun clearMessage() {
         _showSnackbarMessage.value = null
+    }
+
+    fun setGoogleApiKey(key: String) {
+        _model.apiKey = key
+    }
+
+    fun clearDisposables() {
+        compositeDisposable.clear()
     }
 
     fun removeUserLocation() {
@@ -168,6 +206,32 @@ class HomeViewModel(
                         markerToRemove?.let { marker ->
                             _removeMarker.value = marker
                             _model.mapMarkers.remove(uid)
+                            _model.driversSubscribed.remove(uid)
+                        }
+                    } else {
+                        snapshot.getValue(GeoQueryModel::class.java)?.let { model ->
+                            val animationModel = AnimationModel(false, model)
+                            if (_model.driversSubscribed.containsKey(uid)) {
+                                val marker = _model.mapMarkers[uid]
+                                val oldPosition = _model.driversSubscribed.get(uid)
+
+                                val from = StringBuilder()
+                                    .append(oldPosition?.geoQueryModel?.l?.get(0))
+                                    .append(",")
+                                    .append(oldPosition?.geoQueryModel?.l?.get(1))
+                                    .toString()
+
+                                val to = StringBuilder()
+                                    .append(animationModel?.geoQueryModel?.l?.get(0))
+                                    .append(",")
+                                    .append(animationModel?.geoQueryModel?.l?.get(1))
+                                    .toString()
+
+                                moveMarkerAnimation(uid, animationModel, marker, from, to)
+                            } else {
+                                // first location
+                                _model.driversSubscribed.put(uid, animationModel)
+                            }
                         }
                     }
                 }
@@ -177,6 +241,100 @@ class HomeViewModel(
                 }
 
             })
+        }
+    }
+
+    private fun moveMarkerAnimation(
+        uid: String,
+        newData: AnimationModel,
+        marker: Marker?,
+        from: String,
+        to: String
+    ) {
+        if (!newData.isRun) {
+            //fetch directions between the 2 points
+            compositeDisposable.add(
+                directionsService.getDirections(
+                    "driving",
+                    "less_driving", from, to, _model.apiKey
+                )
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe { returnResult ->
+                        Log.i(
+                            "App_Info",
+                            "Directions api returned for uid: $uid"
+                        )
+                        try {
+                            val jsonObject = JSONObject(returnResult)
+                            val errorString = jsonObject.getString("status")
+                            if (errorString.isNotEmpty()) {
+                                _showSnackbarMessage.value = "Directions api: $errorString"
+                            }
+                            val jsonArray = jsonObject.getJSONArray("routes")
+                            for (i in 0 until jsonArray.length()) {
+                                val route = jsonArray.getJSONObject(i)
+                                val poly = route.getJSONObject("overview_polyline")
+                                val polyline = poly.getString("points")
+                                //polylineList = Common.decodePoly(polyline)
+                                polylineList = PolyUtil.decode(polyline)
+                            }
+
+                            // Movement
+                            handler = Handler(Looper.getMainLooper())
+                            index = -1
+                            next = 1
+
+                            val runnable = object : Runnable {
+                                override fun run() {
+                                    polylineList?.let { list ->
+                                        // Takes 2 points at a time
+                                        if (list.size > 1) {
+                                            if (index < list.size - 2) {
+                                                index++
+                                                next = index + 1
+                                                start = list[index]
+                                                end = list[next]
+                                            }
+
+                                            val valueAnimator = ValueAnimator.ofInt(0, 1)
+                                            valueAnimator.duration = 3000
+                                            valueAnimator.interpolator = LinearInterpolator()
+                                            valueAnimator.addUpdateListener { value ->
+                                                start?.let {start->
+                                                    end?.let{end->
+                                                        v = value.animatedFraction
+                                                        lat = v * end.latitude + (1 - v) * start.latitude
+                                                        lng = v * end.longitude + (1 - v) * start.longitude
+                                                        val newPos = LatLng(lat, lng)
+                                                        marker?.position = newPos
+                                                        marker?.setAnchor(0.5f,0.5f)
+                                                        marker?.rotation = Common.getBearing(start, newPos)
+                                                    }
+                                                }
+                                            }
+                                            valueAnimator.start()
+                                            if (index < list.size -2) {
+                                                // Keep running a new animation after 1.5s
+                                                handler!!.postDelayed(this, 1500)
+                                            } else if (index < list.size - 1){
+                                                newData.isRun = false
+                                                _model.driversSubscribed.put(uid, newData)
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+
+                            handler!!.postDelayed(runnable, 1500)
+
+
+                        } catch (e: Exception) {
+                            _showSnackbarMessage.value = e.message
+                        }
+                    }
+            )
         }
     }
 
@@ -211,6 +369,7 @@ class HomeViewModel(
                         markerToRemove?.let { marker ->
                             _removeMarker.value = marker
                             _model.mapMarkers.remove(it)
+                            _model.driversSubscribed.remove(it)
                         }
 
                     }
@@ -255,7 +414,10 @@ class HomeViewModel(
                             val newDist =
                                 location.distanceTo(newDriverLocation) / 1000 //Kms)
                             if (newDist <= _model.range_limit) {
-                                Log.i("App_Info", "Child Listener driver on map uid: ${snapshot.key}")
+                                Log.i(
+                                    "App_Info",
+                                    "Child Listener driver on map uid: ${snapshot.key}"
+                                )
                                 fetchDriverInfoByKey(driverGeoModel)
                             }
                         }
