@@ -33,7 +33,6 @@ import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.json.JSONObject
-import retrofit2.create
 
 class HomeViewModel(
     private val accountUsecase: AccountUsecase,
@@ -286,6 +285,7 @@ class HomeViewModel(
                                                 newData.end = list[newData.next]
                                             }
 
+                                            /*
                                             val valueAnimator = ValueAnimator.ofInt(0, 1)
                                             valueAnimator.duration = 3000
                                             valueAnimator.interpolator = LinearInterpolator()
@@ -302,14 +302,50 @@ class HomeViewModel(
                                                     }
                                                 }
                                             }
-                                            valueAnimator.start()
+                                            valueAnimator.start()*/
+                                            newData.start?.let { start ->
+                                                newData.end?.let { end ->
+                                                    marker?.let{marker->
+                                                        val startPosition = start
+                                                        val endPosition = end
+                                                        val startRotation = marker.rotation
+
+                                                        val latLngInterpolator = LinearFixed()
+                                                        val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
+                                                        valueAnimator.setDuration(1000) // duration 1 second
+
+                                                        valueAnimator.interpolator = LinearInterpolator()
+                                                        valueAnimator.addUpdateListener { animation ->
+                                                            try {
+                                                                val v = animation.animatedFraction
+                                                                val newPosition =
+                                                                    latLngInterpolator.interpolate(
+                                                                        v,
+                                                                        startPosition,
+                                                                        endPosition
+                                                                    )
+
+                                                                val endRotation = Common.getBearing(start,end)
+                                                                marker.position = newPosition
+                                                                marker.setAnchor(0.5f,0.5f)
+                                                                marker.rotation = Common.computeRotationNew(
+                                                                    v,
+                                                                    startRotation,
+                                                                    endRotation
+                                                                )
+                                                            } catch (ex: java.lang.Exception) {
+                                                                // I don't care atm..
+                                                            }
+                                                        }
+                                                        valueAnimator.start()
+                                                    }
+                                                }
+                                            }
+
+
                                             if (newData.index < list.size -2) {
                                                 // Keep running a new animation after 1.5s
-                                                Log.i(
-                                                    "App_Info",
-                                                    "valueAnimator, create new  : $uid, ${newData.lat} ${newData.lng}"
-                                                )
-                                                newData.handler!!.postDelayed(this, 3500)
+                                                newData.handler!!.postDelayed(this, 1000)
                                             } else if (newData.index < list.size - 1){
                                                 newData.isRun = false
                                                 _model.driversSubscribed.put(uid, newData)

@@ -137,5 +137,20 @@ object Common {
         }
     }
 
+    fun computeRotationNew(fraction: Float, start: Float, end: Float): Float {
+        val normalizeEnd = end - start // rotate start to 0
+        val normalizedEndAbs = (normalizeEnd + 360) % 360
+        val direction =
+            (if (normalizedEndAbs > 180) -1 else 1).toFloat() // -1 = anticlockwise, 1 = clockwise
+        val rotation: Float
+        rotation = if (direction > 0) {
+            normalizedEndAbs
+        } else {
+            normalizedEndAbs - 360
+        }
+        val result = fraction * rotation + start
+        return (result + 360) % 360
+    }
+
 
 }

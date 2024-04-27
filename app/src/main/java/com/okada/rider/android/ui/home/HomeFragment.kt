@@ -111,6 +111,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                         .flat(true)
                         .title(newMarker.getMarkerTitle())
                         .snippet(newMarker.getRating())
+                        .rotation(90f)
                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.okada_driver_marker_no_bg))
                 )
                 marker?.let { homeViewModel.saveMapMarker(newMarker.uid, it) }
