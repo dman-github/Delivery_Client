@@ -8,8 +8,8 @@ import com.okada.rider.android.data.model.MarkerModel
 
 class HomeModel {
     var apiKey: String = ""
-    var distance = 10.0
-    var range_limit = 10.0
+    var distance = 20.0
+    var range_limit = 20.0
     var uid: String? = null
     var currentLocation: Location? = null
     var previousLocation: Location? = null
