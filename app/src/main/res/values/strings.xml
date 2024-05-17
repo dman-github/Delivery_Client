@@ -52,4 +52,6 @@
     <string name="menu_profile">Profile</string>
     <string name="sign_out_msg">Do you really want to sign out?</string>
     <string name="cancel_string">Cancel</string>
+    <string name="slidingUpPickUp">Select a pickup location</string>
+    <string name="chooseSavedPlace">Choose a saved place</string>
 </resources>

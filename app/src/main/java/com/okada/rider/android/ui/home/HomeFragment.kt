@@ -17,6 +17,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
@@ -32,10 +33,16 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.libraries.places.api.Places
+import com.google.android.libraries.places.api.model.Place
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.material.snackbar.Snackbar
 import com.okada.rider.android.R
 import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.databinding.FragmentHomeBinding
+import com.sothree.slidinguppanel.SlidingUpPanelLayout
+import java.util.Arrays
 
 interface FirebaseDriverInfoListener {
     fun onDriverInfoLoadSuccess(driverGeoModel: DriverGeoModel?) {
@@ -57,7 +64,8 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var locationRequest: LocationRequest
     private lateinit var locationCallback: LocationCallback
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
-
+    private lateinit var slidingUpPanelLayout: SlidingUpPanelLayout
+    private lateinit var autoCompleteSupportFragment: AutocompleteSupportFragment
 
 
     // This property is only valid between onCreateView and
@@ -79,11 +87,45 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        initViews()
         init()
         return root
     }
 
+
+    private fun initViews() {
+        slidingUpPanelLayout = binding.slidingUpPanelLayout
+        autoCompleteSupportFragment =
+            childFragmentManager.findFragmentById(R.id.autocompleteFragment) as AutocompleteSupportFragment
+    }
+
     private fun init() {
+        if (!Places.isInitialized()) {
+            Places.initialize(requireContext(), resources.getString(R.string.GOOGLE_MAPS_API_KEY))
+        }
+        autoCompleteSupportFragment.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.ADDRESS,
+                Place.Field.LAT_LNG,
+                Place.Field.NAME
+            )
+        )
+        autoCompleteSupportFragment.setCountries("UK")
+        autoCompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onError(p0: Status) {
+                mapFragment.view?.let {
+                    Snackbar.make(it, "Error places", Snackbar.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onPlaceSelected(p0: Place) {
+                mapFragment.view?.let {
+                    Snackbar.make(it, "Place select: ${p0.address}", Snackbar.LENGTH_LONG).show()
+                }
+            }
+
+        })
         //set google map api key
         homeViewModel.setGoogleApiKey(resources.getString(R.string.GOOGLE_MAPS_API_KEY))
 
@@ -137,6 +179,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         fusedLocationProviderClient =
             LocationServices.getFusedLocationProviderClient(requireContext())
     }
+
 
     override fun onResume() {
         super.onResume()

@@ -106,12 +106,14 @@ dependencies {
     //Geofire
     implementation("com.firebase:geofire-android:3.2.0")
 
-    //Maps
+    //Maps and Places
     implementation("com.google.android.gms:play-services-maps:18.2.0")
-
+    implementation("com.google.android.libraries.places:places:3.4.0")
 
     //Circular image view
     implementation ("de.hdodenhof:circleimageview:3.1.0")
+    // Sliding up panel
+    implementation ("com.sothree.slidinguppanel:library:3.4.0")
 
     // Glide for loading images
     implementation ("com.github.bumptech.glide:glide:4.16.0")
@@ -127,5 +129,6 @@ dependencies {
 
     // Google maps utils
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
+
 
 }
