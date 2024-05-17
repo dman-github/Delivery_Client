@@ -4,6 +4,7 @@ plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
+    id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
 }
 
 android {
@@ -130,5 +131,7 @@ dependencies {
     // Google maps utils
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
 
+    //Eventbus
+    implementation("org.greenrobot:eventbus-java:3.3.1")
 
 }

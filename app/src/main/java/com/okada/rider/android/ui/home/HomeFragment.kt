@@ -1,7 +1,6 @@
 package com.okada.rider.android.ui.home
 
 import HomeViewModelFactory
-import android.Manifest
 import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager
 import android.content.res.Resources
@@ -11,12 +10,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
@@ -28,7 +27,6 @@ import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MapStyleOptions
@@ -39,22 +37,11 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener
 import com.google.android.material.snackbar.Snackbar
 import com.okada.rider.android.R
-import com.okada.rider.android.data.model.DriverGeoModel
+import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.databinding.FragmentHomeBinding
 import com.sothree.slidinguppanel.SlidingUpPanelLayout
-import java.util.Arrays
+import org.greenrobot.eventbus.EventBus
 
-interface FirebaseDriverInfoListener {
-    fun onDriverInfoLoadSuccess(driverGeoModel: DriverGeoModel?) {
-
-    }
-}
-
-interface FirebaseDriverFailedListener {
-    fun onFirebaseFailed(message: String) {
-
-    }
-}
 
 class HomeFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentHomeBinding? = null
@@ -71,8 +58,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     // This property is only valid between onCreateView and
     // onDestroyView.
     private val binding get() = _binding!!
-    lateinit var iFirebaseDriverInfoListener: FirebaseDriverInfoListener
-    lateinit var iFirebaseDriverFailedListener: FirebaseDriverFailedListener
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -103,29 +88,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         if (!Places.isInitialized()) {
             Places.initialize(requireContext(), resources.getString(R.string.GOOGLE_MAPS_API_KEY))
         }
-        autoCompleteSupportFragment.setPlaceFields(
-            listOf(
-                Place.Field.ID,
-                Place.Field.ADDRESS,
-                Place.Field.LAT_LNG,
-                Place.Field.NAME
-            )
-        )
-        autoCompleteSupportFragment.setCountries("UK")
-        autoCompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
-            override fun onError(p0: Status) {
-                mapFragment.view?.let {
-                    Snackbar.make(it, "Error places", Snackbar.LENGTH_LONG).show()
-                }
-            }
-
-            override fun onPlaceSelected(p0: Place) {
-                mapFragment.view?.let {
-                    Snackbar.make(it, "Place select: ${p0.address}", Snackbar.LENGTH_LONG).show()
-                }
-            }
-
-        })
+        setupAutoCompleteFragment()
         //set google map api key
         homeViewModel.setGoogleApiKey(resources.getString(R.string.GOOGLE_MAPS_API_KEY))
 
@@ -265,6 +228,53 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setupAutoCompleteFragment() {
+        autoCompleteSupportFragment.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.ADDRESS,
+                Place.Field.LAT_LNG,
+                Place.Field.NAME
+            )
+        )
+        autoCompleteSupportFragment.setCountries("UK")
+        autoCompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+            override fun onError(p0: Status) {
+                mapFragment.view?.let {
+                    Snackbar.make(it, "Error places", Snackbar.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onPlaceSelected(place: Place) {
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    fusedLocationProviderClient
+                        .lastLocation
+                        .addOnFailureListener { e ->
+                            Toast.makeText(
+                                requireContext(),
+                                "Error: $e", Toast.LENGTH_SHORT
+                            ).show();
+                        }.addOnSuccessListener { lastLocation ->
+                            val origin = LatLng(lastLocation.latitude, lastLocation.longitude)
+                            val dest = place.latLng?.let {
+                                place.latLng?.let { it1 ->
+                                    LatLng(it.latitude, it1.longitude)
+                                }
+                            }
+                            dest?.let{destination->
+                                findNavController().navigate(R.id.action_navigation_home_to_requestDriverActivity)
+                                EventBus.getDefault().postSticky(SelectedPlaceEvent(origin, destination))
+                            }
+                        }
+                }
+            }
+        })
+    }
+
     private fun fetchLastLocation() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
@@ -283,4 +293,5 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 }
         }
     }
+
 }
