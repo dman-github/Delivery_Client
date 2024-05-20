@@ -5,16 +5,19 @@ import android.animation.ValueAnimator
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
 import android.view.animation.LinearInterpolator
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
-import com.okada.rider.android.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.GoogleMap.CancelableCallback
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -24,10 +27,17 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.SquareCap
-import com.google.android.material.snackbar.Snackbar
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.getValue
 import com.google.maps.android.PolyUtil
+import com.google.maps.android.ui.IconGenerator
+import com.okada.rider.android.Common
+import com.okada.rider.android.R
 import com.okada.rider.android.data.model.SelectedPlaceEvent
+import com.okada.rider.android.data.model.UserInfo
 import com.okada.rider.android.databinding.ActivityRequestDriverBinding
+import com.okada.rider.android.databinding.DestinationMarkerBinding
 import com.okada.rider.android.databinding.OriginMarkerBinding
 import com.okada.rider.android.services.DirectionsService
 import com.okada.rider.android.services.RetrofitClient
@@ -39,11 +49,11 @@ import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
 import org.json.JSONObject
 
+
 class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityRequestDriverBinding
-    private lateinit var bindingPickUpMarker: OriginMarkerBinding
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
 
     // Routes
@@ -54,6 +64,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
     private var polylineList: List<LatLng>? = null
     private var polylineOptions: PolylineOptions? = null
     private var blackPolyLineOptions: PolylineOptions? = null
+    private var originMarker: Marker? = null
     private var destinationMarker: Marker? = null
     override fun onStart() {
         super.onStart()
@@ -103,7 +114,6 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        mMap.uiSettings.isZoomControlsEnabled = true
         try {
             val success =
                 googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.maps_style))
@@ -127,6 +137,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
         ) {
             mMap.isMyLocationEnabled = true
             mMap.uiSettings.isMyLocationButtonEnabled = true
+            mMap.uiSettings.isZoomControlsEnabled = true
             mMap.setOnMyLocationButtonClickListener {
                 selectedPlaceEvent?.let {
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(it.origin, 18f))
@@ -227,11 +238,14 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                         addOriginMarker(duration,start_address)
                         addDestinationMarker(end_address)
 
-                        mMap.animateCamera(CameraUpdateFactory.newLatLngBounds(latLngBound, 160))
+                        val cameraUpdate = CameraUpdateFactory
+                            .newLatLngBounds(latLngBound, 100)
+                        // moceCamera instead of animateCamera
+                        mMap.moveCamera(cameraUpdate)
                         mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
 
                     } catch (e: Exception) {
-                        //_showSnackbarMessage.value = e.message
+                        Toast.makeText(this,e.message,Toast.LENGTH_SHORT).show()
                     }
                 }
         )
@@ -243,12 +257,32 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
         val txt_time = binding.textTime
         val txt_origin = binding.textOrigin
 
-        //txt_time.text =
+        txt_time.text = Common.formatDuration(duration)
+        txt_origin.text = Common.formatAddress(startAddress)
+
+        val generator = IconGenerator(this)
+        generator.setContentView(view)
+        generator.setBackground(ColorDrawable(Color.TRANSPARENT))
+        val icon = generator.makeIcon()
+        selectedPlaceEvent?.let {evnt->
+            originMarker = mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.origin))
+        }
     }
 
     private fun addDestinationMarker(endAddress: String) {
-        val view = layoutInflater.inflate(R.layout.origin_marker, null)
-    }
+        val binding = DestinationMarkerBinding.inflate(layoutInflater)
+        val view = binding.root
+        val txt_destination = binding.textDest
 
+        txt_destination.text = Common.formatAddress(endAddress)
+
+        val generator = IconGenerator(this)
+        generator.setContentView(view)
+        generator.setBackground(ColorDrawable(Color.TRANSPARENT))
+        val icon = generator.makeIcon()
+        selectedPlaceEvent?.let {evnt->
+            destinationMarker = mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.destination))
+        }
+    }
 
 }

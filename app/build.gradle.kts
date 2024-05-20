@@ -132,6 +132,6 @@ dependencies {
     implementation("com.google.maps.android:android-maps-utils:3.8.2")
 
     //Eventbus
-    implementation("org.greenrobot:eventbus-java:3.3.1")
+    implementation("org.greenrobot:eventbus:3.3.1")
 
 }

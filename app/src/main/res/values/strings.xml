@@ -55,4 +55,5 @@
     <string name="slidingUpPickUp">Select a pickup location</string>
     <string name="chooseSavedPlace">Choose a saved place</string>
     <string name="title_activity_request_driver">RequestDriverActivity</string>
+    <string name="minText">Min</string>
 </resources>

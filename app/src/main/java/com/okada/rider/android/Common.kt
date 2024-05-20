@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
@@ -150,6 +151,21 @@ object Common {
         }
         val result = fraction * rotation + start
         return (result + 360) % 360
+    }
+
+    fun formatDuration(duration: String): CharSequence? {
+        if (duration.contains("mins")) {
+            val firstIndexMins = duration.indexOf("mins")
+            // Remove the space+mins from the duration and add a carriage return
+            return "${duration.substring(0, firstIndexMins - 1)}\nmins"
+        }
+        else
+            return duration
+    }
+
+    fun formatAddress(startAddress: String): CharSequence? {
+        val firstIndexComma = startAddress.indexOf(",")
+        return startAddress.substring(0,firstIndexComma)
     }
 
 
