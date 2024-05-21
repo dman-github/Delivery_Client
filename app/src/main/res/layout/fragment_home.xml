@@ -2,11 +2,13 @@
 
 
 <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/tools"
     xmlns:sothree="http://schemas.android.com/apk/res-auto"
     android:id="@+id/slidingUpPanelLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="bottom"
+    android:theme="@style/Theme.Okada"
     sothree:umanoPanelHeight="220dp"
     sothree:umanoShadowHeight="20dp">
 
@@ -32,8 +34,7 @@
 
         <View
             android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="?colorOnBackground" />
+            android:layout_height="1dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -55,7 +56,8 @@
                 android:layout_marginLeft="@dimen/editText_bottom_margin"
                 android:layout_marginRight="@dimen/editText_bottom_margin"
                 android:layout_weight="1"
-                android:src="@drawable/ic_action_add" />
+                android:src="@drawable/ic_action_add"
+                android:tint="?colorSecondary" />
 
 
         </LinearLayout>
@@ -72,7 +74,8 @@
                 android:layout_gravity="center"
                 android:layout_marginLeft="@dimen/editText_bottom_margin"
                 android:layout_marginRight="@dimen/editText_bottom_margin"
-                android:src="@drawable/ic_action_stars" />
+                android:src="@drawable/ic_action_stars"
+                android:tint="?colorSecondary" />
 
             <TextView
                 android:layout_width="wrap_content"

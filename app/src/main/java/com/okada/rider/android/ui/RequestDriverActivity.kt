@@ -170,9 +170,9 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                     try {
                         val jsonObject = JSONObject(returnResult)
                         val errorString = jsonObject.getString("status")
-                        if (errorString.isNotEmpty()) {
+                        if (errorString.isNotEmpty() && errorString.lowercase() != "ok") {
                             val msg = "Directions api: $errorString"
-                            Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
+                            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
                             return@subscribe
                         }
                         val jsonArray = jsonObject.getJSONArray("routes")
@@ -208,16 +208,16 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
                         //Animation
-                        val valueAnimator = ValueAnimator.ofInt(0,100)
+                        val valueAnimator = ValueAnimator.ofInt(0, 100)
                         valueAnimator.duration = 1100
                         valueAnimator.repeatCount = ValueAnimator.INFINITE
                         valueAnimator.interpolator = LinearInterpolator()
-                        valueAnimator.addUpdateListener { value->
+                        valueAnimator.addUpdateListener { value ->
                             val points = greyPolyLine!!.points
                             val percentValue = value.animatedValue.toString().toInt()
                             val size = points.size
-                            val newPoints = (size * (percentValue/100.0f)).toInt()
-                            val p = points.subList(0,newPoints)
+                            val newPoints = (size * (percentValue / 100.0f)).toInt()
+                            val p = points.subList(0, newPoints)
                             blackPolyLine!!.points = p
                         }
                         valueAnimator.start()
@@ -236,7 +236,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                         val start_address = legsObject.getString("start_address")
                         val end_address = legsObject.getString("end_address")
 
-                        addOriginMarker(duration,start_address)
+                        addOriginMarker(duration, start_address)
                         addDestinationMarker(end_address)
 
                         val cameraUpdate = CameraUpdateFactory
@@ -246,7 +246,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                         mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
 
                     } catch (e: Exception) {
-                        Toast.makeText(this,e.message,Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, e.message, Toast.LENGTH_SHORT).show()
                     }
                 }
         )
@@ -265,8 +265,10 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
         generator.setContentView(view)
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
-        selectedPlaceEvent?.let {evnt->
-            originMarker = mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.origin))
+        selectedPlaceEvent?.let { evnt ->
+            originMarker = mMap.addMarker(
+                MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.origin)
+            )
         }
     }
 
@@ -281,8 +283,11 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
         generator.setContentView(view)
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
-        selectedPlaceEvent?.let {evnt->
-            destinationMarker = mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.destination))
+        selectedPlaceEvent?.let { evnt ->
+            destinationMarker = mMap.addMarker(
+                MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
+                    .position(evnt.destination)
+            )
         }
     }
 
