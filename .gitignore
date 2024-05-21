@@ -16,3 +16,5 @@ local.properties
 app/okadaAppKey
 app/release/app-release.aab
 deploymentTargetDropDown.xml
+app/release/app-release.apk
+app/release/output-metadata.json

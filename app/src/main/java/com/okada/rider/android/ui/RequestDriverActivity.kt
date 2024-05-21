@@ -172,7 +172,8 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                         val errorString = jsonObject.getString("status")
                         if (errorString.isNotEmpty()) {
                             val msg = "Directions api: $errorString"
-                            // Snackbar.make(, msg, Snackbar.LENGTH_LONG).show()
+                            Toast.makeText(this,msg,Toast.LENGTH_SHORT).show()
+                            return@subscribe
                         }
                         val jsonArray = jsonObject.getJSONArray("routes")
                         for (i in 0 until jsonArray.length()) {
