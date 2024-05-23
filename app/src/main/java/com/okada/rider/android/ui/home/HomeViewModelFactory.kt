@@ -1,6 +1,7 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.okada.rider.android.data.AccountUsecase
+import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.LocationUsecase
 import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.services.AccountServiceImpl
@@ -26,7 +27,8 @@ class HomeViewModelFactory : ViewModelProvider.Factory {
                 ),
                 profileUsecase = ProfileUsecase(
                     dataService = DataServiceImpl()
-                )
+                ),
+                directionsUsecase = DirectionsUsecase()
             ) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")

@@ -21,6 +21,7 @@ import com.google.firebase.database.ValueEventListener
 import com.google.maps.android.PolyUtil
 import com.okada.rider.android.Common
 import com.okada.rider.android.data.AccountUsecase
+import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.LocationUsecase
 import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.data.model.AnimationModel
@@ -37,7 +38,8 @@ import org.json.JSONObject
 class HomeViewModel(
     private val accountUsecase: AccountUsecase,
     private val locationUsecase: LocationUsecase,
-    private val profileUsecase: ProfileUsecase
+    private val profileUsecase: ProfileUsecase,
+    private val directionsUsecase: DirectionsUsecase
 ) : ViewModel() {
 
 
@@ -82,6 +84,7 @@ class HomeViewModel(
 
     fun viewWillStop() {
         compositeDisposable.clear()
+        directionsUsecase.closeConnection()
     }
 
     fun removeUserLocation() {
@@ -240,126 +243,88 @@ class HomeViewModel(
         to: String
     ) {
         if (!newData.isRun) {
-            //fetch directions between the 2 points
-            compositeDisposable.add(
-                directionsService.getDirections(
-                    "driving",
-                    "less_driving", from, to, _model.apiKey
-                )
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe { returnResult ->
-                        Log.i(
-                            "App_Info",
-                            "Directions api returned for uid: $uid"
-                        )
-                        try {
-                            val jsonObject = JSONObject(returnResult)
-                            val errorString = jsonObject.getString("status")
-                            if (errorString.isNotEmpty()) {
-                                _showSnackbarMessage.value = "Directions api: $errorString"
-                            }
-                            val jsonArray = jsonObject.getJSONArray("routes")
-                            for (i in 0 until jsonArray.length()) {
-                                val route = jsonArray.getJSONObject(i)
-                                val poly = route.getJSONObject("overview_polyline")
-                                val polyline = poly.getString("points")
-                                //polylineList = Common.decodePoly(polyline)
-                                newData.polylineList = PolyUtil.decode(polyline)
-                            }
+            //fetch directions between the 2 points from the Google directions api
+            directionsUsecase.getDirections(from, to, _model.apiKey) { result ->
+                result.onSuccess { directionsList ->
+                    try {
+                        newData.polylineList = directionsList
+                        // create the marker movement animation
+                        newData.handler = Handler(Looper.getMainLooper())
+                        newData.index = -1
+                        newData.next = 1
+                        val runnable = object : Runnable {
+                            override fun run() {
+                                newData.polylineList?.let { list ->
+                                    // Takes 2 points at a time
+                                    if (list.size > 1) {
+                                        if (newData.index < list.size - 2) {
+                                            newData.index++
+                                            newData.next = newData.index + 1
+                                            newData.start = list[newData.index]
+                                            newData.end = list[newData.next]
+                                        }
+                                        newData.start?.let { start ->
+                                            newData.end?.let { end ->
+                                                marker?.let { marker ->
+                                                    val startPosition = start
+                                                    val endPosition = end
+                                                    val startRotation = marker.rotation
 
-                            // Movement
-                            newData.handler = Handler(Looper.getMainLooper())
-                            newData.index = -1
-                            newData.next = 1
+                                                    val latLngInterpolator = LinearFixed()
+                                                    val valueAnimator =
+                                                        ValueAnimator.ofFloat(0f, 1f)
+                                                    valueAnimator.setDuration(1000) // duration 1 second
 
-                            val runnable = object : Runnable {
-                                override fun run() {
-                                    newData.polylineList?.let { list ->
-                                        // Takes 2 points at a time
-                                        if (list.size > 1) {
-                                            if (newData.index < list.size - 2) {
-                                                newData.index++
-                                                newData.next = newData.index + 1
-                                                newData.start = list[newData.index]
-                                                newData.end = list[newData.next]
-                                            }
+                                                    valueAnimator.interpolator =
+                                                        LinearInterpolator()
+                                                    valueAnimator.addUpdateListener { animation ->
+                                                        try {
+                                                            val v = animation.animatedFraction
+                                                            val newPosition =
+                                                                latLngInterpolator.interpolate(
+                                                                    v,
+                                                                    startPosition,
+                                                                    endPosition
+                                                                )
 
-                                            /*
-                                            val valueAnimator = ValueAnimator.ofInt(0, 1)
-                                            valueAnimator.duration = 3000
-                                            valueAnimator.interpolator = LinearInterpolator()
-                                            valueAnimator.addUpdateListener { value ->
-                                                newData.start?.let {start->
-                                                    newData.end?.let{end->
-                                                        newData.v = value.animatedFraction
-                                                        newData.lat = newData.v * end.latitude + (1 - newData.v) * start.latitude
-                                                        newData.lng = newData.v * end.longitude + (1 - newData.v) * start.longitude
-                                                        val newPos = LatLng(newData.lat, newData.lng)
-                                                        marker?.position = newPos
-                                                        marker?.setAnchor(0.5f,0.5f)
-                                                        marker?.rotation = Common.getBearing(start, newPos)
-                                                    }
-                                                }
-                                            }
-                                            valueAnimator.start()*/
-                                            newData.start?.let { start ->
-                                                newData.end?.let { end ->
-                                                    marker?.let{marker->
-                                                        val startPosition = start
-                                                        val endPosition = end
-                                                        val startRotation = marker.rotation
-
-                                                        val latLngInterpolator = LinearFixed()
-                                                        val valueAnimator = ValueAnimator.ofFloat(0f, 1f)
-                                                        valueAnimator.setDuration(1000) // duration 1 second
-
-                                                        valueAnimator.interpolator = LinearInterpolator()
-                                                        valueAnimator.addUpdateListener { animation ->
-                                                            try {
-                                                                val v = animation.animatedFraction
-                                                                val newPosition =
-                                                                    latLngInterpolator.interpolate(
-                                                                        v,
-                                                                        startPosition,
-                                                                        endPosition
-                                                                    )
-
-                                                                val endRotation = Common.getBearing(start,end)
-                                                                marker.position = newPosition
-                                                                marker.setAnchor(0.5f,0.5f)
-                                                                marker.rotation = Common.computeRotationNew(
+                                                            val endRotation =
+                                                                Common.getBearing(start, end)
+                                                            marker.position = newPosition
+                                                            marker.setAnchor(0.5f, 0.5f)
+                                                            marker.rotation =
+                                                                Common.computeRotationNew(
                                                                     v,
                                                                     startRotation,
                                                                     endRotation
                                                                 )
-                                                            } catch (ex: java.lang.Exception) {
-                                                                // I don't care atm..
-                                                            }
+                                                        } catch (ex: java.lang.Exception) {
+                                                            // I don't care atm..
                                                         }
-                                                        valueAnimator.start()
                                                     }
+                                                    valueAnimator.start()
                                                 }
                                             }
-
-
-                                            if (newData.index < list.size -2) {
-                                                // Keep running a new animation after 1.5s
-                                                newData.handler!!.postDelayed(this, 1000)
-                                            } else if (newData.index < list.size - 1){
-                                                newData.isRun = false
-                                                _model.driversSubscribed.put(uid, newData)
-                                            }
+                                        }
+                                        if (newData.index < list.size - 2) {
+                                            // Keep running a new animation after 1.5s
+                                            newData.handler!!.postDelayed(this, 1000)
+                                        } else if (newData.index < list.size - 1) {
+                                            newData.isRun = false
+                                            _model.driversSubscribed.put(uid, newData)
                                         }
                                     }
                                 }
                             }
-                            newData.handler!!.postDelayed(runnable, 1500)
-                        } catch (e: Exception) {
-                            _showSnackbarMessage.value = e.message
                         }
+                        newData.handler!!.postDelayed(runnable, 1500)
+                    } catch (e: Exception) {
+                        _showSnackbarMessage.value = e.message
                     }
-            )
+                }
+                result.onFailure {
+                    _showSnackbarMessage.value = it.message
+                }
+            }
         }
     }
 
