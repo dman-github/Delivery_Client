@@ -50,15 +50,15 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mapFragment: SupportMapFragment // The fragment that contains the map
     private lateinit var mMap: GoogleMap // The map
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
-
+    private lateinit var valueAnimator: ValueAnimator
     // Routes
-    private var blackPolyLine: Polyline? = null
+    /*private var blackPolyLine: Polyline? = null
     private var greyPolyLine: Polyline? = null
     private var polylineList: List<LatLng>? = null
     private var polylineOptions: PolylineOptions? = null
     private var blackPolyLineOptions: PolylineOptions? = null
     private var originMarker: Marker? = null
-    private var destinationMarker: Marker? = null
+    private var destinationMarker: Marker? = null*/
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -174,6 +174,8 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     */
     override fun onStop() {
         super.onStop()
+        valueAnimator.end()
+        valueAnimator.cancel()
         requestDriverVM.viewWillStop()
         if (EventBus.getDefault().hasSubscriberForEvent(SelectedPlaceEvent::class.java))
             EventBus.getDefault().removeStickyEvent(SelectedPlaceEvent::class.java)
@@ -240,6 +242,12 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun drawPath(model: SelectedPlaceModel) {
+        var blackPolyLine: Polyline? = null
+        var greyPolyLine: Polyline? = null
+        var polylineList: List<LatLng>? = null
+        var polylineOptions: PolylineOptions? = null
+        var blackPolyLineOptions: PolylineOptions? = null
+
         polylineList = model.polylineList
         polylineOptions = PolylineOptions()
         polylineOptions?.color(Color.GRAY)
@@ -266,7 +274,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
 
         //Animation
-        val valueAnimator = ValueAnimator.ofInt(0, 100)
+        valueAnimator = ValueAnimator.ofInt(0, 100)
         valueAnimator.duration = 1100
         valueAnimator.repeatCount = ValueAnimator.INFINITE
         valueAnimator.interpolator = LinearInterpolator()
@@ -307,7 +315,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
         selectedPlaceEvent?.let { evnt ->
-            originMarker = mMap.addMarker(
+            mMap.addMarker(
                 MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.origin)
             )
         }
@@ -325,7 +333,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
         selectedPlaceEvent?.let { evnt ->
-            destinationMarker = mMap.addMarker(
+            mMap.addMarker(
                 MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
                     .position(evnt.destination)
             )

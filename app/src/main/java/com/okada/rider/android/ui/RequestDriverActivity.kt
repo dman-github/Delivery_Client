@@ -58,14 +58,16 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
 
     // Routes
     private val compositeDisposable = CompositeDisposable()
+    private lateinit var valueAnimator: ValueAnimator
     lateinit var directionsService: DirectionsService
-    private var blackPolyLine: Polyline? = null
+
+    /*private var blackPolyLine: Polyline? = null
     private var greyPolyLine: Polyline? = null
     private var polylineList: List<LatLng>? = null
     private var polylineOptions: PolylineOptions? = null
     private var blackPolyLineOptions: PolylineOptions? = null
     private var originMarker: Marker? = null
-    private var destinationMarker: Marker? = null
+    private var destinationMarker: Marker? = null*/
     override fun onStart() {
         super.onStart()
         if (!EventBus.getDefault().isRegistered(this))
@@ -74,7 +76,9 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        compositeDisposable.clear()
+        valueAnimator.end()
+        valueAnimator.cancel()
+        compositeDisposable.dispose()
         if (EventBus.getDefault().hasSubscriberForEvent(SelectedPlaceEvent::class.java))
             EventBus.getDefault().removeStickyEvent(SelectedPlaceEvent::class.java)
         EventBus.getDefault().unregister(this)
@@ -168,6 +172,13 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                         "Directions api returned"
                     )
                     try {
+                        var blackPolyLine: Polyline? = null
+                        var greyPolyLine: Polyline? = null
+                        var polylineList: List<LatLng>? = null
+                        var polylineOptions: PolylineOptions? = null
+                        var blackPolyLineOptions: PolylineOptions? = null
+                        //var originMarker: Marker? = null
+                        //var destinationMarker: Marker? = null
                         val jsonObject = JSONObject(returnResult)
                         val errorString = jsonObject.getString("status")
                         if (errorString.isNotEmpty() && errorString.lowercase() != "ok") {
@@ -208,7 +219,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
 
 
                         //Animation
-                        val valueAnimator = ValueAnimator.ofInt(0, 100)
+                        valueAnimator = ValueAnimator.ofInt(0, 100)
                         valueAnimator.duration = 1100
                         valueAnimator.repeatCount = ValueAnimator.INFINITE
                         valueAnimator.interpolator = LinearInterpolator()
@@ -236,8 +247,8 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                         val start_address = legsObject.getString("start_address")
                         val end_address = legsObject.getString("end_address")
 
-                        addOriginMarker(duration, start_address)
-                        addDestinationMarker(end_address)
+                         addOriginMarker(duration, start_address)
+                         addDestinationMarker(end_address)
 
                         val cameraUpdate = CameraUpdateFactory
                             .newLatLngBounds(latLngBound, 100)
@@ -266,7 +277,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
         selectedPlaceEvent?.let { evnt ->
-            originMarker = mMap.addMarker(
+            mMap.addMarker(
                 MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon)).position(evnt.origin)
             )
         }
@@ -284,7 +295,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
         selectedPlaceEvent?.let { evnt ->
-            destinationMarker = mMap.addMarker(
+            mMap.addMarker(
                 MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
                     .position(evnt.destination)
             )

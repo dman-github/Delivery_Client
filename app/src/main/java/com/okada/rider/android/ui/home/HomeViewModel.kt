@@ -377,7 +377,7 @@ class HomeViewModel(
                             "Inc Distance + loadAvailableDrivers  + ${_model.distance}"
                         )
                     } else {
-                        _model.distance = 10.0
+                        _model.distance = _model.range_limit
                         addDriverMarkers()
                         Log.i("App_Info", "Clear Distance + addDriverMarker")
                     }
