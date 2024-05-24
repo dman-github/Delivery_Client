@@ -10,6 +10,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -52,6 +54,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var locationCallback: LocationCallback
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var slidingUpPanelLayout: SlidingUpPanelLayout
+    private lateinit var useCurrentButton: ImageView
     private lateinit var autoCompleteSupportFragment: AutocompleteSupportFragment
 
 
@@ -80,9 +83,15 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
     private fun initViews() {
         slidingUpPanelLayout = binding.slidingUpPanelLayout
+        useCurrentButton = binding.actionAdd
+        useCurrentButton.setOnClickListener {
+            useCurrentButtonPressed()
+        }
         autoCompleteSupportFragment =
             childFragmentManager.findFragmentById(R.id.autocompleteFragment) as AutocompleteSupportFragment
     }
+
+
 
     private fun init() {
         if (!Places.isInitialized()) {
@@ -265,15 +274,23 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                                     LatLng(it.latitude, it1.longitude)
                                 }
                             }
-                            dest?.let{destination->
+                            dest?.let { destination ->
                                 findNavController().navigate(R.id.action_navigation_home_to_requestDriverFragment)
-                                EventBus.getDefault().postSticky(SelectedPlaceEvent(origin, destination))
+                                EventBus.getDefault()
+                                    .postSticky(SelectedPlaceEvent(origin, destination))
                             }
                         }
                 }
             }
         })
     }
+
+    private fun useCurrentButtonPressed() {
+        if (homeViewModel.getAddress().isNotEmpty()) {
+            autoCompleteSupportFragment.setText(homeViewModel.getAddress())
+        }
+    }
+
 
     private fun fetchLastLocation() {
         if (ContextCompat.checkSelfPermission(

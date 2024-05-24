@@ -12,6 +12,7 @@ class HomeModel {
     var range_limit = 20.0
     var uid: String? = null
     var currentLocation: Location? = null
+    var currentAddress: String = ""
     var previousLocation: Location? = null
     var firstTime: Boolean = true
     var domain: String? = null

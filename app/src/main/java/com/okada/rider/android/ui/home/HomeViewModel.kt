@@ -87,6 +87,10 @@ class HomeViewModel(
         directionsUsecase.closeConnection()
     }
 
+    fun getAddress(): String {
+        return _model.currentAddress
+    }
+
     fun removeUserLocation() {
         _model.uid?.also { uid ->
             locationUsecase.removeLocationFor(uid)
@@ -106,6 +110,7 @@ class HomeViewModel(
                         _showSnackbarMessage.value =
                             "Location updated\nLat: ${location.latitude}, Lon: ${location.longitude}}"
                         loadAvailableDrivers(location, context)
+                        fetchAddress(LatLng(location.latitude, location.longitude))
                     }
                     result.onFailure {
                         _showSnackbarMessage.value = it.message
@@ -436,6 +441,27 @@ class HomeViewModel(
             })
     }
 
+    fun fetchAddress(current: LatLng) {
+        //fetch directions between the 2 points from the Google directions api
+        val at = StringBuilder()
+            .append(current.latitude)
+            .append(",")
+            .append(current.longitude)
+            .toString()
+        directionsUsecase.getAddressForLocation(at, _model.apiKey) { result ->
+            result.onSuccess { model ->
+                try {
+                    Log.i("App_Info", "${model.first}  ${model.second}")
+                    _model.currentAddress = model.first
+                } catch (e: Exception) {
+                    _showSnackbarMessage.value = e.message
+                }
+            }
+            result.onFailure {
+                _showSnackbarMessage.value = it.message
+            }
+        }
+    }
     fun clearDatabase() {
         _model.domain?.let {
             locationUsecase.removeAllListeners(it)

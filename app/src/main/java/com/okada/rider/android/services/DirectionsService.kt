@@ -13,4 +13,10 @@ interface DirectionsService {
         @Query("destination") to:String?,
         @Query("key") key:String
     ): Observable<String?>
+
+    @GET("maps/api/geocode/json")
+    fun getAddress(
+        @Query("latlng") at:String?,
+        @Query("key") key:String
+    ): Observable<String?>
 }

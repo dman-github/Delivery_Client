@@ -10,6 +10,7 @@ import com.okada.rider.android.services.RetrofitClient
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.json.JSONArray
 import org.json.JSONObject
 
 class DirectionsUsecase() {
@@ -70,5 +71,66 @@ class DirectionsUsecase() {
                     }
                 }
         )
+    }
+
+    fun getAddressForLocation(
+        at: String,
+        apiKey: String,
+        completion: (Result<Pair<String, String>>) -> Unit
+    ) {
+        //fetch address information at a point
+        compositeDisposable.add(
+            directionsService.getAddress(
+                at, apiKey
+            )
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe { returnResult ->
+                    returnResult?.let { result ->
+                        try {
+                            val jsonObject = JSONObject(result)
+                            if (jsonObject.getString("status").lowercase() == "ok") {
+                                val results = jsonObject.getJSONArray("results")
+                                if (results.length() > 0) {
+                                    val addressComponents =
+                                        results.getJSONObject(0).getJSONArray("address_components")
+                                    val components = parseAddressComponents(addressComponents)
+                                    completion(Result.success(components))
+                                } else {
+                                    completion(Result.failure(Exception("Did not get any address information")))
+                                }
+                            }
+                        } catch (e: Exception) {
+                            completion(Result.failure(e))
+                        }
+                    } ?: run {
+                        completion(Result.failure(Exception("Did not get any address information")))
+                    }
+                }
+        )
+    }
+
+    private fun parseAddressComponents(addressComponents: JSONArray): Pair<String, String> {
+        var streetNumber = ""
+        var route = ""
+        var locality = ""
+        var sublocality = ""
+
+        for (i in 0 until addressComponents.length()) {
+            val component = addressComponents.getJSONObject(i)
+            val types = component.getJSONArray("types")
+            val longName = component.getString("long_name")
+
+            when {
+                types.toString().contains("street_number") -> streetNumber = longName
+                types.toString().contains("route") -> route = longName
+                types.toString().contains("locality") -> locality = longName
+                types.toString().contains("sublocality") -> sublocality = longName
+            }
+        }
+
+        val firstLine = "$streetNumber $route"
+        val secondLine = sublocality.ifEmpty { locality }
+        return Pair(firstLine, secondLine)
     }
 }
