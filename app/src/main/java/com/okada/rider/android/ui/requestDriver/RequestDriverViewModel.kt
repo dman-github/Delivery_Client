@@ -18,7 +18,6 @@ import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
-import com.google.maps.android.PolyUtil
 import com.okada.rider.android.Common
 import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.data.DirectionsUsecase
@@ -30,12 +29,9 @@ import com.okada.rider.android.data.model.GeoQueryModel
 import com.okada.rider.android.data.model.MarkerModel
 import com.okada.rider.android.services.DirectionsService
 import com.okada.rider.android.services.RetrofitClient
-import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
-import io.reactivex.schedulers.Schedulers
-import org.json.JSONObject
 
-class HomeViewModel(
+class RequestDriverViewModel(
     private val accountUsecase: AccountUsecase,
     private val locationUsecase: LocationUsecase,
     private val profileUsecase: ProfileUsecase,

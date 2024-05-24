@@ -13,6 +13,9 @@
         <action
             android:id="@+id/action_navigation_home_to_requestDriverActivity"
             app:destination="@id/requestDriverActivity" />
+        <action
+            android:id="@+id/action_navigation_home_to_requestDriverFragment"
+            app:destination="@id/requestDriverFragment" />
     </fragment>
 
     <fragment
@@ -31,4 +34,8 @@
         android:name="com.okada.rider.android.ui.RequestDriverActivity"
         android:label="activity_request_driver"
         tools:layout="@layout/activity_request_driver" />
+    <fragment
+        android:id="@+id/requestDriverFragment"
+        android:name="com.okada.rider.android.ui.home.RequestDriverFragment"
+        android:label="RequestDriverFragment" />
 </navigation>

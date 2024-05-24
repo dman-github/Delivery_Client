@@ -266,7 +266,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                                 }
                             }
                             dest?.let{destination->
-                                findNavController().navigate(R.id.action_navigation_home_to_requestDriverActivity)
+                                findNavController().navigate(R.id.action_navigation_home_to_requestDriverFragment)
                                 EventBus.getDefault().postSticky(SelectedPlaceEvent(origin, destination))
                             }
                         }
