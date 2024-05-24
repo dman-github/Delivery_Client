@@ -245,9 +245,9 @@ class HomeViewModel(
         if (!newData.isRun) {
             //fetch directions between the 2 points from the Google directions api
             directionsUsecase.getDirections(from, to, _model.apiKey) { result ->
-                result.onSuccess { directionsList ->
+                result.onSuccess { model ->
                     try {
-                        newData.polylineList = directionsList
+                        newData.polylineList = model.polylineList
                         // create the marker movement animation
                         newData.handler = Handler(Looper.getMainLooper())
                         newData.index = -1

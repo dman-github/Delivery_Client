@@ -36,6 +36,6 @@
         tools:layout="@layout/activity_request_driver" />
     <fragment
         android:id="@+id/requestDriverFragment"
-        android:name="com.okada.rider.android.ui.home.RequestDriverFragment"
+        android:name="com.okada.rider.android.ui.requestDriver.RequestDriverFragment"
         android:label="RequestDriverFragment" />
 </navigation>

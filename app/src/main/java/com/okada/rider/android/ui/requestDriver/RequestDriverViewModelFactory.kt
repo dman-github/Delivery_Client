@@ -7,7 +7,7 @@ import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.services.AccountServiceImpl
 import com.okada.rider.android.services.DataServiceImpl
 import com.okada.rider.android.services.LocationServiceImpl
-import com.okada.rider.android.ui.home.RequestDriverViewModel
+import com.okada.rider.android.ui.requestDriver.RequestDriverViewModel
 
 /**
  * ViewModel provider factory to instantiate LoginViewModel.
