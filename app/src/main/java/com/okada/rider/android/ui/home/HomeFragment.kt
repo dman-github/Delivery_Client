@@ -5,14 +5,17 @@ import android.Manifest.permission.ACCESS_FINE_LOCATION
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.os.Bundle
+import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.constraintlayout.utils.widget.ImageFilterButton
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -55,8 +58,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private lateinit var fusedLocationProviderClient: FusedLocationProviderClient
     private lateinit var slidingUpPanelLayout: SlidingUpPanelLayout
     private lateinit var useCurrentButton: ImageView
-    private lateinit var autoCompleteSupportFragment: AutocompleteSupportFragment
-
+    private lateinit var autoCompleteSupportFragmentPickup: AutocompleteSupportFragment
+    private lateinit var autoCompleteSupportFragmentDropoff: AutocompleteSupportFragment
+    private lateinit var editTextPickup: EditText
+    private lateinit var editTextDropoff: EditText
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -87,10 +92,17 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         useCurrentButton.setOnClickListener {
             useCurrentButtonPressed()
         }
-        autoCompleteSupportFragment =
-            childFragmentManager.findFragmentById(R.id.autocompleteFragment) as AutocompleteSupportFragment
+        autoCompleteSupportFragmentPickup =
+            childFragmentManager.findFragmentById(R.id.autocompleteFragmentPickup) as AutocompleteSupportFragment
+        autoCompleteSupportFragmentDropoff =
+            childFragmentManager.findFragmentById(R.id.autocompleteFragmentDropOff) as AutocompleteSupportFragment
+        autoCompleteSupportFragmentPickup.setHint("Pickup location")
+        autoCompleteSupportFragmentDropoff.setHint("Dropoff location")
+        editTextPickup =
+            autoCompleteSupportFragmentPickup.view?.findViewById<EditText>(com.google.android.libraries.places.R.id.places_autocomplete_search_input) as EditText
+        editTextDropoff =
+            autoCompleteSupportFragmentDropoff.view?.findViewById<EditText>(com.google.android.libraries.places.R.id.places_autocomplete_search_input) as EditText
     }
-
 
 
     private fun init() {
@@ -238,7 +250,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun setupAutoCompleteFragment() {
-        autoCompleteSupportFragment.setPlaceFields(
+        autoCompleteSupportFragmentPickup.setPlaceFields(
             listOf(
                 Place.Field.ID,
                 Place.Field.ADDRESS,
@@ -246,8 +258,18 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 Place.Field.NAME
             )
         )
-        autoCompleteSupportFragment.setCountries("UK")
-        autoCompleteSupportFragment.setOnPlaceSelectedListener(object : PlaceSelectionListener {
+        autoCompleteSupportFragmentDropoff.setPlaceFields(
+            listOf(
+                Place.Field.ID,
+                Place.Field.ADDRESS,
+                Place.Field.LAT_LNG,
+                Place.Field.NAME
+            )
+        )
+        autoCompleteSupportFragmentPickup.setCountries("UK")
+        autoCompleteSupportFragmentDropoff.setCountries("UK")
+        autoCompleteSupportFragmentPickup.setOnPlaceSelectedListener(object :
+            PlaceSelectionListener {
             override fun onError(p0: Status) {
                 mapFragment.view?.let {
                     Snackbar.make(it, "Error places", Snackbar.LENGTH_LONG).show()
@@ -268,27 +290,69 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                                 "Error: $e", Toast.LENGTH_SHORT
                             ).show();
                         }.addOnSuccessListener { lastLocation ->
-                            val origin = LatLng(lastLocation.latitude, lastLocation.longitude)
-                            val dest = place.latLng?.let {
-                                place.latLng?.let { it1 ->
-                                    LatLng(it.latitude, it1.longitude)
-                                }
+                            /* val origin = LatLng(lastLocation.latitude, lastLocation.longitude)
+                             val dest = place.latLng?.let {
+                                 place.latLng?.let { it1 ->
+                                     LatLng(it.latitude, it1.longitude)
+                                 }
+                             }*/
+                            place.latLng?.let { place ->
+                                homeViewModel.setPickupAddress(place)
                             }
-                            dest?.let { destination ->
-                                findNavController().navigate(R.id.action_navigation_home_to_requestDriverFragment)
-                                EventBus.getDefault()
-                                    .postSticky(SelectedPlaceEvent(origin, destination))
-                            }
+                            checkRouteAddressComplete()
                         }
                 }
             }
         })
+        autoCompleteSupportFragmentDropoff.setOnPlaceSelectedListener(object :
+            PlaceSelectionListener {
+            override fun onError(p0: Status) {
+                mapFragment.view?.let {
+                    Snackbar.make(it, "Error places", Snackbar.LENGTH_LONG).show()
+                }
+            }
+
+            override fun onPlaceSelected(place: Place) {
+                place.latLng?.let { place ->
+                    homeViewModel.setDropAddress(place)
+                }
+                /* This delayed response is needed because when the place fragment gets the new Place it is not updated on the internal EditText straight away */
+                Handler(Looper.getMainLooper()).postDelayed({
+                    checkRouteAddressComplete()
+                }, 200)
+
+            }
+        })
+
+    }
+
+    private fun checkRouteAddressComplete() {
+        if (editTextPickup.text.isEmpty() || editTextDropoff.text.isEmpty()) {
+            return
+        }
+        if (homeViewModel.addressComplete()) {
+            homeViewModel.getPickupAddress()?.let { pickupAdd ->
+                homeViewModel.getDropAddress()?.let { dropoffAdd ->
+                    findNavController().navigate(R.id.action_navigation_home_to_requestDriverFragment)
+                    EventBus.getDefault()
+                        .postSticky(SelectedPlaceEvent(pickupAdd, dropoffAdd))
+                }
+            }
+        }
     }
 
     private fun useCurrentButtonPressed() {
         if (homeViewModel.getAddress().isNotEmpty()) {
-            autoCompleteSupportFragment.setText(homeViewModel.getAddress())
+            autoCompleteSupportFragmentPickup.setText(homeViewModel.getAddress())
         }
+    }
+
+    private fun cancelPickupButtonPressed() {
+        homeViewModel.setPickupAddress(null)
+    }
+
+    private fun cancelDropoffButtonPressed() {
+        homeViewModel.setDropAddress(null)
     }
 
 

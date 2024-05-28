@@ -91,6 +91,26 @@ class HomeViewModel(
         return _model.currentAddress
     }
 
+    fun setDropAddress(latLng: LatLng?) {
+        _model.dropAddress = latLng
+    }
+
+    fun getDropAddress(): LatLng? {
+        return _model.dropAddress
+    }
+
+    fun setPickupAddress(latLng: LatLng?) {
+        _model.pickupAddress = latLng
+    }
+
+    fun getPickupAddress(): LatLng? {
+        return _model.pickupAddress
+    }
+
+    fun addressComplete(): Boolean {
+        return ((_model.dropAddress!= null) && (_model.pickupAddress!= null))
+    }
+
     fun removeUserLocation() {
         _model.uid?.also { uid ->
             locationUsecase.removeLocationFor(uid)
@@ -453,6 +473,7 @@ class HomeViewModel(
                 try {
                     Log.i("App_Info", "${model.first}  ${model.second}")
                     _model.currentAddress = model.first
+                    _model.pickupAddress = current
                 } catch (e: Exception) {
                     _showSnackbarMessage.value = e.message
                 }

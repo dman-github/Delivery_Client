@@ -52,8 +52,10 @@
     <string name="menu_profile">Profile</string>
     <string name="sign_out_msg">Do you really want to sign out?</string>
     <string name="cancel_string">Cancel</string>
-    <string name="slidingUpPickUp">Select a pickup location</string>
+    <string name="slidingUpPickUp">Select a route</string>
     <string name="chooseSavedPlace">Choose a saved place</string>
     <string name="title_activity_request_driver">RequestDriverActivity</string>
+    <string name="pickup">Pickup location</string>
+    <string name="dropoff">Drop off location</string>
     <string name="minText">Min</string>
 </resources>
