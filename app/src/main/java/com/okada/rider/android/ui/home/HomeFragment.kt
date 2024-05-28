@@ -344,6 +344,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     private fun useCurrentButtonPressed() {
         if (homeViewModel.getAddress().isNotEmpty()) {
             autoCompleteSupportFragmentPickup.setText(homeViewModel.getAddress())
+            homeViewModel.useCurrentLocationForPickup()
             checkRouteAddressComplete()
         }
     }

@@ -14,12 +14,15 @@ class HomeModel {
     var uid: String? = null
     var currentLocation: Location? = null
     var previousLocation: Location? = null
-    var currentAddress: String = ""
     var firstTime: Boolean = true
     var domain: String? = null
-    var dropAddress: LatLng? = null
-    var pickupAddress: LatLng? = null
     var nearestDrivers: MutableSet<DriverGeoModel>  =  HashSet()
     var mapMarkers: MutableMap<String, Marker> = HashMap()
     var driversSubscribed: MutableMap<String, AnimationModel> = HashMap()
+    // pickup and drop off
+    var dropAddress: LatLng? = null
+    var pickupAddress: LatLng? = null
+    var currentAddress: String = ""
+    var currentAddressLatLng: LatLng? = null
+
 }

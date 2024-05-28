@@ -107,6 +107,10 @@ class HomeViewModel(
         return _model.pickupAddress
     }
 
+    fun useCurrentLocationForPickup() {
+        _model.pickupAddress = _model.currentAddressLatLng
+    }
+
     fun addressComplete(): Boolean {
         return ((_model.dropAddress!= null) && (_model.pickupAddress!= null))
     }
@@ -473,7 +477,7 @@ class HomeViewModel(
                 try {
                     Log.i("App_Info", "${model.first}  ${model.second}")
                     _model.currentAddress = model.first
-                    _model.pickupAddress = current
+                    _model.currentAddressLatLng = current
                 } catch (e: Exception) {
                     _showSnackbarMessage.value = e.message
                 }
