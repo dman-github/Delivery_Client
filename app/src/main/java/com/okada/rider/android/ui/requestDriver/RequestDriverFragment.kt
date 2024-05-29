@@ -13,7 +13,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
+import android.widget.Button
 import android.widget.Toast
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -49,16 +51,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var requestDriverVM: RequestDriverViewModel
     private lateinit var mapFragment: SupportMapFragment // The fragment that contains the map
     private lateinit var mMap: GoogleMap // The map
+    private lateinit var btnConfirmBiker: Button
+    private lateinit var confirmBikerLayout: CardView
+    private lateinit var confirmPickupLayout: CardView
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
     private lateinit var valueAnimator: ValueAnimator
-    // Routes
-    /*private var blackPolyLine: Polyline? = null
-    private var greyPolyLine: Polyline? = null
-    private var polylineList: List<LatLng>? = null
-    private var polylineOptions: PolylineOptions? = null
-    private var blackPolyLineOptions: PolylineOptions? = null
-    private var originMarker: Marker? = null
-    private var destinationMarker: Marker? = null*/
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -76,6 +73,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
         _binding = FragmentRequestDriverBinding.inflate(inflater, container, false)
         val root: View = binding.root
+
+        btnConfirmBiker = binding.layoutConfirmBiker.btnConfirmRider
+        confirmPickupLayout = binding.layoutConfirmPickup.layoutConfirmPickup
+        confirmBikerLayout = binding.layoutConfirmBiker.layoutConfirmBiker
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -100,40 +101,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 drawPath(model)
             })
 
-        /* homeViewModel.updateMapDriver.observe(viewLifecycleOwner,
-             Observer { newMarker ->
-                 val moo = newMarker.getMarkerTitle()
-                 val marker = mMap.addMarker(
-                     MarkerOptions()
-                         .position(LatLng(newMarker.driverLat, newMarker.driverLong))
-                         .flat(true)
-                         .title(newMarker.getMarkerTitle())
-                         .snippet(newMarker.getRating())
-                         .rotation(90f)
-                         .icon(BitmapDescriptorFactory.fromResource(R.drawable.okada_driver_marker_no_bg))
-                 )
-                 marker?.let { homeViewModel.saveMapMarker(newMarker.uid, it) }
-             })
-         homeViewModel.removeMarker.observe(viewLifecycleOwner,
-             Observer { marker ->
-                 marker.remove()
-             })*/
-
-        // The google map builder
-        /* locationRequest = LocationRequest.Builder(5000)
-             .setPriority(Priority.PRIORITY_HIGH_ACCURACY)
-             .setMinUpdateDistanceMeters(10f)
-             .setMinUpdateIntervalMillis(3000).build()
-
-         // Adding a location callback for the google map
-         locationCallback = object : LocationCallback() {
-             override fun onLocationResult(locationResult: LocationResult) {
-                 super.onLocationResult(locationResult)
-                 homeViewModel.updateLocation(locationResult.lastLocation, requireContext())
-             }
-         }
-         fusedLocationProviderClient =
-             LocationServices.getFusedLocationProviderClient(requireContext())*/
+        btnConfirmBiker.setOnClickListener{
+            confirmPickupLayout.visibility = View.VISIBLE
+            confirmBikerLayout.visibility = View.GONE
+        }
     }
 
     override fun onStart() {
@@ -142,36 +113,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             EventBus.getDefault().register(this)
     }
 
-    /*
-        override fun onResume() {
-            super.onResume()
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationProviderClient.requestLocationUpdates(
-                    locationRequest,
-                    locationCallback,
-                    Looper.myLooper()
-                )
-                fetchLastLocation()
-            } else {
-                Log.i("App_Info", "onResume  NO permissions")
-            }
-        }
 
-        override fun onPause() {
-            super.onPause()
-            if (ContextCompat.checkSelfPermission(
-                    requireContext(),
-                    ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-            ) {
-                fusedLocationProviderClient.removeLocationUpdates(locationCallback)
-            }
-        }
-    */
     override fun onStop() {
         super.onStop()
         valueAnimator.end()

@@ -58,4 +58,7 @@
     <string name="pickup">Pickup location</string>
     <string name="dropoff">Drop off location</string>
     <string name="minText">Min</string>
+    <string name="pay_by_cash">Pay by cash</string>
+    <string name="confirm_rider">Confirm Biker</string>
+    <string name="confirm_pickup">Confirm Pickup</string>
 </resources>
