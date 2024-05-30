@@ -14,6 +14,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.LinearInterpolator
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
@@ -39,6 +40,7 @@ import com.okada.rider.android.Common
 import com.okada.rider.android.R
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
+import com.okada.rider.android.databinding.ConfirmPickupMarkerBinding
 import com.okada.rider.android.databinding.DestinationMarkerBinding
 import com.okada.rider.android.databinding.FragmentRequestDriverBinding
 import com.okada.rider.android.databinding.OriginMarkerBinding
@@ -54,6 +56,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var btnConfirmBiker: Button
     private lateinit var confirmBikerLayout: CardView
     private lateinit var confirmPickupLayout: CardView
+    private lateinit var txtAddressPickup: TextView
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
@@ -77,6 +80,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         btnConfirmBiker = binding.layoutConfirmBiker.btnConfirmRider
         confirmPickupLayout = binding.layoutConfirmPickup.layoutConfirmPickup
         confirmBikerLayout = binding.layoutConfirmBiker.layoutConfirmBiker
+        txtAddressPickup = binding.layoutConfirmPickup.txtAddressPickup
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -101,9 +105,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 drawPath(model)
             })
 
-        btnConfirmBiker.setOnClickListener{
+        btnConfirmBiker.setOnClickListener {
             confirmPickupLayout.visibility = View.VISIBLE
             confirmBikerLayout.visibility = View.GONE
+            setDataPickup()
         }
     }
 
@@ -135,11 +140,6 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         requestDriverVM.clearMessage()
     }
 
-    /*   override fun onDestroy() {
-           super.onDestroy()
-           homeViewModel.removeUserLocation()
-       }
-   */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         try {
@@ -162,14 +162,21 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
+    private fun setDataPickup() {
+        mMap.clear()
+        addPickupMarker()
+    }
+
+
+
     private fun setupMapWhenReady() {
         if (ContextCompat.checkSelfPermission(
                 requireContext(),
                 Manifest.permission.ACCESS_FINE_LOCATION
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            mMap.isMyLocationEnabled = true
-            mMap.uiSettings.isMyLocationButtonEnabled = true
+            mMap.isMyLocationEnabled = false
+            mMap.uiSettings.isMyLocationButtonEnabled = false
             mMap.uiSettings.isZoomControlsEnabled = true
             mMap.setOnMyLocationButtonClickListener {
                 selectedPlaceEvent?.let {
@@ -242,7 +249,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         // moveCamera instead of animateCamera
         mMap.moveCamera(cameraUpdate)
         mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
+
+        //Add Address name
+        txtAddressPickup.text = if (model.startAddress != null) model.startAddress else "None"
     }
+
     private fun addOriginMarker(duration: String, startAddress: String) {
         val binding = OriginMarkerBinding.inflate(layoutInflater)
         val view = binding.root
@@ -278,6 +289,22 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             mMap.addMarker(
                 MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
                     .position(evnt.destination)
+            )
+        }
+    }
+
+    private fun addPickupMarker() {
+        val binding = ConfirmPickupMarkerBinding.inflate(layoutInflater)
+        val view = binding.root
+
+        val generator = IconGenerator(requireContext())
+        generator.setContentView(view)
+        generator.setBackground(ColorDrawable(Color.TRANSPARENT))
+        val icon = generator.makeIcon()
+        selectedPlaceEvent?.let { evnt ->
+            mMap.addMarker(
+                MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
+                    .position(evnt.origin)
             )
         }
     }

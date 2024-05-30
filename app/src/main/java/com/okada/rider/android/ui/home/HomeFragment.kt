@@ -130,7 +130,6 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
 
         homeViewModel.updateMapDriver.observe(viewLifecycleOwner,
             Observer { newMarker ->
-                val moo = newMarker.getMarkerTitle()
                 val marker = mMap.addMarker(
                     MarkerOptions()
                         .position(LatLng(newMarker.driverLat, newMarker.driverLong))
