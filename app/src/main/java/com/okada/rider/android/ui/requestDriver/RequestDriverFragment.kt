@@ -2,7 +2,9 @@ package com.okada.rider.android.ui.requestDriver
 
 import RequestDriverViewModelFactory
 import android.Manifest
+import android.animation.Animator
 import android.animation.ValueAnimator
+import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
@@ -26,6 +28,9 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.Circle
+import com.google.android.gms.maps.model.CircleOptions
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -53,12 +58,26 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var requestDriverVM: RequestDriverViewModel
     private lateinit var mapFragment: SupportMapFragment // The fragment that contains the map
     private lateinit var mMap: GoogleMap // The map
+    private lateinit var fillMapsView: View
     private lateinit var btnConfirmBiker: Button
+    private lateinit var btnConfirmPickup: Button
     private lateinit var confirmBikerLayout: CardView
     private lateinit var confirmPickupLayout: CardView
+    private lateinit var findDriverLayout: CardView
     private lateinit var txtAddressPickup: TextView
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
     private lateinit var valueAnimator: ValueAnimator
+
+    //Pulsating effect
+    private var lastUserCircle: Circle? = null
+    val duration = 1000
+    private var lastPulseAnimator: ValueAnimator? = null
+
+    //Spinning effect
+    private val numOfSpins = 5f
+    private val secondsPerOneFullRotation = 40
+    private var spinAnimator: ValueAnimator? = null
+
 
     // This property is only valid between onCreateView and
     // onDestroyView.
@@ -78,8 +97,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         val root: View = binding.root
 
         btnConfirmBiker = binding.layoutConfirmBiker.btnConfirmRider
+        btnConfirmPickup = binding.layoutConfirmPickup.btnConfirmPickup
         confirmPickupLayout = binding.layoutConfirmPickup.layoutConfirmPickup
+        fillMapsView = binding.fillMaps
         confirmBikerLayout = binding.layoutConfirmBiker.layoutConfirmBiker
+        findDriverLayout = binding.layoutFindingYourDriver.layoutFindingYourDriver
         txtAddressPickup = binding.layoutConfirmPickup.txtAddressPickup
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = childFragmentManager
@@ -110,6 +132,19 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             confirmBikerLayout.visibility = View.GONE
             setDataPickup()
         }
+        btnConfirmPickup.setOnClickListener {
+            if (mMap == null) return@setOnClickListener
+            if (selectedPlaceEvent == null) return@setOnClickListener
+            // Clear map
+            mMap.clear()
+            //Tilt
+            val cameraPos =
+                CameraPosition.Builder().target(selectedPlaceEvent!!.origin).tilt(45f).zoom(16f)
+                    .build()
+            mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPos))
+            // Start animation
+            addMarkerWithPulseMarker()
+        }
     }
 
     override fun onStart() {
@@ -123,6 +158,8 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         super.onStop()
         valueAnimator.end()
         valueAnimator.cancel()
+        if (lastPulseAnimator != null) lastPulseAnimator?.end()
+        if (spinAnimator != null) spinAnimator?.end()
         requestDriverVM.viewWillStop()
         if (EventBus.getDefault().hasSubscriberForEvent(SelectedPlaceEvent::class.java))
             EventBus.getDefault().removeStickyEvent(SelectedPlaceEvent::class.java)
@@ -166,7 +203,6 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         mMap.clear()
         addPickupMarker()
     }
-
 
 
     private fun setupMapWhenReady() {
@@ -307,6 +343,61 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                     .position(evnt.origin)
             )
         }
+    }
+
+    private fun addMarkerWithPulseMarker() {
+        confirmPickupLayout.visibility = View.GONE
+        fillMapsView.visibility = View.VISIBLE
+        findDriverLayout.visibility = View.VISIBLE
+
+        mMap.addMarker(
+            MarkerOptions().icon(BitmapDescriptorFactory.defaultMarker())
+                .position(selectedPlaceEvent!!.origin)
+        )
+
+        addPulsatingEffect(selectedPlaceEvent!!.origin)
+    }
+
+    private fun addPulsatingEffect(origin: LatLng) {
+        if (lastPulseAnimator != null) lastPulseAnimator?.cancel()
+        if (lastUserCircle != null) lastUserCircle?.center = origin
+        lastPulseAnimator = Common.valueAnimate(duration, object : AnimatorUpdateListener {
+            override fun onAnimationUpdate(p0: ValueAnimator) {
+                if (lastUserCircle != null) lastUserCircle!!.radius =
+                    p0!!.animatedValue.toString().toDouble() else {
+                    val fColor = if (Common.isDarkMode(requireContext())) R.color.md_theme_dark_tertiary else R.color.md_theme_light_tertiary
+                    lastUserCircle = mMap.addCircle(
+                        CircleOptions().center(origin)
+                            .radius(p0!!.animatedValue.toString().toDouble())
+                            .strokeColor(Color.WHITE).fillColor(fColor)
+                    )
+                }
+            }
+        })
+
+        //start rotation camera
+        startMapCameraSpinningAnimation(mMap.cameraPosition.target)
+    }
+
+    private fun startMapCameraSpinningAnimation(target: LatLng?) {
+        if (spinAnimator != null) spinAnimator?.cancel()
+        spinAnimator = ValueAnimator.ofFloat(0f, numOfSpins * 360)
+        spinAnimator?.duration = (numOfSpins * secondsPerOneFullRotation * 1000).toLong()
+        spinAnimator?.interpolator = LinearInterpolator()
+        spinAnimator?.startDelay = (100)
+        spinAnimator?.addUpdateListener { va ->
+            val newBearingValue = va.animatedValue as Float
+            target?.let { target ->
+                mMap.moveCamera(
+                    CameraUpdateFactory.newCameraPosition(
+                        CameraPosition.builder().target(target).zoom(16f).tilt(45f)
+                            .bearing(newBearingValue).build()
+                    )
+                )
+            }
+
+        }
+        spinAnimator?.start()
     }
 
 }
