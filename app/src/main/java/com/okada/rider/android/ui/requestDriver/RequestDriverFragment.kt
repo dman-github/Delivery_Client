@@ -408,48 +408,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                     )
                 )
             }
-
         }
         spinAnimator?.start()
-        findNearbyDriver(target)
+        requestDriverVM.findNearbyDriver(target, sharedVM.getNearestDriver())
     }
 
-    private fun findNearbyDriver(target: LatLng?) {
-        target?.let { pt ->
-            val drivers = sharedVM.getNearestDriver()
-            if (drivers.size > 0) {
-                var min = 0f
-                var foundDriver = drivers.first()
-                val currentRiderLocation = Location("")
-                currentRiderLocation.latitude = pt.latitude
-                currentRiderLocation.longitude = pt.longitude
-                drivers.forEach() { driver ->
-                    driver.geoLocation?.let { loc ->
-                        val driverLocation = Location("")
-                        driverLocation.latitude = loc.latitude
-                        driverLocation.longitude = loc.longitude
-                        // First , init minvalue and found driver if first driver in list
-                        if (min == 0f) {
-                            min = driverLocation.distanceTo(currentRiderLocation)
-                        } else if (driverLocation.distanceTo(currentRiderLocation) < min) {
-                            min = driverLocation.distanceTo(currentRiderLocation)
-                            foundDriver = driver
-                        }
-                    }
-                }
-                mapFragment.view?.let {
-                    Snackbar.make(
-                        it,
-                        "Found driver: ${foundDriver.driverInfoModel?.email}",
-                        Snackbar.LENGTH_LONG
-                    ).show()
-                }
-            } else {
-                mapFragment.view?.let {
-                    Snackbar.make(it, R.string.drivers_not_found, Snackbar.LENGTH_LONG).show()
-                }
-            }
-        }
-    }
+
 
 }
