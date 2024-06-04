@@ -2,7 +2,7 @@ package com.okada.rider.android.data.model
 
 import com.firebase.geofire.GeoLocation
 
-class DriverGeoModel(
+class DriverGeoModel (
     var key: String? = null,
     var geoLocation: GeoLocation? = null,
     var driverInfoModel: DriverInfo? = null

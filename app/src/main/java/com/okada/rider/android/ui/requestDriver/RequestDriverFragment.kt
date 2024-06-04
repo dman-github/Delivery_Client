@@ -1,5 +1,6 @@
 package com.okada.rider.android.ui.requestDriver
 
+import HomeViewModelFactory
 import RequestDriverViewModelFactory
 import android.Manifest
 import android.animation.Animator
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -40,6 +42,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.SquareCap
+import com.google.android.material.snackbar.Snackbar
 import com.google.maps.android.ui.IconGenerator
 import com.okada.rider.android.Common
 import com.okada.rider.android.R
@@ -49,6 +52,7 @@ import com.okada.rider.android.databinding.ConfirmPickupMarkerBinding
 import com.okada.rider.android.databinding.DestinationMarkerBinding
 import com.okada.rider.android.databinding.FragmentRequestDriverBinding
 import com.okada.rider.android.databinding.OriginMarkerBinding
+import com.okada.rider.android.ui.home.HomeViewModel
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -56,6 +60,7 @@ import org.greenrobot.eventbus.ThreadMode
 class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private var _binding: FragmentRequestDriverBinding? = null
     private lateinit var requestDriverVM: RequestDriverViewModel
+    private lateinit var sharedVM: HomeViewModel
     private lateinit var mapFragment: SupportMapFragment // The fragment that contains the map
     private lateinit var mMap: GoogleMap // The map
     private lateinit var fillMapsView: View
@@ -93,10 +98,17 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 RequestDriverViewModelFactory()
             ).get(RequestDriverViewModel::class.java)
 
+        sharedVM =
+            ViewModelProvider(
+                requireActivity(),
+                HomeViewModelFactory()
+            ).get(HomeViewModel::class.java)
+
+
         _binding = FragmentRequestDriverBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
-        btnConfirmBiker = binding.layoutConfirmBiker.btnConfirmRider
+        btnConfirmBiker = binding.layoutConfirmBiker.btnConfirmRoute
         btnConfirmPickup = binding.layoutConfirmPickup.btnConfirmPickup
         confirmPickupLayout = binding.layoutConfirmPickup.layoutConfirmPickup
         fillMapsView = binding.fillMaps
@@ -365,7 +377,8 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             override fun onAnimationUpdate(p0: ValueAnimator) {
                 if (lastUserCircle != null) lastUserCircle!!.radius =
                     p0!!.animatedValue.toString().toDouble() else {
-                    val fColor = if (Common.isDarkMode(requireContext())) R.color.md_theme_dark_tertiary else R.color.md_theme_light_tertiary
+                    val fColor =
+                        if (Common.isDarkMode(requireContext())) R.color.md_theme_dark_tertiary else R.color.md_theme_light_tertiary
                     lastUserCircle = mMap.addCircle(
                         CircleOptions().center(origin)
                             .radius(p0!!.animatedValue.toString().toDouble())
@@ -398,6 +411,45 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
         }
         spinAnimator?.start()
+        findNearbyDriver(target)
+    }
+
+    private fun findNearbyDriver(target: LatLng?) {
+        target?.let { pt ->
+            val drivers = sharedVM.getNearestDriver()
+            if (drivers.size > 0) {
+                var min = 0f
+                var foundDriver = drivers.first()
+                val currentRiderLocation = Location("")
+                currentRiderLocation.latitude = pt.latitude
+                currentRiderLocation.longitude = pt.longitude
+                drivers.forEach() { driver ->
+                    driver.geoLocation?.let { loc ->
+                        val driverLocation = Location("")
+                        driverLocation.latitude = loc.latitude
+                        driverLocation.longitude = loc.longitude
+                        // First , init minvalue and found driver if first driver in list
+                        if (min == 0f) {
+                            min = driverLocation.distanceTo(currentRiderLocation)
+                        } else if (driverLocation.distanceTo(currentRiderLocation) < min) {
+                            min = driverLocation.distanceTo(currentRiderLocation)
+                            foundDriver = driver
+                        }
+                    }
+                }
+                mapFragment.view?.let {
+                    Snackbar.make(
+                        it,
+                        "Found driver: ${foundDriver.driverInfoModel?.email}",
+                        Snackbar.LENGTH_LONG
+                    ).show()
+                }
+            } else {
+                mapFragment.view?.let {
+                    Snackbar.make(it, R.string.drivers_not_found, Snackbar.LENGTH_LONG).show()
+                }
+            }
+        }
     }
 
 }

@@ -63,4 +63,5 @@
     <string name="confirm_pickup">Confirm Pickup</string>
     <string name="meet_driver_here">Meet biker here</string>
     <string name="finding_your_ride">Finding your ride</string>
+    <string name="drivers_not_found">No drivers found</string>
 </resources>

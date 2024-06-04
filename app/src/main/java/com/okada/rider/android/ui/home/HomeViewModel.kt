@@ -115,6 +115,10 @@ class HomeViewModel(
         return ((_model.dropAddress!= null) && (_model.pickupAddress!= null))
     }
 
+    fun getNearestDriver(): MutableSet<DriverGeoModel> {
+        return _model.nearestDrivers
+    }
+
     fun removeUserLocation() {
         _model.uid?.also { uid ->
             locationUsecase.removeLocationFor(uid)

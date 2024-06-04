@@ -72,7 +72,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View {
         homeViewModel =
-            ViewModelProvider(this, HomeViewModelFactory()).get(HomeViewModel::class.java)
+            ViewModelProvider(requireActivity(), HomeViewModelFactory()).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
