@@ -108,4 +108,8 @@ class RequestDriverViewModel(
         }
     }
 
+    fun sendDriverRequest(pickupLocation: LatLng, driver: DriverGeoModel) {
+
+    }
+
 }

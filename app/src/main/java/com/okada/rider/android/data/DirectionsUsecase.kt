@@ -1,12 +1,9 @@
 package com.okada.rider.android.data
 
-import android.util.Log
-import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.PolyUtil
-import com.okada.rider.android.data.model.LoggedInUser
 import com.okada.rider.android.data.model.SelectedPlaceModel
 import com.okada.rider.android.services.DirectionsService
-import com.okada.rider.android.services.RetrofitClient
+import com.okada.rider.android.services.remote.RetrofitClient
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers

@@ -1,4 +1,4 @@
-package com.okada.rider.android.services
+package com.okada.rider.android.services.remote
 
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory

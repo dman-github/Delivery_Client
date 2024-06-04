@@ -9,7 +9,13 @@ import com.google.firebase.database.ValueEventListener
 import com.google.firebase.messaging.FirebaseMessaging
 import com.okada.rider.android.data.model.LoggedInUser
 
-class AccountServiceImpl: AccountService {
+class DriverRequestServiceImpl: DriverRequestService {
+
+
+    override fun sendDriverRouteRequest(completion: (Result<Unit>) -> Unit) {
+       // FirebaseMessaging.getInstance().send()
+    }
+    /*
     override fun authenticate(email: String, password: String, completion: (Result<LoggedInUser>) -> Unit) {
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password).addOnCompleteListener {
             if (it.isSuccessful) {
@@ -69,5 +75,5 @@ class AccountServiceImpl: AccountService {
         FirebaseAuth.getInstance().signOut()
         completion(Result.success(Unit))
     }
-
+*/
 }
