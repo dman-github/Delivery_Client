@@ -1,19 +1,33 @@
 package com.okada.rider.android.services
 
-import android.widget.Toast
-import com.google.android.gms.tasks.OnFailureListener
-import com.google.android.gms.tasks.OnSuccessListener
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
-import com.google.firebase.messaging.FirebaseMessaging
-import com.okada.rider.android.data.model.LoggedInUser
-
-class DriverRequestServiceImpl: DriverRequestService {
+import com.google.android.gms.maps.model.LatLng
+import com.google.firebase.functions.FirebaseFunctions
+import com.okada.rider.android.data.model.DriverGeoModel
 
 
-    override fun sendDriverRouteRequest(completion: (Result<Unit>) -> Unit) {
-       // FirebaseMessaging.getInstance().send()
+class DriverRequestServiceImpl : DriverRequestService {
+    val cloudFuncRequestDriverName = "sendPN"
+    override fun sendDriverRouteRequest(
+        pickuploc: LatLng,
+        driverPushToken: String,
+        completion: (Result<Unit>) -> Unit
+    ) {
+        val locstr = StringBuilder().append(pickuploc.latitude).append(",").append(pickuploc.longitude).toString()
+        val data = hashMapOf(
+            "token" to driverPushToken,
+            "title" to "Driver requested",
+            "body" to "This message is to check the request functionality from the Okada app",
+            "pickupLoc" to locstr
+        )
+        val functions = FirebaseFunctions.getInstance()
+        functions.getHttpsCallable(cloudFuncRequestDriverName)
+            .call(data)
+            .addOnSuccessListener {
+                completion(Result.success(Unit))
+            }
+            .addOnFailureListener {exp->
+                completion(Result.failure(exp))
+            }
     }
     /*
     override fun authenticate(email: String, password: String, completion: (Result<LoggedInUser>) -> Unit) {

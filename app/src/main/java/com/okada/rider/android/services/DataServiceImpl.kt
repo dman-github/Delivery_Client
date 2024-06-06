@@ -35,6 +35,10 @@ class DataServiceImpl: DataService {
             }
     }
 
+    override fun retrievePushMessagingToken(uid: String, listener: ValueEventListener) {
+        pushTokenRef.child(uid).addListenerForSingleValueEvent(listener)
+    }
+
     override fun fetchDriverInfo(uid: String, listener: ValueEventListener) {
         // Set up Firebase listener
         databaseRefDriverInfo.child(uid).addListenerForSingleValueEvent(listener)

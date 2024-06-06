@@ -98,6 +98,7 @@ dependencies {
     implementation("com.google.firebase:firebase-database:20.3.1")
     implementation("com.google.firebase:firebase-storage:20.3.0")
     implementation("com.google.firebase:firebase-messaging:23.4.1")
+    implementation("com.google.firebase:firebase-functions:21.0.0")
     //Easy permissions
     implementation("com.vmadalin:easypermissions-ktx:1.0.0")
 

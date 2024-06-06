@@ -2,6 +2,7 @@ package com.okada.rider.android.ui.requestDriver
 
 import android.graphics.Color
 import android.location.Location
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -12,21 +13,22 @@ import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.SquareCap
 import com.google.android.material.snackbar.Snackbar
+import com.okada.rider.android.Common
 import com.okada.rider.android.R
 import com.okada.rider.android.data.AccountUsecase
 import com.okada.rider.android.data.DirectionsUsecase
+import com.okada.rider.android.data.DriverRequestUsecase
 import com.okada.rider.android.data.LocationUsecase
 import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.data.model.MarkerModel
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
+import com.okada.rider.android.ui.login.LoginResult
 
 class RequestDriverViewModel(
-    private val accountUsecase: AccountUsecase,
-    private val locationUsecase: LocationUsecase,
-    private val profileUsecase: ProfileUsecase,
-    private val directionsUsecase: DirectionsUsecase
+    private val directionsUsecase: DirectionsUsecase,
+    private val driverRequestUsecase: DriverRequestUsecase
 ) : ViewModel() {
 
 
@@ -99,6 +101,7 @@ class RequestDriverViewModel(
                 }
                 driverFound?.let { driver ->
                     _showMessage.value = "Found driver: ${driver.driverInfoModel?.email}"
+                    sendDriverRequest(pt, driver)
                 } ?: run {
                     _showMessage.value = "Drivers not found"
                 }
@@ -109,7 +112,19 @@ class RequestDriverViewModel(
     }
 
     fun sendDriverRequest(pickupLocation: LatLng, driver: DriverGeoModel) {
+        driver.key?.let { key ->
+            driverRequestUsecase.sendDriverRouteRequest(key, pickupLocation) { result ->
+                result.fold(onSuccess = {
+                    // Push done
+                    _showMessage.value = "push done"
+                }, onFailure = {
+                    // Error occurred
+                    _showMessage.value = it.message
+                })
+            }
+        }
+
 
     }
-
 }
+

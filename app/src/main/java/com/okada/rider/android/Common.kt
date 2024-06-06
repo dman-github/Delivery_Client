@@ -24,6 +24,7 @@ object Common {
     var currentUser: UserInfo? = null
     val NOTI_BODY: String = "body"
     val NOTI_TITLE: String = "title"
+    val NOTI_PICKUP_LOC: String = "pickuploc"
 
     fun buildFullname(): String {
         return StringBuilder(currentUser!!.firstname)
