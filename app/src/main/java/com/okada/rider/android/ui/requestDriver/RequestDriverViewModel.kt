@@ -80,7 +80,7 @@ class RequestDriverViewModel(
         }
     }
 
-    fun findNearbyDriver(target: LatLng?, nearestDrivers: MutableSet<DriverGeoModel>) {
+    fun findNearbyDriver(target: LatLng?, nearestDrivers: MutableSet<DriverGeoModel>, userUid: String?) {
         target?.let { pt ->
             if (nearestDrivers.size > 0) {
                 var min = Float.MAX_VALUE
@@ -101,7 +101,9 @@ class RequestDriverViewModel(
                 }
                 driverFound?.let { driver ->
                     _showMessage.value = "Found driver: ${driver.driverInfoModel?.email}"
-                    sendDriverRequest(pt, driver)
+                    userUid?.let{uid->
+                        sendDriverRequest(pt, driver, uid)
+                    }
                 } ?: run {
                     _showMessage.value = "Drivers not found"
                 }
@@ -111,9 +113,9 @@ class RequestDriverViewModel(
         }
     }
 
-    fun sendDriverRequest(pickupLocation: LatLng, driver: DriverGeoModel) {
+    fun sendDriverRequest(pickupLocation: LatLng, driver: DriverGeoModel, userUid: String) {
         driver.key?.let { key ->
-            driverRequestUsecase.sendDriverRouteRequest(key, pickupLocation) { result ->
+            driverRequestUsecase.sendDriverRouteRequest(key, userUid, pickupLocation) { result ->
                 result.fold(onSuccess = {
                     // Push done
                     _showMessage.value = "push done"

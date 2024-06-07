@@ -115,6 +115,10 @@ class HomeViewModel(
         return _model.nearestDrivers
     }
 
+    fun getUserUiD(): String? {
+        return _model.uid
+    }
+
     fun removeUserLocation() {
         _model.uid?.also { uid ->
             locationUsecase.removeLocationFor(uid)

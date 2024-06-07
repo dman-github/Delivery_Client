@@ -410,7 +410,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             }
         }
         spinAnimator?.start()
-        requestDriverVM.findNearbyDriver(target, sharedVM.getNearestDriver())
+        requestDriverVM.findNearbyDriver(target, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
     }
 
 

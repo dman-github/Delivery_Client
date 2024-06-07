@@ -10,6 +10,7 @@ class DriverRequestServiceImpl : DriverRequestService {
     override fun sendDriverRouteRequest(
         pickuploc: LatLng,
         driverPushToken: String,
+        uid: String,
         completion: (Result<Unit>) -> Unit
     ) {
         val locstr = StringBuilder().append(pickuploc.latitude).append(",").append(pickuploc.longitude).toString()
@@ -17,6 +18,7 @@ class DriverRequestServiceImpl : DriverRequestService {
             "token" to driverPushToken,
             "title" to "Driver requested",
             "body" to "This message is to check the request functionality from the Okada app",
+            "clientKey" to uid,
             "pickupLoc" to locstr
         )
         val functions = FirebaseFunctions.getInstance()

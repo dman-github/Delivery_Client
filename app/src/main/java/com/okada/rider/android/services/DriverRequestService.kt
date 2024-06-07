@@ -13,6 +13,7 @@ interface DriverRequestService {
     fun sendDriverRouteRequest(
         pickuploc: LatLng,
         driverPushToken: String,
+        uid: String,
         completion: (Result<Unit>) -> Unit)
 
 }

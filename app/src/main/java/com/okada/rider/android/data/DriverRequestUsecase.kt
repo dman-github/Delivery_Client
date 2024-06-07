@@ -14,11 +14,12 @@ class DriverRequestUsecase (
     val dataService: DataService
 ) {
     fun sendDriverRouteRequest(
-        uid: String,
+        driverUid: String,
+        userUid: String,
         pickupLocation: LatLng,
         completion: (Result<Unit>) -> Unit
     ) {
-        dataService.retrievePushMessagingToken(uid, object : ValueEventListener {
+        dataService.retrievePushMessagingToken(driverUid, object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.hasChildren()) {
 
@@ -26,7 +27,8 @@ class DriverRequestUsecase (
                     snapshot.getValue(TokenModel::class.java)?.let { model ->
                         driverRequestService.sendDriverRouteRequest(
                             pickupLocation,
-                            model.token
+                            userUid,
+                            model.token,
                         ) { result ->
                             result.fold(onSuccess = {
                                 // Notification sent
