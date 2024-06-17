@@ -24,7 +24,10 @@ object Common {
     var currentUser: UserInfo? = null
     val NOTI_BODY: String = "body"
     val NOTI_TITLE: String = "title"
-    val NOTI_PICKUP_LOC: String = "pickuploc"
+    val CLIENT_KEY: String = "clientKey"
+    val PICKUP_LOCATION: String = "pickupLoc"
+    val REQUEST_DRIVER_MSG_TITLE: String = "Driver requested!"
+    val DECLINE_REQUEST_MSG_TITLE: String = "Request Cancelled!"
 
     fun buildFullname(): String {
         return StringBuilder(currentUser!!.firstname)

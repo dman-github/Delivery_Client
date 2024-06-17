@@ -6,8 +6,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import com.okada.rider.android.Common
+import com.okada.rider.android.Common.CLIENT_KEY
+import com.okada.rider.android.Common.DECLINE_REQUEST_MSG_TITLE
 import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.data.model.TokenModel
+import org.greenrobot.eventbus.EventBus
 import java.util.Random
 
 class FirebaseMessagingIdService : FirebaseMessagingService() {
@@ -15,15 +18,23 @@ class FirebaseMessagingIdService : FirebaseMessagingService() {
 
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
+        // Firebase message has a Notification object and a Data object. The Data object is a dictionary
         val data = message.data
-        data.let {
-            Common.showNotification(
-                this,
-                Random().nextInt(),
-                data[Common.NOTI_TITLE],
-                data[Common.NOTI_BODY],
-                null
-            )
+        message.notification?.let { noti ->
+            if (noti.title.equals(DECLINE_REQUEST_MSG_TITLE)) {
+                data[CLIENT_KEY]?.let { key ->
+
+                }
+            } else {
+                Common.showNotification(
+                    this,
+                    Random().nextInt(),
+                    noti.title,
+                    noti.body,
+                    null
+                )
+            }
+
         }
     }
 
