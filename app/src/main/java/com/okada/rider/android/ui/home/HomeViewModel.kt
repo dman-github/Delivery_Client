@@ -54,8 +54,6 @@ class HomeViewModel(
     //Model
     private val _model = HomeModel()
 
-    val compositeDisposable = CompositeDisposable()
-    lateinit var directionsService: DirectionsService
 
 
     init {
@@ -67,7 +65,6 @@ class HomeViewModel(
                 _showSnackbarMessage.value = it.message
             })
         }
-        directionsService = RetrofitClient.instance!!.create(DirectionsService::class.java)
     }
 
     fun clearMessage() {
@@ -79,7 +76,6 @@ class HomeViewModel(
     }
 
     fun viewWillStop() {
-        compositeDisposable.clear()
         directionsUsecase.closeConnection()
     }
 

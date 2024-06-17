@@ -27,8 +27,8 @@ class DriverRequestUsecase (
                     snapshot.getValue(TokenModel::class.java)?.let { model ->
                         driverRequestService.sendDriverRouteRequest(
                             pickupLocation,
-                            userUid,
                             model.token,
+                            userUid,
                         ) { result ->
                             result.fold(onSuccess = {
                                 // Notification sent

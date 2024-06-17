@@ -16,7 +16,7 @@ class DriverRequestServiceImpl : DriverRequestService {
         val locstr = StringBuilder().append(pickuploc.latitude).append(",").append(pickuploc.longitude).toString()
         val data = hashMapOf(
             "token" to driverPushToken,
-            "title" to "Driver requested",
+            "title" to "Driver requested!",
             "body" to "This message is to check the request functionality from the Okada app",
             "clientKey" to uid,
             "pickupLoc" to locstr
