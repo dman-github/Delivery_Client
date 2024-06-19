@@ -2,6 +2,8 @@ package com.okada.rider.android.ui.requestDriver
 
 import android.graphics.Color
 import android.location.Location
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -42,9 +44,15 @@ class RequestDriverViewModel(
     private val _updateMap = MutableLiveData<SelectedPlaceModel>()
     val updateMap: LiveData<SelectedPlaceModel> = _updateMap
 
+    private val _triggerNearestDrivers = MutableLiveData<Boolean>()
+    val triggerNearestDrivers: LiveData<Boolean> = _triggerNearestDrivers
+
+    private val _triggerClose = MutableLiveData<Boolean>()
+    val triggerClose: LiveData<Boolean> = _triggerClose
+
     //Model
     private val _model = RequestDriverModel()
-
+    private lateinit var nearestDriverTimeoutHandler: Handler
 
     fun clearMessage() {
         _showMessage.value = null
@@ -58,9 +66,15 @@ class RequestDriverViewModel(
         _model.declinedDrivers = mutableListOf<String>()
     }
 
+    fun stopTimeoutTimer() {
+        // When the response from the driver has arrived we do not need the timeout
+        nearestDriverTimeoutHandler.removeCallbacksAndMessages(null)
+    }
+
     fun addDeclinedDriver(declinedDriver: DeclineRequestEvent) {
         _model.declinedDrivers.add(declinedDriver.driverUid)
     }
+
     fun viewWillStop() {
         directionsUsecase.closeConnection()
     }
@@ -88,7 +102,11 @@ class RequestDriverViewModel(
         }
     }
 
-    fun findNearbyDriver(target: LatLng?, nearestDrivers: MutableSet<DriverGeoModel>, userUid: String?) {
+    fun findNearbyDriver(
+        target: LatLng?,
+        nearestDrivers: MutableSet<DriverGeoModel>,
+        userUid: String?
+    ) {
         target?.let { pt ->
             if (nearestDrivers.size > 0) {
                 var min = Float.MAX_VALUE
@@ -97,7 +115,7 @@ class RequestDriverViewModel(
                 currentRiderLocation.latitude = pt.latitude
                 currentRiderLocation.longitude = pt.longitude
                 nearestDrivers.forEach() { driver ->
-                    driver.key?.let {driverUID->
+                    driver.key?.let { driverUID ->
                         // ignore the drivers that have declined
                         if (!_model.declinedDrivers.contains(driverUID)) {
                             driver.geoLocation?.let { loc ->
@@ -114,11 +132,12 @@ class RequestDriverViewModel(
                 }
                 driverFound?.let { driver ->
                     _showMessage.value = "Found driver: ${driver.getFullName()}"
-                    userUid?.let{uid->
+                    userUid?.let { uid ->
                         sendDriverRequest(pt, driver, uid)
                     }
                 } ?: run {
                     _showMessage.value = "No drivers have accepeted the job!!"
+                    _triggerClose.value = true
                 }
             } else {
                 _showMessage.value = "Drivers not found"
@@ -132,14 +151,22 @@ class RequestDriverViewModel(
                 result.fold(onSuccess = {
                     // Push done
                     _showMessage.value = "push done"
+
                 }, onFailure = {
                     // Error occurred
                     _showMessage.value = it.message
                 })
+                startRequestTimeoutTimer(key)
             }
         }
+    }
 
-
+    private fun startRequestTimeoutTimer(driverUid: String) {
+        nearestDriverTimeoutHandler = Handler(Looper.getMainLooper())
+        nearestDriverTimeoutHandler.postDelayed({
+            _model.declinedDrivers.add(driverUid)
+            _triggerNearestDrivers.value = true
+        }, 15000)
     }
 }
 

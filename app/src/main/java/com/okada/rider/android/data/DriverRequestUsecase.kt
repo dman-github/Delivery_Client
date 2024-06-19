@@ -22,7 +22,7 @@ class DriverRequestUsecase (
         dataService.retrievePushMessagingToken(driverUid, object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
                 if (!snapshot.hasChildren()) {
-
+                    completion(Result.failure(Exception("No Push token")))
                 } else {
                     snapshot.getValue(TokenModel::class.java)?.let { model ->
                         driverRequestService.sendDriverRouteRequest(

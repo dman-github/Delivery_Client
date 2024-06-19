@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -137,6 +138,23 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 drawPath(model)
             })
 
+        requestDriverVM.triggerNearestDrivers.observe(viewLifecycleOwner,
+            Observer { trigger ->
+                if (trigger) {
+                    selectedPlaceEvent?.let {
+                        findNearByDrivers(it.origin)
+                    }
+                }
+            })
+
+        requestDriverVM.triggerClose.observe(viewLifecycleOwner,
+            Observer { trigger ->
+                if (trigger) {
+                    findNavController().popBackStack()
+
+                }
+            })
+
         btnConfirmBiker.setOnClickListener {
             confirmPickupLayout.visibility = View.VISIBLE
             confirmBikerLayout.visibility = View.GONE
@@ -185,12 +203,14 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     fun onDeclineRequestEvent(event: DeclineRequestEvent) {
         declineRequestEvent = event
         requestDriverVM.addDeclinedDriver(event)
+        requestDriverVM.stopTimeoutTimer()
         selectedPlaceEvent?.let {
             findNearByDrivers(it.origin)
         }
 
 
     }
+
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onSelectPlaceEvent(event: SelectedPlaceEvent) {
         selectedPlaceEvent = event
@@ -400,7 +420,6 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 }
             }
         })
-
         //start rotation camera
         startMapCameraSpinningAnimation(mMap.cameraPosition.target)
     }
@@ -423,7 +442,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             }
         }
         spinAnimator?.start()
-        target?.let{
+        target?.let {
             findNearByDrivers(it)
         }
     }
@@ -431,7 +450,6 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private fun findNearByDrivers(origin: LatLng) {
         requestDriverVM.findNearbyDriver(origin, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
     }
-
 
 
 }
