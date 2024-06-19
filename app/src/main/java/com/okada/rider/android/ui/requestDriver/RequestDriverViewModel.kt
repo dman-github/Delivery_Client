@@ -20,6 +20,7 @@ import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.DriverRequestUsecase
 import com.okada.rider.android.data.LocationUsecase
 import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.data.model.MarkerModel
 import com.okada.rider.android.data.model.SelectedPlaceEvent
@@ -53,6 +54,13 @@ class RequestDriverViewModel(
         _model.apiKey = key
     }
 
+    fun resetDeclinedDrivers() {
+        _model.declinedDrivers = mutableListOf<String>()
+    }
+
+    fun addDeclinedDriver(declinedDriver: DeclineRequestEvent) {
+        _model.declinedDrivers.add(declinedDriver.driverUid)
+    }
     fun viewWillStop() {
         directionsUsecase.closeConnection()
     }
@@ -89,23 +97,28 @@ class RequestDriverViewModel(
                 currentRiderLocation.latitude = pt.latitude
                 currentRiderLocation.longitude = pt.longitude
                 nearestDrivers.forEach() { driver ->
-                    driver.geoLocation?.let { loc ->
-                        val driverLocation = Location("")
-                        driverLocation.latitude = loc.latitude
-                        driverLocation.longitude = loc.longitude
-                        if (driverLocation.distanceTo(currentRiderLocation) < min) {
-                            min = driverLocation.distanceTo(currentRiderLocation)
-                            driverFound = driver
+                    driver.key?.let {driverUID->
+                        // ignore the drivers that have declined
+                        if (!_model.declinedDrivers.contains(driverUID)) {
+                            driver.geoLocation?.let { loc ->
+                                val driverLocation = Location("")
+                                driverLocation.latitude = loc.latitude
+                                driverLocation.longitude = loc.longitude
+                                if (driverLocation.distanceTo(currentRiderLocation) < min) {
+                                    min = driverLocation.distanceTo(currentRiderLocation)
+                                    driverFound = driver
+                                }
+                            }
                         }
                     }
                 }
                 driverFound?.let { driver ->
-                    _showMessage.value = "Found driver: ${driver.driverInfoModel?.email}"
+                    _showMessage.value = "Found driver: ${driver.getFullName()}"
                     userUid?.let{uid->
                         sendDriverRequest(pt, driver, uid)
                     }
                 } ?: run {
-                    _showMessage.value = "Drivers not found"
+                    _showMessage.value = "No drivers have accepeted the job!!"
                 }
             } else {
                 _showMessage.value = "Drivers not found"

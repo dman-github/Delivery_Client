@@ -3,14 +3,12 @@ package com.okada.rider.android.ui.requestDriver
 import HomeViewModelFactory
 import RequestDriverViewModelFactory
 import android.Manifest
-import android.animation.Animator
 import android.animation.ValueAnimator
 import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.location.Location
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
@@ -37,15 +35,14 @@ import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.SquareCap
-import com.google.android.material.snackbar.Snackbar
 import com.google.maps.android.ui.IconGenerator
 import com.okada.rider.android.Common
 import com.okada.rider.android.R
+import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
 import com.okada.rider.android.databinding.ConfirmPickupMarkerBinding
@@ -71,6 +68,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var findDriverLayout: CardView
     private lateinit var txtAddressPickup: TextView
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
+    private var declineRequestEvent: DeclineRequestEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
     //Pulsating effect
@@ -173,11 +171,26 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         if (lastPulseAnimator != null) lastPulseAnimator?.end()
         if (spinAnimator != null) spinAnimator?.end()
         requestDriverVM.viewWillStop()
+
         if (EventBus.getDefault().hasSubscriberForEvent(SelectedPlaceEvent::class.java))
             EventBus.getDefault().removeStickyEvent(SelectedPlaceEvent::class.java)
+
+        if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestEvent::class.java))
+            EventBus.getDefault().removeStickyEvent(DeclineRequestEvent::class.java)
+
         EventBus.getDefault().unregister(this)
     }
 
+    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+    fun onDeclineRequestEvent(event: DeclineRequestEvent) {
+        declineRequestEvent = event
+        requestDriverVM.addDeclinedDriver(event)
+        selectedPlaceEvent?.let {
+            findNearByDrivers(it.origin)
+        }
+
+
+    }
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onSelectPlaceEvent(event: SelectedPlaceEvent) {
         selectedPlaceEvent = event
@@ -410,7 +423,13 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             }
         }
         spinAnimator?.start()
-        requestDriverVM.findNearbyDriver(target, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
+        target?.let{
+            findNearByDrivers(it)
+        }
+    }
+
+    private fun findNearByDrivers(origin: LatLng) {
+        requestDriverVM.findNearbyDriver(origin, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
     }
 
 

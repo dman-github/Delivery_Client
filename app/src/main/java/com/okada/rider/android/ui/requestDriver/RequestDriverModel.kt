@@ -7,4 +7,5 @@ import com.google.android.gms.maps.model.PolylineOptions
 
 class RequestDriverModel {
     var apiKey: String = ""
+    var declinedDrivers =  mutableListOf<String>()
 }

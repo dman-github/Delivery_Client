@@ -9,6 +9,7 @@ import com.okada.rider.android.Common
 import com.okada.rider.android.Common.CLIENT_KEY
 import com.okada.rider.android.Common.DECLINE_REQUEST_MSG_TITLE
 import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.TokenModel
 import org.greenrobot.eventbus.EventBus
 import java.util.Random
@@ -23,7 +24,7 @@ class FirebaseMessagingIdService : FirebaseMessagingService() {
         message.notification?.let { noti ->
             if (noti.title.equals(DECLINE_REQUEST_MSG_TITLE)) {
                 data[CLIENT_KEY]?.let { key ->
-
+                    EventBus.getDefault().postSticky(DeclineRequestEvent(key))
                 }
             } else {
                 Common.showNotification(

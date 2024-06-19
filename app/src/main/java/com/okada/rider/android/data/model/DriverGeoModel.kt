@@ -36,5 +36,13 @@ class DriverGeoModel(
         return result
     }
 
+    fun getFullName(): String {
+        var result = ""
+        driverInfoModel?.let {model ->
+            result =  StringBuilder().append(model.firstname).append(",").append(model.lastname).toString()
+        }
+        return result
+    }
+
 
 }
