@@ -1,11 +1,13 @@
 package com.okada.rider.android.data.model
 
+import com.okada.rider.android.data.model.enums.JobStatus
+
 
 data class JobInfoModel (var jobId: String? = null,
-                       var driverUid: String? = null,
-                       var clientUid: String? = null,
-                       var status: String? = null,
-                       var jobDetails: JobDetails? = null
+                         var driverUid: String? = null,
+                         var clientUid: String? = null,
+                         var status: JobStatus? = null,
+                         var jobDetails: JobDetails? = null
 ) {
     // Null default values create a no-argument default constructor, which is needed
     // for deserialization from a DataSnapshot.
@@ -24,9 +26,4 @@ data class Location(
     var longitude: Double? = null
 )
 
-enum class JobStatus {
-    NEW,
-    ACCEPTED,
-    IN_PROGRESS,
-    COMPLETED
-}
+
