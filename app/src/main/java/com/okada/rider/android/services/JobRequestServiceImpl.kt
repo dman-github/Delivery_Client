@@ -16,19 +16,18 @@ class JobRequestServiceImpl : JobRequestService {
     private val jobListener: ChildEventListener? = null
     private lateinit var newJobRef: DatabaseReference
     override fun sendDriverRouteRequest(
-        pickuploc: LatLng,
+        job: JobInfoModel,
         driverPushToken: String,
-        uid: String,
         completion: (Result<Unit>) -> Unit
     ) {
         val locstr =
-            StringBuilder().append(pickuploc.latitude).append(",").append(pickuploc.longitude)
+            StringBuilder().append(job.jobDetails!!.pickupLocation!!.latitude).append(",").append(job.jobDetails!!.pickupLocation!!.longitude)
                 .toString()
         val data = hashMapOf(
             "token" to driverPushToken,
             "title" to "Driver requested!",
             "body" to "This message is to check the request functionality from the Okada app",
-            "clientKey" to uid,
+            "clientKey" to job.clientUid,
             "pickupLoc" to locstr
         )
         val functions = FirebaseFunctions.getInstance()

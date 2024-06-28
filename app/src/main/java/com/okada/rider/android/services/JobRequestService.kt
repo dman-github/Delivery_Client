@@ -1,15 +1,15 @@
 package com.okada.rider.android.services
 
-import com.google.android.gms.maps.model.LatLng
+
 import com.google.firebase.database.ChildEventListener
 import com.okada.rider.android.data.model.JobInfoModel
+import com.okada.rider.android.data.model.Location
 
 interface JobRequestService {
 
     fun sendDriverRouteRequest(
-        pickuploc: LatLng,
+        job: JobInfoModel,
         driverPushToken: String,
-        uid: String,
         completion: (Result<Unit>) -> Unit
     )
 

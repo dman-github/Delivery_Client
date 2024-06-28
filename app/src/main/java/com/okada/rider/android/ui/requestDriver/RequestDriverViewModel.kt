@@ -1,37 +1,26 @@
 package com.okada.rider.android.ui.requestDriver
 
-import android.graphics.Color
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.google.android.gms.maps.CameraUpdate
-import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.android.gms.maps.model.SquareCap
-import com.google.android.material.snackbar.Snackbar
-import com.okada.rider.android.Common
-import com.okada.rider.android.R
-import com.okada.rider.android.data.AccountUsecase
+import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.okada.rider.android.data.DirectionsUsecase
-import com.okada.rider.android.data.DriverRequestUsecase
-import com.okada.rider.android.data.LocationUsecase
-import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.data.JobRequestUsecase
 import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.DriverGeoModel
-import com.okada.rider.android.data.model.MarkerModel
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
-import com.okada.rider.android.ui.login.LoginResult
 
 class RequestDriverViewModel(
     private val directionsUsecase: DirectionsUsecase,
-    private val driverRequestUsecase: DriverRequestUsecase
+    private val jobRequestUsecase: JobRequestUsecase
 ) : ViewModel() {
 
 
@@ -104,6 +93,7 @@ class RequestDriverViewModel(
 
     fun findNearbyDriver(
         target: LatLng?,
+        dest: LatLng?,
         nearestDrivers: MutableSet<DriverGeoModel>,
         userUid: String?
     ) {
@@ -133,7 +123,9 @@ class RequestDriverViewModel(
                 driverFound?.let { driver ->
                     _showMessage.value = "Found driver: ${driver.getFullName()}"
                     userUid?.let { uid ->
-                        sendDriverRequest(pt, driver, uid)
+                        dest?.let {
+                            sendDriverRequest(pt, it, driver, uid)
+                        }
                     }
                 } ?: run {
                     _showMessage.value = "No drivers have accepeted the job!!"
@@ -145,9 +137,36 @@ class RequestDriverViewModel(
         }
     }
 
-    fun sendDriverRequest(pickupLocation: LatLng, driver: DriverGeoModel, userUid: String) {
+    fun sendDriverRequest(
+        pickupLocation: LatLng,
+        destination: LatLng,
+        driver: DriverGeoModel,
+        userUid: String
+    ) {
         driver.key?.let { key ->
-            driverRequestUsecase.sendDriverRouteRequest(key, userUid, pickupLocation) { result ->
+            jobRequestUsecase.createJobRequest(
+                key,
+                userUid,
+                pickupLocation,
+                destination,
+                object : ChildEventListener {
+                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {}
+                    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
+                    override fun onChildChanged(
+                        snapshot: DataSnapshot,
+                        previousChildName: String?
+                    ) {
+                        TODO("Not yet implemented")
+                    }
+
+                    override fun onChildRemoved(snapshot: DataSnapshot) {
+                        _showMessage.value = "Driver request removed"
+                    }
+
+                    override fun onCancelled(error: DatabaseError) {
+                        _showMessage.value = "Datebase error: $error"
+                    }
+                }) { result ->
                 result.fold(onSuccess = {
                     // Push done
                     _showMessage.value = "push done"

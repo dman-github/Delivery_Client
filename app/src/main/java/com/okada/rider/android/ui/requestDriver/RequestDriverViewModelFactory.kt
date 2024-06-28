@@ -1,7 +1,7 @@
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.okada.rider.android.data.DirectionsUsecase
-import com.okada.rider.android.data.DriverRequestUsecase
+import com.okada.rider.android.data.JobRequestUsecase
 import com.okada.rider.android.services.DataServiceImpl
 import com.okada.rider.android.services.JobRequestServiceImpl
 import com.okada.rider.android.ui.requestDriver.RequestDriverViewModel
@@ -17,8 +17,8 @@ class RequestDriverViewModelFactory : ViewModelProvider.Factory {
         if (modelClass.isAssignableFrom(RequestDriverViewModel::class.java)) {
             return RequestDriverViewModel(
                 directionsUsecase = DirectionsUsecase(),
-                driverRequestUsecase = DriverRequestUsecase(
-                    driverRequestService = JobRequestServiceImpl(),
+                jobRequestUsecase = JobRequestUsecase(
+                    jobRequestService = JobRequestServiceImpl(),
                     dataService = DataServiceImpl()
                 )
             ) as T

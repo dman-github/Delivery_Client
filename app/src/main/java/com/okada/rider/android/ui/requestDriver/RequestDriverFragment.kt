@@ -142,7 +142,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             Observer { trigger ->
                 if (trigger) {
                     selectedPlaceEvent?.let {
-                        findNearByDrivers(it.origin)
+                        findNearByDrivers(it.origin, it .destination)
                     }
                 }
             })
@@ -205,7 +205,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         requestDriverVM.addDeclinedDriver(event)
         requestDriverVM.stopTimeoutTimer()
         selectedPlaceEvent?.let {
-            findNearByDrivers(it.origin)
+            findNearByDrivers(it.origin, it.destination)
         }
 
 
@@ -443,12 +443,14 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
         spinAnimator?.start()
         target?.let {
-            findNearByDrivers(it)
+            selectedPlaceEvent?.destination?.let {dest->
+                findNearByDrivers(it, dest)
+            }
         }
     }
 
-    private fun findNearByDrivers(origin: LatLng) {
-        requestDriverVM.findNearbyDriver(origin, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
+    private fun findNearByDrivers(origin: LatLng, dest: LatLng) {
+        requestDriverVM.findNearbyDriver(origin, dest, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
     }
 
 
