@@ -156,7 +156,7 @@ class RequestDriverViewModel(
                         snapshot: DataSnapshot,
                         previousChildName: String?
                     ) {
-                        TODO("Not yet implemented")
+                        _showMessage.value = "Request CHANGED"
                     }
 
                     override fun onChildRemoved(snapshot: DataSnapshot) {

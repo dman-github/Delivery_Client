@@ -12,7 +12,7 @@ import com.okada.rider.android.data.model.JobInfoModel
 class JobRequestServiceImpl : JobRequestService {
     private val cloudFuncRequestDriverName = "sendPN"
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
-    private val jobsRef: DatabaseReference = database.getReference("jobs")
+    private val jobsRef: DatabaseReference = database.getReference("Jobs")
     private val jobListener: ChildEventListener? = null
     private lateinit var newJobRef: DatabaseReference
     override fun sendDriverRouteRequest(
