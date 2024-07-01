@@ -1,10 +1,14 @@
 package com.okada.rider.android.services
 
+import android.icu.text.IDNA.Info
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import com.google.firebase.functions.FirebaseFunctions
 import com.okada.rider.android.data.model.JobInfoModel
 
@@ -68,6 +72,42 @@ class JobRequestServiceImpl : JobRequestService {
         } ?: run {
             completion(Result.failure(Exception("Cannot create Job")))
         }
+    }
+
+    override fun updateJobDriver(
+        jobId: String,
+        driverUid: String,
+        completion: (Result<Unit>) -> Unit
+    ) {
+        jobsRef.child(jobId).child("driverUid").setValue(driverUid).addOnCompleteListener{
+            if(it.isSuccessful){
+                completion(Result.success(Unit))
+            } else {
+                it.exception?.also { exception ->
+                    completion(Result.failure(exception))
+                } ?: run {
+                    completion(Result.failure(Exception("Cannot update Job")))
+                }
+            }
+        }}
+
+    override fun fetchCurrentJob(jobId: String,
+                                 completion: (Result<JobInfoModel>) -> Unit) {
+        jobsRef.child(jobId).addListenerForSingleValueEvent(object : ValueEventListener {
+            override fun onDataChange(snapshot: DataSnapshot) {
+                if (snapshot.exists()){
+                    snapshot.getValue(JobInfoModel::class.java)?.also { job ->
+                        completion(Result.success(job))
+                    } ?: run {
+                        completion(Result.failure(Exception("Cannot fetch Job")))
+                    }
+                }
+            }
+
+            override fun onCancelled(error: DatabaseError) {
+                completion(Result.failure(Exception("Cannot fetch Job")))
+            }
+        })
     }
 
     override  fun removeJobListener() {

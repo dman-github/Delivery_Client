@@ -51,6 +51,29 @@ class JobRequestUsecase(
 
     }
 
+    fun updateJobDriver(newDriverUid: String, completion: (Result<Unit>) -> Unit) {
+        currentJobId?.let { jobId ->
+            // Driver is changed to the new driver
+            jobRequestService.updateJobDriver(jobId,newDriverUid) { result ->
+                result.fold(onSuccess = {
+                    // Job is fetched from DB
+                    jobRequestService.fetchCurrentJob(jobId) {result->
+                        result.fold(onSuccess = {jobInfoResult->
+                            // Send the push notification request to the new driver
+                            sendDriverRouteRequest(jobInfoResult, completion)
+                        }, onFailure = {
+                            // Error occurred
+                            completion(Result.failure(it))
+                        })
+                    }
+                }, onFailure = {
+                    // Error occurred
+                    completion(Result.failure(it))
+                })
+            }
+        }
+    }
+
     private fun sendDriverRouteRequest(
         jobRequest: JobInfoModel,
         completion: (Result<Unit>) -> Unit

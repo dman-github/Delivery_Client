@@ -19,6 +19,15 @@ interface JobRequestService {
         completion: (Result<String>) -> Unit
     )
 
+    fun updateJobDriver(
+        jobId: String,
+        driverUid: String,
+        completion: (Result<Unit>) -> Unit
+    )
+
+    fun fetchCurrentJob(jobId: String,
+                        completion: (Result<JobInfoModel>) -> Unit)
+
     fun removeJobListener()
 
 }
