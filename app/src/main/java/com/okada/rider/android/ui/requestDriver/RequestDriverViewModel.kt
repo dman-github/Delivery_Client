@@ -144,39 +144,63 @@ class RequestDriverViewModel(
         userUid: String
     ) {
         driver.key?.let { key ->
-            jobRequestUsecase.createJobRequest(
-                key,
-                userUid,
-                pickupLocation,
-                destination,
-                object : ChildEventListener {
-                    override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {}
-                    override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {}
-                    override fun onChildChanged(
-                        snapshot: DataSnapshot,
-                        previousChildName: String?
-                    ) {
-                        _showMessage.value = "Request CHANGED"
-                    }
+            if (!jobRequestUsecase.hasActiveJob) {
+                // Create a new job
+                jobRequestUsecase.createJobRequest(
+                    key,
+                    userUid,
+                    pickupLocation,
+                    destination,
+                    object : ChildEventListener {
+                        override fun onChildAdded(
+                            snapshot: DataSnapshot,
+                            previousChildName: String?
+                        ) {
+                        }
 
-                    override fun onChildRemoved(snapshot: DataSnapshot) {
-                        _showMessage.value = "Driver request removed"
-                    }
+                        override fun onChildMoved(
+                            snapshot: DataSnapshot,
+                            previousChildName: String?
+                        ) {
+                        }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        _showMessage.value = "Datebase error: $error"
-                    }
-                }) { result ->
-                result.fold(onSuccess = {
-                    // Push done
-                    _showMessage.value = "push done"
+                        override fun onChildChanged(
+                            snapshot: DataSnapshot,
+                            previousChildName: String?
+                        ) {
+                            _showMessage.value = "Request CHANGED"
+                        }
 
-                }, onFailure = {
-                    // Error occurred
-                    _showMessage.value = it.message
-                })
-                startRequestTimeoutTimer(key)
+                        override fun onChildRemoved(snapshot: DataSnapshot) {
+                            _showMessage.value = "Driver request removed"
+                        }
+
+                        override fun onCancelled(error: DatabaseError) {
+                            _showMessage.value = "Datebase error: $error"
+                        }
+                    }) { result ->
+                    result.fold(onSuccess = {
+                        // Push done
+                        _showMessage.value = "push done"
+
+                    }, onFailure = {
+                        // Error occurred
+                        _showMessage.value = it.message
+                    })
+                }
+            } else {
+                jobRequestUsecase.updateJobDriver(key){result->
+                    // Update driver
+                    result.fold(onSuccess = {
+                        // Push done
+                        _showMessage.value = "push done (new) driver"
+                    }, onFailure = {
+                        // Error occurred
+                        _showMessage.value = it.message
+                    })
+                }
             }
+            startRequestTimeoutTimer(key)
         }
     }
 
