@@ -1,7 +1,6 @@
 package com.okada.rider.android.data
 
 import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
@@ -27,7 +26,7 @@ class JobRequestUsecase(
         userUid: String,
         pickupLocation: LatLng,
         destination: LatLng,
-        listener: ChildEventListener,
+        listener: ValueEventListener,
         completion: (Result<Unit>) -> Unit
     ) {
         val jobRequest = JobInfoModel(
@@ -42,7 +41,7 @@ class JobRequestUsecase(
             result.fold(onSuccess = {jobId->
                 // Job created send the push notification
                 currentJobId = jobId
-                sendDriverRouteRequest(jobRequest, completion)
+                sendDriverRouteRequest(jobId, jobRequest, completion)
             }, onFailure = {
                 // Error occurred
                 completion(Result.failure(it))
@@ -60,7 +59,7 @@ class JobRequestUsecase(
                     jobRequestService.fetchCurrentJob(jobId) {result->
                         result.fold(onSuccess = {jobInfoResult->
                             // Send the push notification request to the new driver
-                            sendDriverRouteRequest(jobInfoResult, completion)
+                            sendDriverRouteRequest(jobId,jobInfoResult, completion)
                         }, onFailure = {
                             // Error occurred
                             completion(Result.failure(it))
@@ -75,6 +74,7 @@ class JobRequestUsecase(
     }
 
     private fun sendDriverRouteRequest(
+        jobId: String,
         jobRequest: JobInfoModel,
         completion: (Result<Unit>) -> Unit
     ) {
@@ -85,6 +85,7 @@ class JobRequestUsecase(
                 } else {
                     snapshot.getValue(TokenModel::class.java)?.let { model ->
                         jobRequestService.sendDriverRouteRequest(
+                            jobId,
                             jobRequest,
                             model.token,
                         ) { result ->

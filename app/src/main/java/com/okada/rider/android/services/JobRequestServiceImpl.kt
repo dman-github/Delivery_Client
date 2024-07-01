@@ -1,6 +1,7 @@
 package com.okada.rider.android.services
 
 import android.icu.text.IDNA.Info
+import com.bumptech.glide.disklrucache.DiskLruCache.Value
 import com.google.android.gms.maps.model.LatLng
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.ChildEventListener
@@ -20,6 +21,7 @@ class JobRequestServiceImpl : JobRequestService {
     private val jobListener: ChildEventListener? = null
     private lateinit var newJobRef: DatabaseReference
     override fun sendDriverRouteRequest(
+        jobId: String,
         job: JobInfoModel,
         driverPushToken: String,
         completion: (Result<Unit>) -> Unit
@@ -31,7 +33,7 @@ class JobRequestServiceImpl : JobRequestService {
             "token" to driverPushToken,
             "title" to "Driver requested!",
             "body" to "This message is to check the request functionality from the Okada app",
-            "clientKey" to job.clientUid,
+            "clientKey" to jobId,
             "pickupLoc" to locstr
         )
         val functions = FirebaseFunctions.getInstance()
@@ -47,7 +49,7 @@ class JobRequestServiceImpl : JobRequestService {
 
     override fun createNewJob(
         job: JobInfoModel,
-        listener: ChildEventListener,
+        listener: ValueEventListener,
         completion: (Result<String>) -> Unit
     ) {
         // Generate a new unique job ID
@@ -60,7 +62,7 @@ class JobRequestServiceImpl : JobRequestService {
                     if (it.isSuccessful) {
                         completion(Result.success(jobId))
                         //add the listener
-                        newJobRef.addChildEventListener(listener)
+                        newJobRef.addValueEventListener(listener)
                     } else {
                         it.exception?.also { exception ->
                             completion(Result.failure(exception))

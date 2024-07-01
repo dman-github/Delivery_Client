@@ -8,15 +8,17 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.PolylineOptions
-import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.JobRequestUsecase
 import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.DriverGeoModel
+import com.okada.rider.android.data.model.JobInfoModel
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
+import com.okada.rider.android.data.model.enums.JobStatus
 
 class RequestDriverViewModel(
     private val directionsUsecase: DirectionsUsecase,
@@ -151,28 +153,16 @@ class RequestDriverViewModel(
                     userUid,
                     pickupLocation,
                     destination,
-                    object : ChildEventListener {
-                        override fun onChildAdded(
-                            snapshot: DataSnapshot,
-                            previousChildName: String?
-                        ) {
-                        }
+                    object : ValueEventListener {
 
-                        override fun onChildMoved(
-                            snapshot: DataSnapshot,
-                            previousChildName: String?
-                        ) {
-                        }
-
-                        override fun onChildChanged(
-                            snapshot: DataSnapshot,
-                            previousChildName: String?
-                        ) {
-                            _showMessage.value = "Request CHANGED"
-                        }
-
-                        override fun onChildRemoved(snapshot: DataSnapshot) {
-                            _showMessage.value = "Driver request removed"
+                        override fun onDataChange(snapshot: DataSnapshot) {
+                            if (snapshot.exists()) {
+                                snapshot.getValue(JobInfoModel::class.java)?.also { job ->
+                                    if (job.status == JobStatus.DECLINED) {
+                                        _showMessage.value = "Request DECLINED"
+                                    }
+                                }
+                            }
                         }
 
                         override fun onCancelled(error: DatabaseError) {
@@ -189,7 +179,7 @@ class RequestDriverViewModel(
                     })
                 }
             } else {
-                jobRequestUsecase.updateJobDriver(key){result->
+                jobRequestUsecase.updateJobDriver(key) { result ->
                     // Update driver
                     result.fold(onSuccess = {
                         // Push done

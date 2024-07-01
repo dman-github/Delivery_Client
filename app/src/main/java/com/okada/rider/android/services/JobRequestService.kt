@@ -2,12 +2,14 @@ package com.okada.rider.android.services
 
 
 import com.google.firebase.database.ChildEventListener
+import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.model.JobInfoModel
 import com.okada.rider.android.data.model.Location
 
 interface JobRequestService {
 
     fun sendDriverRouteRequest(
+        jobId: String,
         job: JobInfoModel,
         driverPushToken: String,
         completion: (Result<Unit>) -> Unit
@@ -15,7 +17,7 @@ interface JobRequestService {
 
     fun createNewJob(
         job: JobInfoModel,
-        listener: ChildEventListener,
+        listener: ValueEventListener,
         completion: (Result<String>) -> Unit
     )
 

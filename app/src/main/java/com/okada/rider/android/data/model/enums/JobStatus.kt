@@ -4,6 +4,7 @@ enum class JobStatus {
     NEW,
     ACCEPTED,
     IN_PROGRESS,
+    DECLINED,
     COMPLETED,
     CANCELLED
 }
