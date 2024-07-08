@@ -1,9 +1,6 @@
 package com.okada.rider.android.services
 
-import android.icu.text.IDNA.Info
-import com.bumptech.glide.disklrucache.DiskLruCache.Value
-import com.google.android.gms.maps.model.LatLng
-import com.google.firebase.auth.FirebaseAuth
+import android.R.attr.name
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -12,6 +9,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.functions.FirebaseFunctions
 import com.okada.rider.android.data.model.JobInfoModel
+import com.okada.rider.android.data.model.enums.JobStatus
 
 
 class JobRequestServiceImpl : JobRequestService {
@@ -81,7 +79,11 @@ class JobRequestServiceImpl : JobRequestService {
         driverUid: String,
         completion: (Result<Unit>) -> Unit
     ) {
-        jobsRef.child(jobId).child("driverUid").setValue(driverUid).addOnCompleteListener{
+        val values: MutableMap<String, Any> = HashMap()
+        values["driverUid"] = driverUid
+        // A new driver resets the state to NEW
+        values["status"] = JobStatus.NEW.toString()
+        jobsRef.child(jobId).updateChildren(values).addOnCompleteListener{
             if(it.isSuccessful){
                 completion(Result.success(Unit))
             } else {
