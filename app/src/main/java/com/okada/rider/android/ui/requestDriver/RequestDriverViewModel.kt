@@ -57,11 +57,6 @@ class RequestDriverViewModel(
         _model.declinedDrivers = mutableListOf<String>()
     }
 
-    fun stopTimeoutTimer() {
-        // When the response from the driver has arrived we do not need the timeout
-        nearestDriverTimeoutHandler.removeCallbacksAndMessages(null)
-    }
-
     fun addDeclinedDriver(declinedDriver: DeclineRequestEvent) {
         _model.declinedDrivers.add(declinedDriver.driverUid)
     }
@@ -159,7 +154,11 @@ class RequestDriverViewModel(
                             if (snapshot.exists()) {
                                 snapshot.getValue(JobInfoModel::class.java)?.also { job ->
                                     if (job.status == JobStatus.DECLINED) {
-                                        _showMessage.value = "Request DECLINED"
+                                        job.driverUid?.let {driverId->
+                                            _model.declinedDrivers.add(driverId)
+                                            this@RequestDriverViewModel.stopTimeoutTimer()
+                                            _showMessage.value = "Request DECLINED"
+                                        }
                                     }
                                 }
                             }
@@ -200,6 +199,11 @@ class RequestDriverViewModel(
             _model.declinedDrivers.add(driverUid)
             _triggerNearestDrivers.value = true
         }, 15000)
+    }
+
+    private fun stopTimeoutTimer() {
+        // When the response from the driver has arrived we do not need the timeout
+        nearestDriverTimeoutHandler.removeCallbacksAndMessages(null)
     }
 }
 

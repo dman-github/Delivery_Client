@@ -69,7 +69,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var findDriverLayout: CardView
     private lateinit var txtAddressPickup: TextView
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
-    private var declineRequestEvent: DeclineRequestEvent? = null
+  //  private var declineRequestEvent: DeclineRequestEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
     //Pulsating effect
@@ -193,13 +193,13 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         if (EventBus.getDefault().hasSubscriberForEvent(SelectedPlaceEvent::class.java))
             EventBus.getDefault().removeStickyEvent(SelectedPlaceEvent::class.java)
 
-        if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestEvent::class.java))
-            EventBus.getDefault().removeStickyEvent(DeclineRequestEvent::class.java)
+        /*if (EventBus.getDefault().hasSubscriberForEvent(DeclineRequestEvent::class.java))
+            EventBus.getDefault().removeStickyEvent(DeclineRequestEvent::class.java)*/
 
         EventBus.getDefault().unregister(this)
     }
 
-    @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+  /*  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onDeclineRequestEvent(event: DeclineRequestEvent) {
         declineRequestEvent = event
         requestDriverVM.addDeclinedDriver(event)
@@ -209,7 +209,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
 
 
-    }
+    }*/
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onSelectPlaceEvent(event: SelectedPlaceEvent) {
