@@ -79,10 +79,12 @@ class JobRequestServiceImpl : JobRequestService {
         driverUid: String,
         completion: (Result<Unit>) -> Unit
     ) {
-        val values: MutableMap<String, Any> = HashMap()
+        val values: MutableMap<String, Any?> = HashMap()
         values["driverUid"] = driverUid
         // A new driver resets the state to NEW
         values["status"] = JobStatus.NEW.toString()
+        // Clear the new driver location fields
+        values["JobDetails/driverLocation"] = null
         jobsRef.child(jobId).updateChildren(values).addOnCompleteListener{
             if(it.isSuccessful){
                 completion(Result.success(Unit))

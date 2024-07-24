@@ -153,12 +153,15 @@ class RequestDriverViewModel(
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (snapshot.exists()) {
                                 snapshot.getValue(JobInfoModel::class.java)?.also { job ->
-                                    if (job.status == JobStatus.DECLINED) {
+                                   /* if (job.status == JobStatus.DECLINED) {
                                         job.driverUid?.let {driverId->
                                             _model.declinedDrivers.add(driverId)
                                             this@RequestDriverViewModel.stopTimeoutTimer()
                                             _showMessage.value = "Request DECLINED"
                                         }
+                                    }*/
+                                    job.driverUid?.let { driverId ->
+                                        checkJobStatus(driverId, job.status!!)
                                     }
                                 }
                             }
@@ -204,6 +207,24 @@ class RequestDriverViewModel(
     private fun stopTimeoutTimer() {
         // When the response from the driver has arrived we do not need the timeout
         nearestDriverTimeoutHandler.removeCallbacksAndMessages(null)
+    }
+
+    private fun checkJobStatus(driverUid: String, jobStatus: JobStatus) {
+        when (jobStatus) {
+            JobStatus.DECLINED -> {
+                _model.declinedDrivers.add(driverUid)
+                this@RequestDriverViewModel.stopTimeoutTimer()
+                _showMessage.value = "Request DECLINED"
+                _triggerNearestDrivers.value = true
+            }
+            JobStatus.ACCEPTED -> {
+                this@RequestDriverViewModel.stopTimeoutTimer()
+                _showMessage.value = "Request ACCEPTED"
+            }
+            else -> {
+                print("x is neither 1 nor 2")
+            }
+        }
     }
 }
 

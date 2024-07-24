@@ -16,12 +16,13 @@ data class JobInfoModel(
 data class JobDetails(
     var type: String? = null,
     var info: String? = null,
-    var pickupLocation: Location? = null,
-    var deliveryLocation: Location? = null
+    var pickupLocation: AppLocation? = null,
+    var deliveryLocation: AppLocation? = null,
+    var driverLocation: AppLocation? = null
 )
 
 
-data class Location(
+data class AppLocation(
     var latitude: Double? = null,
     var longitude: Double? = null
 )

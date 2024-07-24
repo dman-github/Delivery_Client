@@ -1,10 +1,8 @@
 package com.okada.rider.android.services
 
 
-import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.model.JobInfoModel
-import com.okada.rider.android.data.model.Location
 
 interface JobRequestService {
 
