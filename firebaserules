@@ -21,10 +21,10 @@
         	".read": "auth != null",
         "$uid": {
         	".read": "$uid === auth.uid",
-        	".write": "$uid === auth.uid"
-					//"geofire": {
-      		//	".indexOn": "g" // For efficient querying of geofire 
-    			//} 
+        	".write": "$uid === auth.uid",
+				  "geofire": {
+      			".indexOn": "g" // For efficient querying of geofire
+    			}
         }
     	}
     }, 
