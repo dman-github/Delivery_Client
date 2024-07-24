@@ -1,0 +1,51 @@
+// These rules grant access to a node matching the authenticated
+// user's ID from the Firebase auth token
+// Any authenticated user can read the data
+// But only the creator of the data point can write
+{
+  "rules": {
+    "DriverInfo": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "UserInfo": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
+      }
+    },   
+    "DriverLocations": {
+			"$key": {
+        	".read": "auth != null",
+        "$uid": {
+        	".read": "$uid === auth.uid",
+        	".write": "$uid === auth.uid"
+					//"geofire": {
+      		//	".indexOn": "g" // For efficient querying of geofire 
+    			//} 
+        }
+    	}
+    }, 
+    "ClientLocations": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
+      }
+    },   
+    "PushTokens": {
+      "$uid": {
+        ".read": "auth != null",
+        ".write": "$uid === auth.uid"
+      }
+    },
+    "Jobs": {
+    	"$jobId": {
+        // Check auth user is present and they are either the clientUid or driverUid. Only these 2 have full access
+      	".read": "auth != null && (data.child('clientUid').val() === auth.uid || data.child('driverUid').val() === auth.uid)",
+      	".write": "auth != null && (newData.child('clientUid').val() === auth.uid || newData.child('driverUid').val() === auth.uid)"
+      }
+    }
+  }
+}
