@@ -10,6 +10,7 @@ import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.transition.Visibility
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -44,6 +46,7 @@ import com.google.maps.android.ui.IconGenerator
 import com.okada.rider.android.Common
 import com.okada.rider.android.R
 import com.okada.rider.android.data.model.DeclineRequestEvent
+import com.okada.rider.android.data.model.DriverInfo
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
 import com.okada.rider.android.databinding.ConfirmPickupMarkerBinding
@@ -51,6 +54,7 @@ import com.okada.rider.android.databinding.DestinationMarkerBinding
 import com.okada.rider.android.databinding.FragmentRequestDriverBinding
 import com.okada.rider.android.databinding.OriginMarkerBinding
 import com.okada.rider.android.ui.home.HomeViewModel
+import de.hdodenhof.circleimageview.CircleImageView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -68,8 +72,15 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var confirmPickupLayout: CardView
     private lateinit var findDriverLayout: CardView
     private lateinit var txtAddressPickup: TextView
+    //Job Accepted
+    private lateinit var jobAcceptedLayout: CardView
+    private lateinit var txtDriverName: TextView
+    private lateinit var textDriverRating: TextView
+    private lateinit var img_avatar: CircleImageView
+
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
-  //  private var declineRequestEvent: DeclineRequestEvent? = null
+
+    //  private var declineRequestEvent: DeclineRequestEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
     //Pulsating effect
@@ -114,6 +125,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         confirmBikerLayout = binding.layoutConfirmBiker.layoutConfirmBiker
         findDriverLayout = binding.layoutFindingYourDriver.layoutFindingYourDriver
         txtAddressPickup = binding.layoutConfirmPickup.txtAddressPickup
+        // Job accepted
+        jobAcceptedLayout = binding.layoutJobDriverInfo.layoutJobAccepted
+        img_avatar = binding.layoutJobDriverInfo.imgDriverAvatar
+        txtDriverName = binding.layoutJobDriverInfo.textDriverName
+        textDriverRating = binding.layoutJobDriverInfo.textDriverRating
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -142,9 +158,15 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             Observer { trigger ->
                 if (trigger) {
                     selectedPlaceEvent?.let {
-                        findNearByDrivers(it.origin, it .destination)
+                        findNearByDrivers(it.origin, it.destination)
                     }
                 }
+            })
+
+        requestDriverVM.triggerJobAccepted.observe(viewLifecycleOwner,
+            Observer { model ->
+                stopAnimations()
+                driverHasAcceptedJob(model)
             })
 
         requestDriverVM.triggerClose.observe(viewLifecycleOwner,
@@ -184,10 +206,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
     override fun onStop() {
         super.onStop()
-        valueAnimator.end()
-        valueAnimator.cancel()
-        if (lastPulseAnimator != null) lastPulseAnimator?.end()
-        if (spinAnimator != null) spinAnimator?.end()
+        stopAnimations()
         requestDriverVM.viewWillStop()
 
         if (EventBus.getDefault().hasSubscriberForEvent(SelectedPlaceEvent::class.java))
@@ -199,17 +218,17 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         EventBus.getDefault().unregister(this)
     }
 
-  /*  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
-    fun onDeclineRequestEvent(event: DeclineRequestEvent) {
-        declineRequestEvent = event
-        requestDriverVM.addDeclinedDriver(event)
-        requestDriverVM.stopTimeoutTimer()
-        selectedPlaceEvent?.let {
-            findNearByDrivers(it.origin, it.destination)
-        }
+    /*  @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
+      fun onDeclineRequestEvent(event: DeclineRequestEvent) {
+          declineRequestEvent = event
+          requestDriverVM.addDeclinedDriver(event)
+          requestDriverVM.stopTimeoutTimer()
+          selectedPlaceEvent?.let {
+              findNearByDrivers(it.origin, it.destination)
+          }
 
 
-    }*/
+      }*/
 
     @Subscribe(sticky = true, threadMode = ThreadMode.MAIN)
     fun onSelectPlaceEvent(event: SelectedPlaceEvent) {
@@ -443,14 +462,53 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
         spinAnimator?.start()
         target?.let {
-            selectedPlaceEvent?.destination?.let {dest->
+            selectedPlaceEvent?.destination?.let { dest ->
                 findNearByDrivers(it, dest)
             }
         }
     }
 
+    private fun stopAnimations() {
+        valueAnimator.end()
+        valueAnimator.cancel()
+        if (lastPulseAnimator != null) lastPulseAnimator?.end()
+        if (spinAnimator != null) spinAnimator?.end()
+        requestDriverVM.viewWillStop()
+    }
+
     private fun findNearByDrivers(origin: LatLng, dest: LatLng) {
-        requestDriverVM.findNearbyDriver(origin, dest, sharedVM.getNearestDriver(), sharedVM.getUserUiD())
+        requestDriverVM.findNearbyDriver(
+            origin,
+            dest,
+            sharedVM.getNearestDriver(),
+            sharedVM.getUserUiD()
+        )
+    }
+
+    private fun driverHasAcceptedJob(driver: DriverInfo) {
+        mMap.clear()
+        fillMapsView.visibility = View.GONE
+        val cameraPos = CameraPosition.Builder().target(mMap.cameraPosition.target).tilt(0f)
+            .zoom(mMap.cameraPosition.zoom).build()
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPos))
+
+        if (!driver.avatar.isNullOrEmpty()) {
+            Glide.with(this)
+                .load(driver.avatar)
+                .into(img_avatar)
+        } else {
+            Glide.with(this)
+                .load(R.drawable.okada_logo)
+                .into(img_avatar)
+        }
+        //Driver name
+        txtDriverName.setText(driver.firstname)
+        textDriverRating.setText(driver.rating.toString())
+
+        confirmBikerLayout.visibility = View.GONE
+        confirmPickupLayout.visibility = View.GONE
+        jobAcceptedLayout.visibility = View.VISIBLE
+
     }
 
 

@@ -2,6 +2,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.JobRequestUsecase
+import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.services.DataServiceImpl
 import com.okada.rider.android.services.JobRequestServiceImpl
 import com.okada.rider.android.ui.requestDriver.RequestDriverViewModel
@@ -19,6 +20,9 @@ class RequestDriverViewModelFactory : ViewModelProvider.Factory {
                 directionsUsecase = DirectionsUsecase(),
                 jobRequestUsecase = JobRequestUsecase(
                     jobRequestService = JobRequestServiceImpl(),
+                    dataService = DataServiceImpl()
+                ),
+                profileUsecase = ProfileUsecase(
                     dataService = DataServiceImpl()
                 )
             ) as T

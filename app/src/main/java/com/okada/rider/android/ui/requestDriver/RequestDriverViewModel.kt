@@ -13,8 +13,10 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.JobRequestUsecase
+import com.okada.rider.android.data.ProfileUsecase
 import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.DriverGeoModel
+import com.okada.rider.android.data.model.DriverInfo
 import com.okada.rider.android.data.model.JobInfoModel
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
@@ -22,7 +24,8 @@ import com.okada.rider.android.data.model.enums.JobStatus
 
 class RequestDriverViewModel(
     private val directionsUsecase: DirectionsUsecase,
-    private val jobRequestUsecase: JobRequestUsecase
+    private val jobRequestUsecase: JobRequestUsecase,
+    private val profileUsecase: ProfileUsecase
 ) : ViewModel() {
 
 
@@ -40,6 +43,9 @@ class RequestDriverViewModel(
 
     private val _triggerClose = MutableLiveData<Boolean>()
     val triggerClose: LiveData<Boolean> = _triggerClose
+
+    private val _triggerJobAccepted = MutableLiveData<DriverInfo>()
+    val triggerJobAccepted: LiveData<DriverInfo> = _triggerJobAccepted
 
     //Model
     private val _model = RequestDriverModel()
@@ -218,11 +224,20 @@ class RequestDriverViewModel(
                 _triggerNearestDrivers.value = true
             }
             JobStatus.ACCEPTED -> {
-                this@RequestDriverViewModel.stopTimeoutTimer()
-                _showMessage.value = "Request ACCEPTED"
+                // We need to load the driver info
+                profileUsecase.fetchDriverInfo(driverUid) {result->
+                    result.fold(onSuccess = {dInfo->
+                        this@RequestDriverViewModel.stopTimeoutTimer()
+                        _showMessage.value = "Request ACCEPTED"
+                        _triggerJobAccepted.value = dInfo
+                    }, onFailure = {
+                        // Error occurred
+                        _showMessage.value = it.message
+                    })
+                }
             }
             else -> {
-                print("x is neither 1 nor 2")
+                _showMessage.value = "Unknown command"
             }
         }
     }

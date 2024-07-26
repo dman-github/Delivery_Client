@@ -50,5 +50,9 @@
             android:id="@+id/layout_finding_your_driver"
             layout="@layout/layout_finding_your_driver" />
 
+        <include
+            android:id="@+id/layout_job_driver_info"
+            layout="@layout/layout_job_driver_info" />
+
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
