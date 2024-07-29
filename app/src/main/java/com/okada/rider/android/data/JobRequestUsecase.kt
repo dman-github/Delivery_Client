@@ -21,6 +21,7 @@ class JobRequestUsecase(
 
     val hasActiveJob: Boolean
         get() = currentJobId != null
+
     fun createJobRequest(
         driverUid: String,
         userUid: String,
@@ -38,7 +39,7 @@ class JobRequestUsecase(
             )
         )
         jobRequestService.createNewJob(jobRequest, listener) { result ->
-            result.fold(onSuccess = {jobId->
+            result.fold(onSuccess = { jobId ->
                 // Job created send the push notification
                 currentJobId = jobId
                 sendDriverRouteRequest(jobId, jobRequest, completion)
@@ -53,18 +54,32 @@ class JobRequestUsecase(
     fun updateJobDriver(newDriverUid: String, completion: (Result<Unit>) -> Unit) {
         currentJobId?.let { jobId ->
             // Driver is changed to the new driver
-            jobRequestService.updateJobDriver(jobId,newDriverUid) { result ->
+            jobRequestService.updateJobDriver(jobId, newDriverUid) { result ->
                 result.fold(onSuccess = {
                     // Job is fetched from DB
-                    jobRequestService.fetchCurrentJob(jobId) {result->
-                        result.fold(onSuccess = {jobInfoResult->
+                    jobRequestService.fetchCurrentJob(jobId) { result ->
+                        result.fold(onSuccess = { jobInfoResult ->
                             // Send the push notification request to the new driver
-                            sendDriverRouteRequest(jobId,jobInfoResult, completion)
+                            sendDriverRouteRequest(jobId, jobInfoResult, completion)
                         }, onFailure = {
                             // Error occurred
                             completion(Result.failure(it))
                         })
                     }
+                }, onFailure = {
+                    // Error occurred
+                    completion(Result.failure(it))
+                })
+            }
+        }
+    }
+
+    fun updateJobToInProgress(completion: (Result<Unit>) -> Unit) {
+        currentJobId?.let { jobId ->
+            // Driver is changed to the new driver
+            jobRequestService.updateJobStatus(jobId, JobStatus.IN_PROGRESS) { result ->
+                result.fold(onSuccess = {
+                    completion(Result.success(Unit))
                 }, onFailure = {
                     // Error occurred
                     completion(Result.failure(it))

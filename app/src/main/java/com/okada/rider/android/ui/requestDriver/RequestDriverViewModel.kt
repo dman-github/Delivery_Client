@@ -186,18 +186,15 @@ class RequestDriverViewModel(
                         override fun onDataChange(snapshot: DataSnapshot) {
                             if (snapshot.exists()) {
                                 snapshot.getValue(JobInfoModel::class.java)?.also { job ->
-                                   /* if (job.status == JobStatus.DECLINED) {
-                                        job.driverUid?.let {driverId->
-                                            _model.declinedDrivers.add(driverId)
-                                            this@RequestDriverViewModel.stopTimeoutTimer()
-                                            _showMessage.value = "Request DECLINED"
-                                        }
-                                    }*/
+                                    /* if (job.status == JobStatus.DECLINED) {
+                                         job.driverUid?.let {driverId->
+                                             _model.declinedDrivers.add(driverId)
+                                             this@RequestDriverViewModel.stopTimeoutTimer()
+                                             _showMessage.value = "Request DECLINED"
+                                         }
+                                     }*/
                                     job.driverUid?.let { driverId ->
-                                        checkJobStatus(driverId, job.status!!)
-                                        if (job.status!! >= JobStatus.ACCEPTED) {
-                                            checkDriverLocation(job.jobDetails)
-                                        }
+                                        checkJobStatus(driverId, job.status!!, job.jobDetails!!)
                                     }
                                 }
                             }
@@ -245,7 +242,7 @@ class RequestDriverViewModel(
         nearestDriverTimeoutHandler.removeCallbacksAndMessages(null)
     }
 
-    private fun checkJobStatus(driverUid: String, jobStatus: JobStatus) {
+    private fun checkJobStatus(driverUid: String, jobStatus: JobStatus, jobDetails: JobDetails) {
         when (jobStatus) {
             JobStatus.DECLINED -> {
                 _model.declinedDrivers.add(driverUid)
@@ -253,34 +250,49 @@ class RequestDriverViewModel(
                 _showMessage.value = "Request DECLINED"
                 _triggerNearestDrivers.value = true
             }
+
             JobStatus.ACCEPTED -> {
                 // We need to load the driver info
-                profileUsecase.fetchDriverInfo(driverUid) {result->
-                    result.fold(onSuccess = {dInfo->
-                        this@RequestDriverViewModel.stopTimeoutTimer()
-                        _showMessage.value = "Request ACCEPTED"
-                        _triggerJobAccepted.value = dInfo
+                profileUsecase.fetchDriverInfo(driverUid) { result ->
+                    result.fold(onSuccess = { dInfo ->
+                        jobRequestUsecase.updateJobToInProgress { result ->
+                            result.fold(onSuccess = {
+                                this@RequestDriverViewModel.stopTimeoutTimer()
+                                _showMessage.value = "Request ACCEPTED"
+                                _triggerJobAccepted.value = dInfo
+                            }, onFailure = {
+                                // Error occurred
+                                _showMessage.value = it.message
+                            })
+                        }
                     }, onFailure = {
                         // Error occurred
                         _showMessage.value = it.message
                     })
                 }
             }
+
             JobStatus.NEW -> {}
             JobStatus.CANCELLED -> {}
-            JobStatus.IN_PROGRESS -> {}
+            JobStatus.IN_PROGRESS -> {
+                checkDriverLocation(jobDetails)
+            }
+
             JobStatus.COMPLETED -> {}
         }
     }
 
     private fun checkDriverLocation(jobDetails: JobDetails?) {
-        jobDetails?.driverLocation?.let {driverLocation->
-            jobDetails.pickupLocation?.let { pickupLocation->
+        jobDetails?.driverLocation?.let { driverLocation ->
+            jobDetails.pickupLocation?.let { pickupLocation ->
                 if (driverLocation != _model.jobDriverCurrentLocation) {
                     _model.jobDriverCurrentLocation = driverLocation
-                    calculatePathForDriver(SelectedPlaceEvent(
-                        LatLng(driverLocation.latitude!!, driverLocation.longitude!!),
-                        LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!)))
+                    calculatePathForDriver(
+                        SelectedPlaceEvent(
+                            LatLng(driverLocation.latitude!!, driverLocation.longitude!!),
+                            LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!)
+                        )
+                    )
                 }
             }
 

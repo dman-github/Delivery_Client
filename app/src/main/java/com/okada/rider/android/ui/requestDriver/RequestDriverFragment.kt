@@ -454,7 +454,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         val generator = IconGenerator(requireContext())
         generator.setContentView(view)
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
-        val  textDuration = binding.textDuration
+        val textDuration = binding.textDuration
         textDuration.setText(Common.formatDurationWithoutMins(duration))
         val icon = generator.makeIcon()
         mMap.addMarker(
@@ -466,7 +466,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private fun addDriverMarker(driverLocation: LatLng) {
         mMap.addMarker(
             MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.okada_driver_marker_no_bg))
-                .position(driverLocation).rotation(90f)
+                .position(driverLocation)
+                .rotation(90f)
+                .flat(true)
+                .anchor(0.5f, 0.5f)
         )
     }
 

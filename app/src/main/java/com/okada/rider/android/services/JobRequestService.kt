@@ -3,6 +3,7 @@ package com.okada.rider.android.services
 
 import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.model.JobInfoModel
+import com.okada.rider.android.data.model.enums.JobStatus
 
 interface JobRequestService {
 
@@ -22,6 +23,12 @@ interface JobRequestService {
     fun updateJobDriver(
         jobId: String,
         driverUid: String,
+        completion: (Result<Unit>) -> Unit
+    )
+
+    fun updateJobStatus(
+        jobId: String,
+        jobStatus: JobStatus,
         completion: (Result<Unit>) -> Unit
     )
 

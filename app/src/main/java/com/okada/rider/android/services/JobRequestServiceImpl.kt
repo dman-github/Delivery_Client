@@ -1,6 +1,8 @@
 package com.okada.rider.android.services
 
 import android.R.attr.name
+import android.location.Location
+import androidx.annotation.UiThread
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -71,6 +73,26 @@ class JobRequestServiceImpl : JobRequestService {
                 }
         } ?: run {
             completion(Result.failure(Exception("Cannot create Job")))
+        }
+    }
+
+    override fun updateJobStatus(
+        jobId: String,
+        jobStatus: JobStatus,
+        completion: (Result<Unit>) -> Unit
+    ) {
+        val values: MutableMap<String, Any> = HashMap()
+        values["status"] = jobStatus.toString()
+        jobsRef.child(jobId).updateChildren(values).addOnCompleteListener {
+            if (it.isSuccessful) {
+                completion(Result.success(Unit))
+            } else {
+                it.exception?.also { exception ->
+                    completion(Result.failure(exception))
+                } ?: run {
+                    completion(Result.failure(Exception("Cannot modify Job")))
+                }
+            }
         }
     }
 
