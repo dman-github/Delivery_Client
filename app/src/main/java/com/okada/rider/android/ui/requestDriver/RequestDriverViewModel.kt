@@ -14,9 +14,11 @@ import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.DirectionsUsecase
 import com.okada.rider.android.data.JobRequestUsecase
 import com.okada.rider.android.data.ProfileUsecase
+import com.okada.rider.android.data.model.AppLocation
 import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.DriverGeoModel
 import com.okada.rider.android.data.model.DriverInfo
+import com.okada.rider.android.data.model.JobDetails
 import com.okada.rider.android.data.model.JobInfoModel
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
@@ -37,6 +39,9 @@ class RequestDriverViewModel(
 
     private val _updateMap = MutableLiveData<SelectedPlaceModel>()
     val updateMap: LiveData<SelectedPlaceModel> = _updateMap
+
+    private val _updateMapForDriver = MutableLiveData<SelectedPlaceModel>()
+    val updateMapForDriver: LiveData<SelectedPlaceModel> = _updateMapForDriver
 
     private val _triggerNearestDrivers = MutableLiveData<Boolean>()
     val triggerNearestDrivers: LiveData<Boolean> = _triggerNearestDrivers
@@ -84,6 +89,28 @@ class RequestDriverViewModel(
                     placeModel.eventOrigin = event.origin
                     placeModel.eventDest = event.destination
                     _updateMap.value = placeModel
+                } catch (e: Exception) {
+                    _showMessage.value = e.message
+                }
+            }
+            result.onFailure {
+                _showMessage.value = it.message
+            }
+        }
+    }
+
+    fun calculatePathForDriver(event: SelectedPlaceEvent) {
+        //fetch directions between the 2 points from the Google directions api
+        directionsUsecase.getDirections(
+            event.originString,
+            event.destString,
+            _model.apiKey
+        ) { result ->
+            result.onSuccess { placeModel ->
+                try {
+                    placeModel.eventOrigin = event.origin
+                    placeModel.eventDest = event.destination
+                    _updateMapForDriver.value = placeModel
                 } catch (e: Exception) {
                     _showMessage.value = e.message
                 }
@@ -168,6 +195,9 @@ class RequestDriverViewModel(
                                     }*/
                                     job.driverUid?.let { driverId ->
                                         checkJobStatus(driverId, job.status!!)
+                                        if (job.status!! >= JobStatus.ACCEPTED) {
+                                            checkDriverLocation(job.jobDetails)
+                                        }
                                     }
                                 }
                             }
@@ -236,9 +266,24 @@ class RequestDriverViewModel(
                     })
                 }
             }
-            else -> {
-                _showMessage.value = "Unknown command"
+            JobStatus.NEW -> {}
+            JobStatus.CANCELLED -> {}
+            JobStatus.IN_PROGRESS -> {}
+            JobStatus.COMPLETED -> {}
+        }
+    }
+
+    private fun checkDriverLocation(jobDetails: JobDetails?) {
+        jobDetails?.driverLocation?.let {driverLocation->
+            jobDetails.pickupLocation?.let { pickupLocation->
+                if (driverLocation != _model.jobDriverCurrentLocation) {
+                    _model.jobDriverCurrentLocation = driverLocation
+                    calculatePathForDriver(SelectedPlaceEvent(
+                        LatLng(driverLocation.latitude!!, driverLocation.longitude!!),
+                        LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!)))
+                }
             }
+
         }
     }
 }

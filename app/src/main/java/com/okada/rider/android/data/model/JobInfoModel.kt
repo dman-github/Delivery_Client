@@ -22,7 +22,7 @@ data class JobDetails(
 )
 
 
-data class AppLocation(
+data class AppLocation (
     var latitude: Double? = null,
     var longitude: Double? = null
 )

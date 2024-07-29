@@ -167,7 +167,11 @@ object Common {
             return "${duration.substring(0, firstIndexMins - 1)}\nmins"
         }
         else
-            return duration
+            return duration.substring(0,duration.indexOf(" "))
+    }
+
+    fun formatDurationWithoutMins(duration: String): CharSequence? {
+        return duration.substring(0,duration.indexOf(" "))
     }
 
     fun formatAddress(startAddress: String): CharSequence? {

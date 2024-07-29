@@ -50,6 +50,7 @@ import com.okada.rider.android.data.model.DriverInfo
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
 import com.okada.rider.android.databinding.ConfirmPickupMarkerBinding
+import com.okada.rider.android.databinding.ConfirmPickupMarkerWithDurationBinding
 import com.okada.rider.android.databinding.DestinationMarkerBinding
 import com.okada.rider.android.databinding.FragmentRequestDriverBinding
 import com.okada.rider.android.databinding.OriginMarkerBinding
@@ -72,6 +73,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var confirmPickupLayout: CardView
     private lateinit var findDriverLayout: CardView
     private lateinit var txtAddressPickup: TextView
+
     //Job Accepted
     private lateinit var jobAcceptedLayout: CardView
     private lateinit var txtDriverName: TextView
@@ -151,7 +153,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
         requestDriverVM.updateMap.observe(viewLifecycleOwner,
             Observer { model ->
-                drawPath(model)
+                drawPathOfJourney(model)
             })
 
         requestDriverVM.triggerNearestDrivers.observe(viewLifecycleOwner,
@@ -167,6 +169,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             Observer { model ->
                 stopAnimations()
                 driverHasAcceptedJob(model)
+            })
+
+        requestDriverVM.updateMapForDriver.observe(viewLifecycleOwner,
+            Observer { placeModel ->
+                drawPathOfDriver(placeModel)
             })
 
         requestDriverVM.triggerClose.observe(viewLifecycleOwner,
@@ -290,7 +297,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    private fun drawPath(model: SelectedPlaceModel) {
+    private fun drawPathOfJourney(model: SelectedPlaceModel) {
         var blackPolyLine: Polyline? = null
         var greyPolyLine: Polyline? = null
         var polylineList: List<LatLng>? = null
@@ -354,6 +361,38 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         txtAddressPickup.text = if (model.startAddress != null) model.startAddress else "None"
     }
 
+    private fun drawPathOfDriver(model: SelectedPlaceModel) {
+        var polylineList: List<LatLng>? = null
+        var blackPolyLineOptions: PolylineOptions? = null
+
+        polylineList = model.polylineList
+        blackPolyLineOptions = PolylineOptions()
+        blackPolyLineOptions.color(Color.BLACK)
+        blackPolyLineOptions.width(5f)
+        blackPolyLineOptions.startCap(SquareCap())
+        blackPolyLineOptions.jointType(JointType.ROUND)
+        polylineList?.asIterable()?.let { iterable ->
+            blackPolyLineOptions.addAll(iterable)
+        }
+        blackPolyLineOptions.let { options ->
+            mMap.addPolyline(options)
+        }
+
+
+        val latLngBound = LatLngBounds.Builder().include(model.eventOrigin!!)
+            .include(model.eventDest!!)
+            .build()
+        //Add icon for pickup
+        addPickUpMarkerWithDuration(model.boundedTime!!, model.eventDest!!)
+        addDriverMarker(model.eventOrigin!!)
+
+        val cameraUpdate = CameraUpdateFactory
+            .newLatLngBounds(latLngBound, 100)
+        // moveCamera instead of animateCamera
+        mMap.moveCamera(cameraUpdate)
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
+    }
+
     private fun addOriginMarker(duration: String, startAddress: String) {
         val binding = OriginMarkerBinding.inflate(layoutInflater)
         val view = binding.root
@@ -407,6 +446,28 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                     .position(evnt.origin)
             )
         }
+    }
+
+    private fun addPickUpMarkerWithDuration(duration: String, pickupAddress: LatLng) {
+        val binding = ConfirmPickupMarkerWithDurationBinding.inflate(layoutInflater)
+        val view = binding.root
+        val generator = IconGenerator(requireContext())
+        generator.setContentView(view)
+        generator.setBackground(ColorDrawable(Color.TRANSPARENT))
+        val  textDuration = binding.textDuration
+        textDuration.setText(Common.formatDurationWithoutMins(duration))
+        val icon = generator.makeIcon()
+        mMap.addMarker(
+            MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
+                .position(pickupAddress)
+        )
+    }
+
+    private fun addDriverMarker(driverLocation: LatLng) {
+        mMap.addMarker(
+            MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.okada_driver_marker_no_bg))
+                .position(driverLocation).rotation(90f)
+        )
     }
 
     private fun addMarkerWithPulseMarker() {
@@ -473,7 +534,6 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         valueAnimator.cancel()
         if (lastPulseAnimator != null) lastPulseAnimator?.end()
         if (spinAnimator != null) spinAnimator?.end()
-        requestDriverVM.viewWillStop()
     }
 
     private fun findNearByDrivers(origin: LatLng, dest: LatLng) {
