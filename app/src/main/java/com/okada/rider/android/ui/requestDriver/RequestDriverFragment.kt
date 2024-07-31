@@ -38,6 +38,7 @@ import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
@@ -81,7 +82,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var img_avatar: CircleImageView
 
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
-
+    private var driverMarker: Marker? = null
     //  private var declineRequestEvent: DeclineRequestEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
@@ -89,6 +90,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private var lastUserCircle: Circle? = null
     val duration = 1000
     private var lastPulseAnimator: ValueAnimator? = null
+
 
     //Spinning effect
     private val numOfSpins = 5f
@@ -464,13 +466,18 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun addDriverMarker(driverLocation: LatLng) {
-        mMap.addMarker(
+        driverMarker?.let {
+            animateMarkerAlpha(it, 1f, 0f, 1000L) // Fade out over 1 second
+            it.remove() // Remove marker after fade out
+        }
+        driverMarker = mMap.addMarker(
             MarkerOptions().icon(BitmapDescriptorFactory.fromResource(R.drawable.okada_driver_marker_no_bg))
                 .position(driverLocation)
                 .rotation(90f)
                 .flat(true)
                 .anchor(0.5f, 0.5f)
         )
+        driverMarker?.let { animateMarkerAlpha(it,0f,1f,1000L) }
     }
 
     private fun addMarkerWithPulseMarker() {
@@ -573,6 +580,17 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         jobAcceptedLayout.visibility = View.VISIBLE
 
     }
+
+    private fun animateMarkerAlpha(marker: Marker, startAlpha: Float, endAlpha: Float, duration: Long) {
+        val alphaAnimator = ValueAnimator.ofFloat(startAlpha, endAlpha).apply {
+            this.duration = duration
+            addUpdateListener { animation ->
+                marker.alpha = animation.animatedValue as Float
+            }
+            start()
+        }
+    }
+
 
 
 }
