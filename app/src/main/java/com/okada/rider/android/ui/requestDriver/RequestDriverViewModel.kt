@@ -158,7 +158,7 @@ class RequestDriverViewModel(
                         }
                     }
                 } ?: run {
-                    _showMessage.value = "No drivers have accepeted the job!!"
+                    _showMessage.value = "No drivers have accepted the job!!"
                     _triggerClose.value = true
                 }
             } else {
@@ -201,7 +201,7 @@ class RequestDriverViewModel(
                         }
 
                         override fun onCancelled(error: DatabaseError) {
-                            _showMessage.value = "Datebase error: $error"
+                            _showMessage.value = "Error creating job: $error"
                         }
                     }) { result ->
                     result.fold(onSuccess = {
@@ -210,7 +210,7 @@ class RequestDriverViewModel(
 
                     }, onFailure = {
                         // Error occurred
-                        _showMessage.value = it.message
+                        _showMessage.value = "Error cannot complete job: $it.message"
                     })
                 }
             } else {
@@ -221,7 +221,7 @@ class RequestDriverViewModel(
                         _showMessage.value = "push done (new) driver"
                     }, onFailure = {
                         // Error occurred
-                        _showMessage.value = it.message
+                        _showMessage.value = "Error updating job: $it.message"
                     })
                 }
             }
@@ -262,12 +262,12 @@ class RequestDriverViewModel(
                                 _triggerJobAccepted.value = dInfo
                             }, onFailure = {
                                 // Error occurred
-                                _showMessage.value = it.message
+                                _showMessage.value = "Error updatingJob to in-progress: $it.message"
                             })
                         }
                     }, onFailure = {
                         // Error occurred
-                        _showMessage.value = it.message
+                        _showMessage.value = "Error fetching driver info: $it.message"
                     })
                 }
             }
