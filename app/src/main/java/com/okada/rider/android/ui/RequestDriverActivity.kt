@@ -162,7 +162,7 @@ class RequestDriverActivity : AppCompatActivity(), OnMapReadyCallback {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe { returnResult ->
                     Log.i(
-                        "App_Info",
+                        "App_info",
                         "Directions api returned"
                     )
                     try {

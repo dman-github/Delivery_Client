@@ -178,7 +178,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             )
             fetchLastLocation()
         } else {
-            Log.i("App_Info", "onResume  NO permissions")
+            Log.i("App_info", "onResume  NO permissions")
         }
     }
 

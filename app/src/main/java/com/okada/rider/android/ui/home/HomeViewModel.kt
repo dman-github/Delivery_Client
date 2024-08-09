@@ -209,7 +209,7 @@ class HomeViewModel(
         _model.currentLocation?.let { currentLoc ->
             _model.previousLocation?.let { previousLoc ->
                 if (previousLoc.distanceTo(currentLoc) / 1000 <= _model.range_limit) {
-                    Log.i("App_Info", "loadAvailableDrivers")
+                    Log.i("App_info", "loadAvailableDrivers")
                     // loadAvailableDrivers(currentLoc)
                 }
             }
@@ -370,7 +370,7 @@ class HomeViewModel(
             object : GeoQueryEventListener {
                 override fun onKeyEntered(key: String?, location: GeoLocation?) {
                     Log.i(
-                        "App_Info",
+                        "App_info",
                         "GeoQueryEventListener, key Entered $key Thread : ${Thread.currentThread().name}"
                     )
                     val geoModel = DriverGeoModel(key, location)
@@ -381,7 +381,7 @@ class HomeViewModel(
                 override fun onKeyExited(key: String?) {
                     key?.let {
                         Log.i(
-                            "App_Info",
+                            "App_info",
                             "GeoQueryEventListener, key Exit Thread: ${Thread.currentThread().name}\""
                         )
                         _model.nearestDrivers.removeIf { model -> model.key == it }
@@ -402,13 +402,13 @@ class HomeViewModel(
                         _model.distance++
                         loadAvailableDrivers(location, context)
                         Log.i(
-                            "App_Info",
+                            "App_info",
                             "Inc Distance + loadAvailableDrivers  + ${_model.distance}"
                         )
                     } else {
                         _model.distance = _model.range_limit
                         addDriverMarkers()
-                        Log.i("App_Info", "Clear Distance + addDriverMarker")
+                        Log.i("App_info", "Clear Distance + addDriverMarker")
                     }
                 }
 
@@ -424,7 +424,7 @@ class HomeViewModel(
                     val geoQueryModel = snapshot.getValue(GeoQueryModel::class.java)
                     geoQueryModel?.let { geoQueryModel ->
                         geoQueryModel.l?.let { l ->
-                            Log.i("App_Info", "Child Listener onChildAdded uid: ${snapshot.key}")
+                            Log.i("App_info", "Child Listener onChildAdded uid: ${snapshot.key}")
                             val geoLocation = GeoLocation(l[0], l[1])
                             val driverGeoModel =
                                 DriverGeoModel(snapshot.key, geoLocation)
@@ -435,7 +435,7 @@ class HomeViewModel(
                                 location.distanceTo(newDriverLocation) / 1000 //Kms)
                             if (newDist <= _model.range_limit) {
                                 Log.i(
-                                    "App_Info",
+                                    "App_info",
                                     "Child Listener driver on map uid: ${snapshot.key}"
                                 )
                                 fetchDriverInfoByKey(driverGeoModel)
@@ -475,7 +475,7 @@ class HomeViewModel(
         directionsUsecase.getAddressForLocation(at, _model.apiKey) { result ->
             result.onSuccess { model ->
                 try {
-                    Log.i("App_Info", "${model.first}  ${model.second}")
+                    Log.i("App_info", "${model.first}  ${model.second}")
                     _model.currentAddress = model.first
                     _model.currentAddressLatLng = current
                 } catch (e: Exception) {

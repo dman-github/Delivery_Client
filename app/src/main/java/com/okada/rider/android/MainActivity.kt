@@ -55,16 +55,16 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     override fun onStart() {
         super.onStart()
-        Log.i("App_Info", "onStart")
+        Log.i("App_info", "onStart")
         appRequiresPermission()
     }
 
     @AfterPermissionGranted(REQUEST_LOCATION_PERMISSION)
     private fun appRequiresPermission() {
-        Log.i("App_Info", "appRequiresPermission called")
+        Log.i("App_info", "appRequiresPermission called")
         if (hasLocationPermission()) {
             // Already have permission
-            Log.i("App_Info", "ALREADY permissions granted!")
+            Log.i("App_info", "ALREADY permissions granted!")
         } else {
             // Do not have permissions, request them now
             EasyPermissions.requestPermissions(this,
@@ -77,7 +77,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-        Log.i("App_Info", "onRequestPermissionsResult permissions count: ${permissions.size}")
+        Log.i("App_info", "onRequestPermissionsResult permissions count: ${permissions.size}")
         // EasyPermissions handles the request result.
         EasyPermissions.onRequestPermissionsResult(requestCode, permissions, grantResults, this)
     }
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
         // Comes here whenever permission has been denied
         if (EasyPermissions.somePermissionPermanentlyDenied(this, perms)) {
             // This will display a dialog directing them to enable the permission in app settings.
-            Log.i("App_Info", "onPermissionsDenied show settings screen")
+            Log.i("App_info", "onPermissionsDenied show settings screen")
             SettingsDialog.Builder(this).build().show()
         } else {
             //Prompt again
@@ -107,7 +107,7 @@ class MainActivity : AppCompatActivity(), EasyPermissions.PermissionCallbacks {
     }
 
     override fun onPermissionsGranted(requestCode: Int, perms: List<String>) {
-        Log.i("App_Info", "onPermissionsGranted called")
+        Log.i("App_info", "onPermissionsGranted called")
     }
 
     private fun hasLocationPermission(): Boolean {

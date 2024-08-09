@@ -35,10 +35,10 @@ class SplashViewModel(
 
     }
     fun startSplashTimer() {
-        Log.i("okada Log","startSplashTimer")
+        Log.i("App_info","startSplashTimer")
         Handler(Looper.getMainLooper()).postDelayed({
             _animationDone.value = true
-            Log.i("okada Log","Time 3s done!")
+            Log.i("App_info","Time 3s done!")
         }, 3000)
         checkUserStatus()
         liveDataMerger.addSource(splashResult) { _ ->
@@ -56,7 +56,7 @@ class SplashViewModel(
         animationDone.value?.let { done ->
             splashResult.value?.let { result ->
                 if (done) {
-                    Log.i("okada Log","combineLatestData DONE!")
+                    Log.i("App_info","combineLatestData DONE!")
                     return result
                 }
             }
@@ -76,16 +76,16 @@ class SplashViewModel(
                 profileUsecase.checkProfileExists(user) {result ->
                     result.fold(onSuccess = { profile ->
                         //check if the logged in user has a profile
-                        Log.i("okada Log","SplashViewModel profile rxed ! ${profile!=null}")
+                        Log.i("App_info","SplashViewModel profile rxed ! ${profile!=null}")
                         profile?.also {user->
                             //-> Goto home screen
-                            Log.i("okada Log","SplashViewModel Goto home screen!")
+                            Log.i("App_info","SplashViewModel Goto home screen!")
                             Common.currentUser = user
                             _splashResult.value =
                                 SplashResult(navigateToHome = true)
                         } ?: run {
                             // No-> goto register screen
-                            Log.i("okada Log","SplashViewModel Goto register screen!")
+                            Log.i("App_info","SplashViewModel Goto register screen!")
                             _splashResult.value =
                                 SplashResult(navigateToRegister = true)
                         }
@@ -96,7 +96,7 @@ class SplashViewModel(
                 }
             }, onFailure = {
                 // No -> goto login screen
-                Log.i("okada Log","Goto Login screen!")
+                Log.i("App_info","Goto Login screen!")
                 _splashResult.value = SplashResult(navigateToLogin = true)
             })
         }
@@ -112,9 +112,11 @@ class SplashViewModel(
                         //check if the logged in user has a profile
                         Log.i("App_info","sendFirebaseToken, Token sent: $token")
                     }, onFailure = {
+                        Log.i("App_info","Error pushing token: ${it.message}")
                     })
                 }
             }, onFailure = {
+                Log.i("App_info","Error fetching new token: ${it.message}")
             })
         }
     }

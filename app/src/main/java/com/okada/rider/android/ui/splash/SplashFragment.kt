@@ -77,7 +77,7 @@ class SplashFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        Log.i("App_Info", "SplashFragment onResume")
+        Log.i("App_info", "SplashFragment onResume")
         if (onBoardingFinishedCheck()) {
             splashViewModel.startSplashTimer()
         } else {
@@ -87,7 +87,7 @@ class SplashFragment : Fragment() {
 
     override fun onPause() {
         super.onPause()
-        Log.i("App_Info", "SplashFragment onPause")
+        Log.i("App_info", "SplashFragment onPause")
         splashViewModel.removeLiveDataSources()
     }
 
