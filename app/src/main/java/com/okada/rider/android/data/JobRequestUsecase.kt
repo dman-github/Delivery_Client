@@ -7,6 +7,7 @@ import com.google.firebase.database.ValueEventListener
 import com.okada.rider.android.data.model.JobDetails
 import com.okada.rider.android.data.model.JobInfoModel
 import com.okada.rider.android.data.model.AppLocation
+import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.TokenModel
 import com.okada.rider.android.data.model.enums.JobStatus
 import com.okada.rider.android.services.DataService
@@ -25,8 +26,7 @@ class JobRequestUsecase(
     fun createJobRequest(
         driverUid: String,
         userUid: String,
-        pickupLocation: LatLng,
-        destination: LatLng,
+        selectedJobPositions: SelectedPlaceEvent,
         listener: ValueEventListener,
         completion: (Result<Unit>) -> Unit
     ) {
@@ -34,8 +34,13 @@ class JobRequestUsecase(
             driverUid, userUid, JobStatus.NEW, JobDetails(
                 "bike",
                 "some info here about the ride",
-                AppLocation(pickupLocation.latitude, pickupLocation.longitude),
-                AppLocation(destination.latitude, destination.longitude)
+                AppLocation(selectedJobPositions.origin.latitude,
+                    selectedJobPositions.origin.longitude),
+                AppLocation(selectedJobPositions.destination.latitude,
+                    selectedJobPositions.destination.longitude),
+                null,
+                selectedJobPositions.originAddress,
+                selectedJobPositions.destAddress
             )
         )
         jobRequestService.createNewJob(jobRequest, listener) { result ->

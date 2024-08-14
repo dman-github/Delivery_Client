@@ -161,8 +161,8 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         requestDriverVM.triggerNearestDrivers.observe(viewLifecycleOwner,
             Observer { trigger ->
                 if (trigger) {
-                    selectedPlaceEvent?.let {
-                        findNearByDrivers(it.origin, it.destination)
+                    selectedPlaceEvent?.let {placeEvent->
+                        findNearByDrivers(placeEvent)
                     }
                 }
             })
@@ -533,8 +533,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
         spinAnimator?.start()
         target?.let {
-            selectedPlaceEvent?.destination?.let { dest ->
-                findNearByDrivers(it, dest)
+            selectedPlaceEvent?.let{event->
+                // The camera origin might be different from the original pickup location
+                event.origin = it
+                findNearByDrivers(event)
             }
         }
     }
@@ -546,10 +548,9 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         if (spinAnimator != null) spinAnimator?.end()
     }
 
-    private fun findNearByDrivers(origin: LatLng, dest: LatLng) {
+    private fun findNearByDrivers(selectedJobPositions: SelectedPlaceEvent) {
         requestDriverVM.findNearbyDriver(
-            origin,
-            dest,
+            selectedJobPositions,
             sharedVM.getNearestDriver(),
             sharedVM.getUserUiD()
         )

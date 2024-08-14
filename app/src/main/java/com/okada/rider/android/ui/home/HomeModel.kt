@@ -22,6 +22,8 @@ class HomeModel {
     // pickup and drop off
     var dropAddress: LatLng? = null
     var pickupAddress: LatLng? = null
+    var pickUpAddressStr: String? = null
+    var dropAddressStr: String? = null
     var currentAddress: String = ""
     var currentAddressLatLng: LatLng? = null
 

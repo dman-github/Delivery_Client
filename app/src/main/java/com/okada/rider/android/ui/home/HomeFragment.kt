@@ -72,7 +72,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         savedInstanceState: Bundle?
     ): View {
         homeViewModel =
-            ViewModelProvider(requireActivity(), HomeViewModelFactory()).get(HomeViewModel::class.java)
+            ViewModelProvider(
+                requireActivity(),
+                HomeViewModelFactory()
+            ).get(HomeViewModel::class.java)
 
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         val root: View = binding.root
@@ -295,8 +298,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                                      LatLng(it.latitude, it1.longitude)
                                  }
                              }*/
-                            place.latLng?.let { place ->
-                                homeViewModel.setPickupAddress(place)
+                            place.address?.let { addy ->
+                                place.latLng?.let { place ->
+                                    homeViewModel.setPickupAddress(place, addy)
+                                }
                             }
                             checkRouteAddressComplete()
                         }
@@ -312,8 +317,10 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
             }
 
             override fun onPlaceSelected(place: Place) {
-                place.latLng?.let { place ->
-                    homeViewModel.setDropAddress(place)
+                place.address?.let { addy ->
+                    place.latLng?.let { place ->
+                        homeViewModel.setDropAddress(place, addy)
+                    }
                 }
                 /* This delayed response is needed because when the place fragment gets the new Place it is not updated on the internal EditText straight away */
                 Handler(Looper.getMainLooper()).postDelayed({
@@ -332,9 +339,20 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         if (homeViewModel.addressComplete()) {
             homeViewModel.getPickupAddress()?.let { pickupAdd ->
                 homeViewModel.getDropAddress()?.let { dropoffAdd ->
-                    findNavController().navigate(R.id.action_navigation_home_to_requestDriverFragment)
-                    EventBus.getDefault()
-                        .postSticky(SelectedPlaceEvent(pickupAdd, dropoffAdd))
+                    homeViewModel.getPickupAddressStr()?.let { pickupAddStr ->
+                        homeViewModel.getDropAddressStr()?.let { dropoffAddStr ->
+                            findNavController().navigate(R.id.action_navigation_home_to_requestDriverFragment)
+                            EventBus.getDefault()
+                                .postSticky(
+                                    SelectedPlaceEvent(
+                                        pickupAdd,
+                                        dropoffAdd,
+                                        pickupAddStr,
+                                        dropoffAddStr
+                                    )
+                                )
+                        }
+                    }
                 }
             }
         }
@@ -349,11 +367,11 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun cancelPickupButtonPressed() {
-        homeViewModel.setPickupAddress(null)
+        homeViewModel.setPickupAddress(null, null)
     }
 
     private fun cancelDropoffButtonPressed() {
-        homeViewModel.setDropAddress(null)
+        homeViewModel.setDropAddress(null, null)
     }
 
 

@@ -18,7 +18,9 @@ data class JobDetails(
     var info: String? = null,
     var pickupLocation: AppLocation? = null,
     var deliveryLocation: AppLocation? = null,
-    var driverLocation: AppLocation? = null
+    var driverLocation: AppLocation? = null,
+    var pickupAddress: String? = null,
+    var deliverAddress: String? = null
 )
 
 

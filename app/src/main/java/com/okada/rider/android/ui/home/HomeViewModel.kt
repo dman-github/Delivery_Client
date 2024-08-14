@@ -2,6 +2,7 @@ package com.okada.rider.android.ui.home
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.location.Address
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
@@ -83,24 +84,34 @@ class HomeViewModel(
         return _model.currentAddress
     }
 
-    fun setDropAddress(latLng: LatLng?) {
+    fun setDropAddress(latLng: LatLng?, address: String?) {
         _model.dropAddress = latLng
+        _model.dropAddressStr = address
     }
 
     fun getDropAddress(): LatLng? {
         return _model.dropAddress
     }
 
-    fun setPickupAddress(latLng: LatLng?) {
+    fun getDropAddressStr(): String? {
+        return _model.dropAddressStr
+    }
+
+    fun setPickupAddress(latLng: LatLng?, address: String?) {
         _model.pickupAddress = latLng
+        _model.pickUpAddressStr = address
     }
 
     fun getPickupAddress(): LatLng? {
         return _model.pickupAddress
     }
+    fun getPickupAddressStr(): String? {
+        return _model.pickUpAddressStr
+    }
 
     fun useCurrentLocationForPickup() {
         _model.pickupAddress = _model.currentAddressLatLng
+        _model.pickUpAddressStr = _model.currentAddress
     }
 
     fun addressComplete(): Boolean {

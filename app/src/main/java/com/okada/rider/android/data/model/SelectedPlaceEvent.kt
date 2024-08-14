@@ -2,7 +2,8 @@ package com.okada.rider.android.data.model
 
 import com.google.android.gms.maps.model.LatLng
 
-class SelectedPlaceEvent(var origin: LatLng, var destination: LatLng) {
+class SelectedPlaceEvent(var origin: LatLng, var destination: LatLng,
+                         var originAddress: String, var destAddress: String) {
     val originString: String
         get() = StringBuilder().append(origin.latitude).append(",").append(origin.longitude).toString()
     val destString: String

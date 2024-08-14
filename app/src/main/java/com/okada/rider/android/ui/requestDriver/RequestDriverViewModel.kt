@@ -122,12 +122,11 @@ class RequestDriverViewModel(
     }
 
     fun findNearbyDriver(
-        target: LatLng?,
-        dest: LatLng?,
+        selectedJobPositions: SelectedPlaceEvent,
         nearestDrivers: MutableSet<DriverGeoModel>,
         userUid: String?
     ) {
-        target?.let { pt ->
+        selectedJobPositions.origin.let { pt ->
             if (nearestDrivers.size > 0) {
                 var min = Float.MAX_VALUE
                 val currentRiderLocation = Location("")
@@ -153,9 +152,7 @@ class RequestDriverViewModel(
                 driverFound?.let { driver ->
                     _showMessage.value = "Found driver: ${driver.getFullName()}"
                     userUid?.let { uid ->
-                        dest?.let {
-                            sendDriverRequest(pt, it, driver, uid)
-                        }
+                        sendDriverRequest(selectedJobPositions, driver, uid)
                     }
                 } ?: run {
                     _showMessage.value = "No drivers have accepted the job!!"
@@ -168,8 +165,7 @@ class RequestDriverViewModel(
     }
 
     fun sendDriverRequest(
-        pickupLocation: LatLng,
-        destination: LatLng,
+        selectedJobPositions: SelectedPlaceEvent,
         driver: DriverGeoModel,
         userUid: String
     ) {
@@ -179,8 +175,7 @@ class RequestDriverViewModel(
                 jobRequestUsecase.createJobRequest(
                     key,
                     userUid,
-                    pickupLocation,
-                    destination,
+                    selectedJobPositions,
                     object : ValueEventListener {
 
                         override fun onDataChange(snapshot: DataSnapshot) {
@@ -290,10 +285,13 @@ class RequestDriverViewModel(
                     calculatePathForDriver(
                         SelectedPlaceEvent(
                             LatLng(driverLocation.latitude!!, driverLocation.longitude!!),
-                            LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!)
+                            LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!),
+                            "",
+                            ""
                         )
                     )
                 }
+
             }
 
         }
