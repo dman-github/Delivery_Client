@@ -83,6 +83,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
     private var driverMarker: Marker? = null
+    private var destinationMarker: Marker? = null
     //  private var declineRequestEvent: DeclineRequestEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
@@ -176,6 +177,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         requestDriverVM.updateMapForDriver.observe(viewLifecycleOwner,
             Observer { placeModel ->
                 drawPathOfDriver(placeModel)
+            })
+
+        requestDriverVM.updateDriverMarker.observe(viewLifecycleOwner,
+            Observer { placeModel ->
+                updateDriverMarker(placeModel)
             })
 
         requestDriverVM.triggerClose.observe(viewLifecycleOwner,
@@ -395,6 +401,22 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
     }
 
+    private fun updateDriverMarker(model: SelectedPlaceModel) {
+        //Add icon for pickup
+        addPickUpMarkerWithDuration(model.boundedTime!!, model.eventDest!!)
+        addDriverMarker(model.eventOrigin!!)
+
+        val latLngBound = LatLngBounds.Builder().include(model.eventOrigin!!)
+            .include(model.eventDest!!)
+            .build()
+
+        val cameraUpdate = CameraUpdateFactory
+            .newLatLngBounds(latLngBound, 100)
+        // moveCamera instead of animateCamera
+        mMap.moveCamera(cameraUpdate)
+        mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
+    }
+
     private fun addOriginMarker(duration: String, startAddress: String) {
         val binding = OriginMarkerBinding.inflate(layoutInflater)
         val view = binding.root
@@ -426,8 +448,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         generator.setContentView(view)
         generator.setBackground(ColorDrawable(Color.TRANSPARENT))
         val icon = generator.makeIcon()
+        // clear the previous marker
+        destinationMarker?.remove()
         selectedPlaceEvent?.let { evnt ->
-            mMap.addMarker(
+            destinationMarker = mMap.addMarker(
                 MarkerOptions().icon(BitmapDescriptorFactory.fromBitmap(icon))
                     .position(evnt.destination)
             )
@@ -542,8 +566,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun stopAnimations() {
-        valueAnimator.end()
-        valueAnimator.cancel()
+        if (valueAnimator != null) {
+            valueAnimator.end()
+            valueAnimator.cancel()
+        }
         if (lastPulseAnimator != null) lastPulseAnimator?.end()
         if (spinAnimator != null) spinAnimator?.end()
     }

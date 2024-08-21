@@ -10,4 +10,6 @@ class RequestDriverModel {
     var apiKey: String = ""
     var declinedDrivers =  mutableListOf<String>()
     var jobDriverCurrentLocation: AppLocation = AppLocation(0.0, 0.0)
+    var plotDriverToPickup = false
+    var plotDriverToDest = false
 }

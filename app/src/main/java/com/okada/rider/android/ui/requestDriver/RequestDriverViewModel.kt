@@ -43,6 +43,9 @@ class RequestDriverViewModel(
     private val _updateMapForDriver = MutableLiveData<SelectedPlaceModel>()
     val updateMapForDriver: LiveData<SelectedPlaceModel> = _updateMapForDriver
 
+    private val _updateDriverMarker = MutableLiveData<SelectedPlaceModel>()
+    val updateDriverMarker: LiveData<SelectedPlaceModel> = _updateDriverMarker
+
     private val _triggerNearestDrivers = MutableLiveData<Boolean>()
     val triggerNearestDrivers: LiveData<Boolean> = _triggerNearestDrivers
 
@@ -110,7 +113,12 @@ class RequestDriverViewModel(
                 try {
                     placeModel.eventOrigin = event.origin
                     placeModel.eventDest = event.destination
-                    _updateMapForDriver.value = placeModel
+                    if (!_model.plotDriverToPickup) {
+                        // Plot the route to the pickup point only once
+                        _updateMapForDriver.value = placeModel
+                        _model.plotDriverToPickup = true
+                    }
+                    _updateDriverMarker.value = placeModel
                 } catch (e: Exception) {
                     _showMessage.value = e.message
                 }
@@ -229,7 +237,7 @@ class RequestDriverViewModel(
         nearestDriverTimeoutHandler.postDelayed({
             _model.declinedDrivers.add(driverUid)
             _triggerNearestDrivers.value = true
-        }, 15000)
+        }, 30000)
     }
 
     private fun stopTimeoutTimer() {
