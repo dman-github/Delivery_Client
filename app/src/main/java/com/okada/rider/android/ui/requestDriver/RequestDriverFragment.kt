@@ -370,6 +370,8 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     }
 
     private fun drawPathOfDriver(model: SelectedPlaceModel) {
+        // Should be called once when the path is drawn first
+        mMap.clear()
         var polylineList: List<LatLng>? = null
         var blackPolyLineOptions: PolylineOptions? = null
 

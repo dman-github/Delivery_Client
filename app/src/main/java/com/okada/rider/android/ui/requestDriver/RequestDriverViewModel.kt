@@ -3,6 +3,7 @@ package com.okada.rider.android.ui.requestDriver
 import android.location.Location
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -102,7 +103,7 @@ class RequestDriverViewModel(
         }
     }
 
-    fun calculatePathForDriver(event: SelectedPlaceEvent) {
+    fun calculatePathDriverToPickup(event: SelectedPlaceEvent) {
         //fetch directions between the 2 points from the Google directions api
         directionsUsecase.getDirections(
             event.originString,
@@ -198,6 +199,7 @@ class RequestDriverViewModel(
                                      }*/
                                     job.driverUid?.let { driverId ->
                                         checkJobStatus(driverId, job.status!!, job.jobDetails!!)
+                                        _model.previousJobStatus = job.status!!
                                     }
                                 }
                             }
@@ -246,6 +248,7 @@ class RequestDriverViewModel(
     }
 
     private fun checkJobStatus(driverUid: String, jobStatus: JobStatus, jobDetails: JobDetails) {
+        Log.i("App_Info", "Check job status: $jobStatus")
         when (jobStatus) {
             JobStatus.DECLINED -> {
                 _model.declinedDrivers.add(driverUid)
@@ -255,51 +258,58 @@ class RequestDriverViewModel(
             }
 
             JobStatus.ACCEPTED -> {
-                // We need to load the driver info
-                profileUsecase.fetchDriverInfo(driverUid) { result ->
-                    result.fold(onSuccess = { dInfo ->
-                        jobRequestUsecase.updateJobToInProgress { result ->
-                            result.fold(onSuccess = {
-                                this@RequestDriverViewModel.stopTimeoutTimer()
-                                _showMessage.value = "Request ACCEPTED"
-                                _triggerJobAccepted.value = dInfo
-                            }, onFailure = {
-                                // Error occurred
-                                _showMessage.value = "Error updatingJob to in-progress: $it.message"
-                            })
-                        }
-                    }, onFailure = {
-                        // Error occurred
-                        _showMessage.value = "Error fetching driver info: $it.message"
-                    })
+                if (_model.previousJobStatus != JobStatus.ACCEPTED) {
+                    // We need to load the driver info
+                    _model.plotDriverToPickup = false
+                    profileUsecase.fetchDriverInfo(driverUid) { result ->
+                        result.fold(onSuccess = { dInfo ->
+                            this@RequestDriverViewModel.stopTimeoutTimer()
+                            _showMessage.value = "Request ACCEPTED"
+                            _triggerJobAccepted.value = dInfo
+                        }, onFailure = {
+                            // Error occurred
+                            _showMessage.value = "Error fetching driver info: $it.message"
+                        })
+                    }
                 }
+                checkDriverLocation(jobDetails, JobStatus.ACCEPTED)
             }
 
             JobStatus.NEW -> {}
             JobStatus.CANCELLED -> {}
             JobStatus.IN_PROGRESS -> {
-                checkDriverLocation(jobDetails)
+                if (_model.previousJobStatus != JobStatus.IN_PROGRESS) {
+                    _model.plotDriverToPickup = false
+                }
+                checkDriverLocation(jobDetails, JobStatus.IN_PROGRESS)
             }
 
             JobStatus.COMPLETED -> {}
         }
     }
 
-    private fun checkDriverLocation(jobDetails: JobDetails?) {
+    private fun checkDriverLocation(jobDetails: JobDetails?, jobStatus: JobStatus) {
         jobDetails?.driverLocation?.let { driverLocation ->
             jobDetails.pickupLocation?.let { pickupLocation ->
-                if (driverLocation != _model.jobDriverCurrentLocation) {
-                    _model.jobDriverCurrentLocation = driverLocation
-                    calculatePathForDriver(
-                        SelectedPlaceEvent(
-                            LatLng(driverLocation.latitude!!, driverLocation.longitude!!),
-                            LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!),
-                            "",
-                            ""
+                jobDetails.deliveryLocation?.let { dstLocation ->
+                    if (driverLocation != _model.jobDriverCurrentLocation) {
+                        _model.jobDriverCurrentLocation = driverLocation
+                        var destination = LatLng(dstLocation.latitude!!, dstLocation.longitude!!)
+                        if (jobStatus == JobStatus.ACCEPTED) {
+                            // Driver is moving towards pickup point
+                            destination =  LatLng(pickupLocation.latitude!!, pickupLocation.longitude!!)
+                        }
+                        Log.i("App_Info", "checkDriverLocation with status: $jobStatus")
+                        calculatePathDriverToPickup(
+                            SelectedPlaceEvent(
+                                LatLng(driverLocation.latitude!!, driverLocation.longitude!!),
+                                destination,
+                                "",
+                                ""
+                            )
                         )
-                    )
+                    }
                 }
-
             }
 
         }
