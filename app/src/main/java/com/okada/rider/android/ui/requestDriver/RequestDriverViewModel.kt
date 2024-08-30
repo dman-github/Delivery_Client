@@ -53,6 +53,9 @@ class RequestDriverViewModel(
     private val _triggerClose = MutableLiveData<Boolean>()
     val triggerClose: LiveData<Boolean> = _triggerClose
 
+    private val _cancelJobDone = MutableLiveData<Boolean>()
+    val cancelJobDone: LiveData<Boolean> = _cancelJobDone
+
     private val _triggerJobAccepted = MutableLiveData<DriverInfo>()
     val triggerJobAccepted: LiveData<DriverInfo> = _triggerJobAccepted
 
@@ -231,6 +234,19 @@ class RequestDriverViewModel(
                 }
             }
             startRequestTimeoutTimer(key)
+        }
+    }
+
+    fun cancelActiveJob() {
+        if (jobRequestUsecase.hasActiveJob) {
+            jobRequestUsecase.cancelJobRequest { result ->
+                result.fold(onSuccess = {
+                    _cancelJobDone.value = true
+                }, onFailure = {
+                    // Error occurred
+                    _showMessage.value = "Error cancelling job: $it.message"
+                })
+            }
         }
     }
 

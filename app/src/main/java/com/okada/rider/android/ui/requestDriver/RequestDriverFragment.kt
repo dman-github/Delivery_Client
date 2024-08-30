@@ -43,6 +43,7 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.Polyline
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.SquareCap
+import com.google.android.material.chip.Chip
 import com.google.maps.android.ui.IconGenerator
 import com.okada.rider.android.Common
 import com.okada.rider.android.R
@@ -80,6 +81,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var txtDriverName: TextView
     private lateinit var textDriverRating: TextView
     private lateinit var img_avatar: CircleImageView
+    private lateinit var cancelView: Chip
 
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
     private var driverMarker: Marker? = null
@@ -135,6 +137,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         img_avatar = binding.layoutJobDriverInfo.imgDriverAvatar
         txtDriverName = binding.layoutJobDriverInfo.textDriverName
         textDriverRating = binding.layoutJobDriverInfo.textDriverRating
+        cancelView = binding.chipCancel
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         mapFragment = childFragmentManager
             .findFragmentById(R.id.map) as SupportMapFragment
@@ -184,6 +187,13 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 updateDriverMarker(placeModel)
             })
 
+        requestDriverVM.cancelJobDone.observe(viewLifecycleOwner,
+            Observer { done ->
+                if (done) {
+                    userHasCancelledJob()
+                }
+            })
+
         requestDriverVM.triggerClose.observe(viewLifecycleOwner,
             Observer { trigger ->
                 if (trigger) {
@@ -196,6 +206,9 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             confirmPickupLayout.visibility = View.VISIBLE
             confirmBikerLayout.visibility = View.GONE
             setDataPickup()
+        }
+        cancelView.setOnClickListener {
+            requestDriverVM.cancelActiveJob()
         }
         btnConfirmPickup.setOnClickListener {
             if (mMap == null) return@setOnClickListener
@@ -607,7 +620,14 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         confirmBikerLayout.visibility = View.GONE
         confirmPickupLayout.visibility = View.GONE
         jobAcceptedLayout.visibility = View.VISIBLE
+        cancelView.visibility = View.VISIBLE
+    }
 
+    private fun userHasCancelledJob() {
+        confirmBikerLayout.visibility = View.GONE
+        confirmPickupLayout.visibility = View.GONE
+        jobAcceptedLayout.visibility = View.GONE
+        findNavController().popBackStack()
     }
 
     private fun animateMarkerAlpha(marker: Marker, startAlpha: Float, endAlpha: Float, duration: Long) {

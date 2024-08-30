@@ -67,4 +67,5 @@
     <string name="asciiDot">■</string>
     <string name="any_pickup_notes">Any pickup notes?</string>
     <string name="minaway">MIN\nAWAY</string>
+    <string name="decline">Cancel</string>
 </resources>

@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:theme="@style/Theme.Okada">
 
     <FrameLayout
@@ -26,6 +27,19 @@
             android:layout_height="match_parent"
             android:visibility="gone"
             android:background="@color/app_map_darker"/>
+
+        <com.google.android.material.chip.Chip
+            android:id="@+id/chip_cancel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="@dimen/activity_horizontal_margin"
+            android:text="@string/decline"
+            android:textColor="?colorOnSecondary"
+            android:visibility="gone"
+            app:chipBackgroundColor="?colorSecondary"
+            app:chipIcon="@drawable/decline"
+            app:chipIconTint="?colorOnSecondary"
+            tools:visibility="visible" />
 
     </FrameLayout>
 

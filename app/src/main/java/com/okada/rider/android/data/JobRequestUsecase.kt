@@ -79,6 +79,48 @@ class JobRequestUsecase(
         }
     }
 
+    fun cancelJobRequest(completion: (Result<JobInfoModel>) -> Unit) {
+        currentJobId?.let { jobId ->
+            jobRequestService.updateJobStatus(jobId,JobStatus.CANCELLED) { result ->
+                result.fold(onSuccess = {
+                    jobRequestService.fetchCurrentJob(jobId) { result ->
+                        result.fold(onSuccess = {
+                            currentJobId = null
+                            completion(Result.success(it))
+                        }, onFailure = {
+                            // Error occurred
+                            completion(Result.failure(it))
+                        })
+                    }
+                }, onFailure = {
+                    // Error occurred
+                    completion(Result.failure(it))
+                })
+            }
+        }
+    }
+
+    fun updateJobStatusRequest(jobStatus: JobStatus, completion: (Result<JobInfoModel>) -> Unit) {
+        currentJobId?.let { jobId ->
+            // Driver is changed to the new driver
+            jobRequestService.updateJobStatus(jobId,jobStatus) { result ->
+                result.fold(onSuccess = {
+                    jobRequestService.fetchCurrentJob(jobId) { result ->
+                        result.fold(onSuccess = {
+                            completion(Result.success(it))
+                        }, onFailure = {
+                            // Error occurred
+                            completion(Result.failure(it))
+                        })
+                    }
+                }, onFailure = {
+                    // Error occurred
+                    completion(Result.failure(it))
+                })
+            }
+        }
+    }
+
     fun updateJobToInProgress(completion: (Result<Unit>) -> Unit) {
         currentJobId?.let { jobId ->
             // Driver is changed to the new driver

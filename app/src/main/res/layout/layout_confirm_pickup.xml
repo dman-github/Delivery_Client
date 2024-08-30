@@ -5,7 +5,8 @@
     android:id="@+id/layout_confirm_pickup"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:visibility="gone">
+    android:visibility="gone"
+    tools:visibility="visible">
 
     <LinearLayout
         android:layout_width="match_parent"
