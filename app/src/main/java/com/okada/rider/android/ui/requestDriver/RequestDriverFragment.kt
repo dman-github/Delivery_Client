@@ -267,6 +267,8 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         super.onDestroyView()
         _binding = null
         requestDriverVM.clearMessage()
+        requestDriverVM.clearDatabase()
+
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

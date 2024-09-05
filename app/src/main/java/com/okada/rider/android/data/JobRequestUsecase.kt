@@ -135,6 +135,10 @@ class JobRequestUsecase(
         }
     }
 
+    fun removeJobListeners() {
+        jobRequestService.removeJobListener()
+    }
+
     private fun sendDriverRouteRequest(
         jobId: String,
         jobRequest: JobInfoModel,
@@ -168,4 +172,6 @@ class JobRequestUsecase(
             }
         })
     }
+
+
 }

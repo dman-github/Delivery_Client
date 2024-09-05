@@ -250,6 +250,10 @@ class RequestDriverViewModel(
         }
     }
 
+    fun clearDatabase() {
+        jobRequestUsecase.removeJobListeners()
+    }
+
     private fun startRequestTimeoutTimer(driverUid: String) {
         nearestDriverTimeoutHandler = Handler(Looper.getMainLooper())
         nearestDriverTimeoutHandler.postDelayed({

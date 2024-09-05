@@ -2,6 +2,7 @@ package com.okada.rider.android.services
 
 import android.R.attr.name
 import android.location.Location
+import android.util.Log
 import androidx.annotation.UiThread
 import com.google.firebase.database.ChildEventListener
 import com.google.firebase.database.DataSnapshot
@@ -18,7 +19,7 @@ class JobRequestServiceImpl : JobRequestService {
     private val cloudFuncRequestDriverName = "sendPN"
     private val database: FirebaseDatabase = FirebaseDatabase.getInstance()
     private val jobsRef: DatabaseReference = database.getReference("Jobs")
-    private val jobListener: ChildEventListener? = null
+    private var jobListener: ValueEventListener? = null
     private lateinit var newJobRef: DatabaseReference
     override fun sendDriverRouteRequest(
         jobId: String,
@@ -63,6 +64,9 @@ class JobRequestServiceImpl : JobRequestService {
                         completion(Result.success(jobId))
                         //add the listener
                         newJobRef.addValueEventListener(listener)
+                        // remove any previous listener
+                        removeJobListener()
+                        jobListener = listener
                     } else {
                         it.exception?.also { exception ->
                             completion(Result.failure(exception))
