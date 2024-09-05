@@ -194,6 +194,13 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 }
             })
 
+        requestDriverVM.jobCannotBeCancelled.observe(viewLifecycleOwner,
+            Observer { trigger ->
+                if (trigger) {
+                    jobCannotBeCancelled()
+                }
+            })
+
         requestDriverVM.triggerClose.observe(viewLifecycleOwner,
             Observer { trigger ->
                 if (trigger) {
@@ -630,6 +637,10 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         confirmPickupLayout.visibility = View.GONE
         jobAcceptedLayout.visibility = View.GONE
         findNavController().popBackStack()
+    }
+
+    private fun jobCannotBeCancelled() {
+        cancelView.visibility = View.GONE
     }
 
     private fun animateMarkerAlpha(marker: Marker, startAlpha: Float, endAlpha: Float, duration: Long) {

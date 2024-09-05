@@ -56,6 +56,9 @@ class RequestDriverViewModel(
     private val _cancelJobDone = MutableLiveData<Boolean>()
     val cancelJobDone: LiveData<Boolean> = _cancelJobDone
 
+    private val _jobCannotBeCancelled = MutableLiveData<Boolean>()
+    val jobCannotBeCancelled: LiveData<Boolean> = _jobCannotBeCancelled
+
     private val _triggerJobAccepted = MutableLiveData<DriverInfo>()
     val triggerJobAccepted: LiveData<DriverInfo> = _triggerJobAccepted
 
@@ -301,6 +304,7 @@ class RequestDriverViewModel(
                 if (_model.previousJobStatus != JobStatus.IN_PROGRESS) {
                     _model.plotDriverToPickup = false
                 }
+                _jobCannotBeCancelled.value = true
                 checkDriverLocation(jobDetails, JobStatus.IN_PROGRESS)
             }
 
