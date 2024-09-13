@@ -180,6 +180,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
                 Looper.myLooper()
             )
             fetchLastLocation()
+            Log.i("App_info", "onResume  fetchLastLocation")
         } else {
             Log.i("App_info", "onResume  NO permissions")
         }
@@ -194,6 +195,7 @@ class HomeFragment : Fragment(), OnMapReadyCallback {
         ) {
             fusedLocationProviderClient.removeLocationUpdates(locationCallback)
         }
+        Log.i("App_info", "onPause")
     }
 
     override fun onStop() {

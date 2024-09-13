@@ -34,7 +34,7 @@
         />
 
         <activity
-            android:name=".ui.RequestDriverActivity"
+            android:name=".RequestDriverActivity"
             android:exported="false"
             android:label="@string/title_activity_request_driver" />
         <activity

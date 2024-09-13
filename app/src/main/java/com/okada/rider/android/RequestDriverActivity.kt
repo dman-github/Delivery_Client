@@ -1,4 +1,4 @@
-package com.okada.rider.android.ui
+package com.okada.rider.android
 
 import android.Manifest
 import android.animation.ValueAnimator
@@ -27,8 +27,6 @@ import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.maps.model.SquareCap
 import com.google.maps.android.PolyUtil
 import com.google.maps.android.ui.IconGenerator
-import com.okada.rider.android.Common
-import com.okada.rider.android.R
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.databinding.ActivityRequestDriverBinding
 import com.okada.rider.android.databinding.DestinationMarkerBinding
