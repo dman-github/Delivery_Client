@@ -68,4 +68,12 @@
     <string name="any_pickup_notes">Any pickup notes?</string>
     <string name="minaway">MIN\nAWAY</string>
     <string name="decline">Cancel</string>
+    <string name="title_activity_job_detail">JobDetailActivity</string>
+    <string name="trip_detail">Trip Detail</string>
+    <string name="receipt">Receipt</string>
+    <string name="pickup_receipt">Pickup Receipt</string>
+    <string name="base_fare">Base Fare</string>
+    <string name="other_charges">Other charges</string>
+    <string name="distance">Distance</string>
+    <string name="duration">Duration</string>
 </resources>
