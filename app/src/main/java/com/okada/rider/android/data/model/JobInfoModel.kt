@@ -16,6 +16,12 @@ data class JobInfoModel(
 data class JobDetails(
     var type: String? = null,
     var info: String? = null,
+    var distance: Int? = null,
+    var distanceText: String? = null,
+    var time: Int? = null,
+    var timeText: String? = null,
+    var price: Double? = null,
+    var priceText: String? = null,
     var pickupLocation: AppLocation? = null,
     var deliveryLocation: AppLocation? = null,
     var driverLocation: AppLocation? = null,

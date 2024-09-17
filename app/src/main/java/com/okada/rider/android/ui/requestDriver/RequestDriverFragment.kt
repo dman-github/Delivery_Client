@@ -9,8 +9,8 @@ import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
+import android.icu.text.DecimalFormat
 import android.os.Bundle
-import android.transition.Visibility
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -47,7 +47,6 @@ import com.google.android.material.chip.Chip
 import com.google.maps.android.ui.IconGenerator
 import com.okada.rider.android.Common
 import com.okada.rider.android.R
-import com.okada.rider.android.data.model.DeclineRequestEvent
 import com.okada.rider.android.data.model.DriverInfo
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.data.model.SelectedPlaceModel
@@ -75,6 +74,9 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private lateinit var confirmPickupLayout: CardView
     private lateinit var findDriverLayout: CardView
     private lateinit var txtAddressPickup: TextView
+    private lateinit var txtConfirmPrice: TextView
+    private lateinit var txtConfirmDistance: TextView
+
 
     //Job Accepted
     private lateinit var jobAcceptedLayout: CardView
@@ -86,6 +88,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
     private var selectedPlaceEvent: SelectedPlaceEvent? = null
     private var driverMarker: Marker? = null
     private var destinationMarker: Marker? = null
+
     //  private var declineRequestEvent: DeclineRequestEvent? = null
     private lateinit var valueAnimator: ValueAnimator
 
@@ -125,13 +128,19 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         _binding = FragmentRequestDriverBinding.inflate(inflater, container, false)
         val root: View = binding.root
 
+
+        fillMapsView = binding.fillMaps
+        findDriverLayout = binding.layoutFindingYourDriver.layoutFindingYourDriver
+        // Confirm biker
+        confirmBikerLayout = binding.layoutConfirmBiker.layoutConfirmBiker
         btnConfirmBiker = binding.layoutConfirmBiker.btnConfirmRoute
+        txtConfirmPrice = binding.layoutConfirmBiker.priceValue
+        txtConfirmDistance = binding.layoutConfirmBiker.distanceValue
+        // Confirm pickup
+        txtAddressPickup = binding.layoutConfirmPickup.txtAddressPickup
         btnConfirmPickup = binding.layoutConfirmPickup.btnConfirmPickup
         confirmPickupLayout = binding.layoutConfirmPickup.layoutConfirmPickup
-        fillMapsView = binding.fillMaps
-        confirmBikerLayout = binding.layoutConfirmBiker.layoutConfirmBiker
-        findDriverLayout = binding.layoutFindingYourDriver.layoutFindingYourDriver
-        txtAddressPickup = binding.layoutConfirmPickup.txtAddressPickup
+
         // Job accepted
         jobAcceptedLayout = binding.layoutJobDriverInfo.layoutJobAccepted
         img_avatar = binding.layoutJobDriverInfo.imgDriverAvatar
@@ -160,12 +169,13 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         requestDriverVM.updateMap.observe(viewLifecycleOwner,
             Observer { model ->
                 drawPathOfJourney(model)
+                showCompleteDialog()
             })
 
         requestDriverVM.triggerNearestDrivers.observe(viewLifecycleOwner,
             Observer { trigger ->
                 if (trigger) {
-                    selectedPlaceEvent?.let {placeEvent->
+                    selectedPlaceEvent?.let { placeEvent ->
                         findNearByDrivers(placeEvent)
                     }
                 }
@@ -278,6 +288,11 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
     }
 
+    private fun showCompleteDialog () {
+        findNavController().navigate(R.id.action_requestDriverFragment_to_jobCompleteDialogFragment)
+        EventBus.getDefault().post(selectedPlaceEvent)
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         try {
@@ -378,7 +393,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             .include(model.eventDest!!)
             .build()
         //Add icon for origin
-        addOriginMarker(model.boundedTime!!, model.startAddress!!)
+        addOriginMarker(model.durationText!!, model.startAddress!!)
         addDestinationMarker(model.endAddress!!)
 
         val cameraUpdate = CameraUpdateFactory
@@ -387,8 +402,25 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         mMap.moveCamera(cameraUpdate)
         mMap.moveCamera(CameraUpdateFactory.zoomTo(mMap.cameraPosition!!.zoom - 1))
 
+        //Update the distance and time from the model
+        model.distanceText?.let { distance ->
+            model.durationText?.let { timeTxt ->
+                selectedPlaceEvent?.let {placeEvnt->
+                    placeEvnt.distanceText = distance
+                    placeEvnt.durationText = timeTxt
+                    placeEvnt.distance = model.distance!!
+                    placeEvnt.duration = model.duration!!
+                    placeEvnt.price = Common.calculateFeeBasedOnDistanceMetres(model.distance!!)
+                    val df = DecimalFormat("#.##")
+                    placeEvnt.priceText = "£${df.format(placeEvnt.price)}"
+                }
+            }
+        }
+
         //Add Address name
         txtAddressPickup.text = if (model.startAddress != null) model.startAddress else "None"
+        txtConfirmPrice.text = selectedPlaceEvent!!.priceText
+        txtConfirmDistance.text = selectedPlaceEvent!!.distanceText
     }
 
     private fun drawPathOfDriver(model: SelectedPlaceModel) {
@@ -415,7 +447,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             .include(model.eventDest!!)
             .build()
         //Add icon for pickup
-        addPickUpMarkerWithDuration(model.boundedTime!!, model.eventDest!!)
+        addPickUpMarkerWithDuration(model.durationText!!, model.eventDest!!)
         addDriverMarker(model.eventOrigin!!)
 
         val cameraUpdate = CameraUpdateFactory
@@ -427,7 +459,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
     private fun updateDriverMarker(model: SelectedPlaceModel) {
         //Add icon for pickup
-        addPickUpMarkerWithDuration(model.boundedTime!!, model.eventDest!!)
+        addPickUpMarkerWithDuration(model.durationText!!, model.eventDest!!)
         addDriverMarker(model.eventOrigin!!)
 
         val latLngBound = LatLngBounds.Builder().include(model.eventOrigin!!)
@@ -525,7 +557,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
                 .flat(true)
                 .anchor(0.5f, 0.5f)
         )
-        driverMarker?.let { animateMarkerAlpha(it,0f,1f,1000L) }
+        driverMarker?.let { animateMarkerAlpha(it, 0f, 1f, 1000L) }
     }
 
     private fun addMarkerWithPulseMarker() {
@@ -581,7 +613,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         }
         spinAnimator?.start()
         target?.let {
-            selectedPlaceEvent?.let{event->
+            selectedPlaceEvent?.let { event ->
                 // The camera origin might be different from the original pickup location
                 event.origin = it
                 findNearByDrivers(event)
@@ -643,7 +675,12 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         cancelView.visibility = View.GONE
     }
 
-    private fun animateMarkerAlpha(marker: Marker, startAlpha: Float, endAlpha: Float, duration: Long) {
+    private fun animateMarkerAlpha(
+        marker: Marker,
+        startAlpha: Float,
+        endAlpha: Float,
+        duration: Long
+    ) {
         val alphaAnimator = ValueAnimator.ofFloat(startAlpha, endAlpha).apply {
             this.duration = duration
             addUpdateListener { animation ->
@@ -652,7 +689,6 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             start()
         }
     }
-
 
 
 }

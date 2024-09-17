@@ -37,5 +37,15 @@
     <fragment
         android:id="@+id/requestDriverFragment"
         android:name="com.okada.rider.android.ui.requestDriver.RequestDriverFragment"
-        android:label="RequestDriverFragment" />
+        android:label="RequestDriverFragment"
+        android:layout="@layout/fragment_request_driver" >
+        <action
+            android:id="@+id/action_requestDriverFragment_to_jobCompleteDialogFragment"
+            app:destination="@id/jobCompleteDialogFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/jobCompleteDialogFragment"
+        android:name="com.okada.rider.android.ui.requestDriver.JobCompleteFragment"
+        android:label="JobCompleteDialogFragment"
+        android:layout="@layout/fragment_job_complete" />
 </navigation>

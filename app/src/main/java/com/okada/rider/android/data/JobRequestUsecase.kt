@@ -34,6 +34,12 @@ class JobRequestUsecase(
             driverUid, userUid, JobStatus.NEW, JobDetails(
                 "bike",
                 "some info here about the ride",
+                selectedJobPositions.distance,
+                selectedJobPositions.distanceText,
+                selectedJobPositions.duration,
+                selectedJobPositions.durationText,
+                selectedJobPositions.price,
+                selectedJobPositions.priceText,
                 AppLocation(selectedJobPositions.origin.latitude,
                     selectedJobPositions.origin.longitude),
                 AppLocation(selectedJobPositions.destination.latitude,

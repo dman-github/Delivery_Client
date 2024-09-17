@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:background="@color/black"
     android:orientation="vertical"
-    tools:context=".JobDetailActivity">
+    tools:context=".ui.requestDriver.JobCompleteFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,18 +15,13 @@
         android:orientation="vertical"
         android:padding="16dp">
 
-        <ImageView
-            android:id="@+id/btnBack"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/back_arrow"
-            app:tint="@color/white" />
 
         <TextView
-            android:id="@+id/trip_detail"
+            android:id="@+id/trip_complete_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/trip_detail"
+            android:layout_gravity="center_horizontal"
+            android:text="@string/trip_complete"
             android:textColor="@color/app_grey"
             android:textSize="30sp" />
     </LinearLayout>
@@ -58,7 +53,7 @@
                     tools:text="19/4/2024 2.30pm" />
 
                 <TextView
-                    android:id="@+id/text_price"
+                    android:id="@+id/text_total"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/black"
@@ -90,21 +85,19 @@
 
                     <TextView
                         android:id="@+id/text_origin"
-                        android:layout_marginStart="10dp"
-                        android:textColor="@android:color/darker_gray"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text = "12 Raven Road, Didcot"
-                        />
+                        android:layout_marginStart="10dp"
+                        android:textColor="@android:color/darker_gray"
+                        tools:text="12 Raven Road, Didcot" />
 
                 </LinearLayout>
 
                 <View
                     android:layout_width="1dp"
-                    android:background="@color/app_light_grey"
+                    android:layout_height="30dp"
                     android:layout_marginStart="10dp"
-                    android:layout_height="30dp">
-                </View>
+                    android:background="@color/app_light_grey"></View>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -118,13 +111,11 @@
 
                     <TextView
                         android:id="@+id/text_destination"
-                        android:layout_marginStart="10dp"
-                        android:textColor="@android:color/darker_gray"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        tools:text = "12 Raven Road, Didcot"
-                        />
-
+                        android:layout_marginStart="10dp"
+                        android:textColor="@android:color/darker_gray"
+                        tools:text="12 Raven Road, Didcot" />
 
 
                 </LinearLayout>
@@ -140,23 +131,26 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@android:color/darker_gray"
                 android:orientation="vertical"
-                android:padding="20dp"
-                android:background="@android:color/darker_gray">
+                android:padding="20dp">
+
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:text="@string/receipt"/>
+                    android:text="@string/receipt" />
 
             </LinearLayout>
 
             <TextView
-                android:text="@string/pickup_receipt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:textSize="15sp"
+                android:textStyle="bold"
                 android:layout_marginBottom="10dp"
-                android:layout_marginTop="10dp"/>
+                android:text="@string/pickup_receipt" />
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -174,7 +168,7 @@
                 <TextView
                     android:id="@+id/text_fare"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                    android:layout_height="match_parent"
                     android:textColor="@color/black"
                     tools:text="$ 3.50" />
 

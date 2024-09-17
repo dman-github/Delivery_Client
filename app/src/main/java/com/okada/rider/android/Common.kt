@@ -10,7 +10,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.content.res.Resources
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.os.Build
@@ -28,7 +27,8 @@ object Common {
     val PICKUP_LOCATION: String = "pickupLoc"
     val REQUEST_DRIVER_MSG_TITLE: String = "Driver requested!"
     val DECLINE_REQUEST_MSG_TITLE: String = "Request Cancelled!"
-
+    val BASE_FARE: Double = 5.0
+    val EXTRA_FARE: Double = 2.0
     fun buildFullname(): String {
         return StringBuilder(currentUser!!.firstname)
             .append(" ")
@@ -132,15 +132,19 @@ object Common {
             begin.latitude < end.latitude && begin.longitude < end.longitude -> {
                 (Math.toDegrees(atan(lng / lat))).toFloat()
             }
+
             begin.latitude >= end.latitude && begin.longitude < end.longitude -> {
                 ((90 - Math.toDegrees(atan(lng / lat))) + 90).toFloat()
             }
+
             begin.latitude >= end.latitude && begin.longitude >= end.longitude -> {
                 (Math.toDegrees(atan(lng / lat)) + 180).toFloat()
             }
+
             begin.latitude < end.latitude && begin.longitude >= end.longitude -> {
                 ((90 - Math.toDegrees(atan(lng / lat))) + 270).toFloat()
             }
+
             else -> -1f
         }
     }
@@ -165,22 +169,21 @@ object Common {
             val firstIndexMins = duration.indexOf("mins")
             // Remove the space+mins from the duration and add a carriage return
             return "${duration.substring(0, firstIndexMins - 1)}\nmins"
-        }
-        else
-            return duration.substring(0,duration.indexOf(" "))
+        } else
+            return duration.substring(0, duration.indexOf(" "))
     }
 
     fun formatDurationWithoutMins(duration: String): CharSequence? {
-        return duration.substring(0,duration.indexOf(" "))
+        return duration.substring(0, duration.indexOf(" "))
     }
 
     fun formatAddress(startAddress: String): CharSequence? {
         val firstIndexComma = startAddress.indexOf(",")
-        return startAddress.substring(0,firstIndexComma)
+        return startAddress.substring(0, firstIndexComma)
     }
 
     fun valueAnimate(duration: Int, listener: AnimatorUpdateListener): ValueAnimator {
-        val va = ValueAnimator.ofFloat(0f,100f)
+        val va = ValueAnimator.ofFloat(0f, 100f)
         va.duration = duration.toLong()
         va.addUpdateListener(listener)
         va.repeatCount = ValueAnimator.INFINITE
@@ -190,8 +193,17 @@ object Common {
     }
 
     fun isDarkMode(context: Context): Boolean {
-        val darkModeFlag = context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
+        val darkModeFlag =
+            context.resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
         return darkModeFlag == Configuration.UI_MODE_NIGHT_YES
+    }
+
+    fun calculateFeeBasedOnDistanceMetres(distance: Int): Double {
+        if (distance <= 1000) {
+            return BASE_FARE
+        } else {
+            return (EXTRA_FARE * (BASE_FARE / 1000) * (distance - 1000)) + BASE_FARE
+        }
     }
 
 

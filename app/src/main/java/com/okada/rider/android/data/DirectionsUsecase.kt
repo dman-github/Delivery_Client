@@ -55,10 +55,18 @@ class DirectionsUsecase() {
                             val legsObject = legs.getJSONObject(0)
 
                             val time = legsObject.getJSONObject(("duration"))
-                            val duration = time.getString("text")
-                            placeModel.boundedTime = duration
+                            val timeText = time.getString("text")
+                            placeModel.durationText = timeText
+                            placeModel.duration = time.getInt("value")
+
+                            val distance = legsObject.getJSONObject(("distance"))
+                            val distanceText = distance.getString("text")
+                            placeModel.distanceText = distanceText
+                            placeModel.distance = distance.getInt("value")
+
                             placeModel.startAddress = legsObject.getString("start_address")
                             placeModel.endAddress = legsObject.getString("end_address")
+
                             completion(Result.success(placeModel))
                         } catch (e: Exception) {
                             completion(Result.failure(e))
