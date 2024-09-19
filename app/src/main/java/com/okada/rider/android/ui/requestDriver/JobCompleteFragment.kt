@@ -1,17 +1,19 @@
 package com.okada.rider.android.ui.requestDriver
 
+import android.content.DialogInterface
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.compose.ui.text.intl.Locale
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.fragment.findNavController
 import com.okada.rider.android.R
 import com.okada.rider.android.data.model.SelectedPlaceEvent
 import com.okada.rider.android.databinding.FragmentJobCompleteBinding
-import com.okada.rider.android.databinding.FragmentRequestDriverBinding
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -44,12 +46,20 @@ class JobCompleteFragment : DialogFragment() {
     // onDestroyView.
     private val binding get() = _binding!!
 
+
+    override fun onDismiss(dialog: DialogInterface) {
+        super.onDismiss(dialog)
+        dismissAndPopFragment()
+    }
+
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         _binding = FragmentJobCompleteBinding.inflate(inflater, container, false)
         val root: View = binding.root
+        this.dialog!!.setCanceledOnTouchOutside(false)
         init()
         return root
     }
@@ -75,6 +85,25 @@ class JobCompleteFragment : DialogFragment() {
         super.onStart()
         if (!EventBus.getDefault().isRegistered(this))
             EventBus.getDefault().register(this)
+    }
+
+    private fun dismissAndPopFragment() {
+        // Pop Fragment just below the dialog fragment
+        findNavController().popBackStack(R.id.requestDriverFragment, true)
+    }
+
+    override fun onPause() {
+        super.onPause()
+        Log.i("App_info", "Job complete fragment is PAUSED")
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.i("App_info", "Job complete fragment  is RESUMED")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("App_info", "Job complete fragment  is Destroyed!!")
     }
 
 
