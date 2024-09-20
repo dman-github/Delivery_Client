@@ -169,7 +169,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
         requestDriverVM.updateMap.observe(viewLifecycleOwner,
             Observer { model ->
                 drawPathOfJourney(model)
-                showCompleteDialog()
+                //showCompleteDialog()
             })
 
         requestDriverVM.triggerNearestDrivers.observe(viewLifecycleOwner,
@@ -208,6 +208,13 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             Observer { trigger ->
                 if (trigger) {
                     jobCannotBeCancelled()
+                }
+            })
+  
+        requestDriverVM.triggerJobCompleted.observe(viewLifecycleOwner,
+            Observer { trigger ->
+                if (trigger) {
+                    showCompleteDialog()
                 }
             })
 
@@ -288,9 +295,23 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
 
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.i("App_info", "Request Driver is PAUSED")
+    }
+    override fun onResume() {
+        super.onResume()
+        Log.i("App_info", "Request Driver is RESUMED")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        Log.i("App_info", "Request Driver is Destroyed!!")
+    }
+
     private fun showCompleteDialog () {
+        EventBus.getDefault().postSticky(selectedPlaceEvent)
         findNavController().navigate(R.id.action_requestDriverFragment_to_jobCompleteDialogFragment)
-        EventBus.getDefault().post(selectedPlaceEvent)
     }
 
     override fun onMapReady(googleMap: GoogleMap) {

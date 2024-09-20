@@ -62,6 +62,9 @@ class RequestDriverViewModel(
     private val _triggerJobAccepted = MutableLiveData<DriverInfo>()
     val triggerJobAccepted: LiveData<DriverInfo> = _triggerJobAccepted
 
+    private val _triggerJobCompleted = MutableLiveData<Boolean>()
+    val triggerJobCompleted: LiveData<Boolean> = _triggerJobCompleted
+
     //Model
     private val _model = RequestDriverModel()
     private lateinit var nearestDriverTimeoutHandler: Handler
@@ -308,7 +311,9 @@ class RequestDriverViewModel(
                 checkDriverLocation(jobDetails, JobStatus.IN_PROGRESS)
             }
 
-            JobStatus.COMPLETED -> {}
+            JobStatus.COMPLETED -> {
+                _triggerJobCompleted.value = true
+            }
         }
     }
 
