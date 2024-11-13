@@ -5,6 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("com.google.gms.google-services")
     id("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    id("com.google.firebase.crashlytics")
 }
 
 android {
@@ -137,5 +138,9 @@ dependencies {
 
     //Eventbus
     implementation("org.greenrobot:eventbus:3.3.1")
+
+    //Crashlytics
+    implementation("com.google.firebase:firebase-crashlytics:19.2.1")
+    implementation("com.google.firebase:firebase-analytics:22.1.2")
 
 }
