@@ -21,3 +21,9 @@ app/release/output-metadata.json
 apiKeys.properties
 .idea/deploymentTargetSelector.xml
 .idea/vcs.xml
+misc.xml
+compiler.xml
+.idea/gradle.xml
+.idea/runConfigurations.xml
+.idea/codeStyles/codeStyleConfig.xml
+.idea/codeStyles/Project.xml
