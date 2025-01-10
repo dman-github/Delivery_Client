@@ -637,6 +637,7 @@ class RequestDriverFragment : Fragment(), OnMapReadyCallback {
             selectedPlaceEvent?.let { event ->
                 // The camera origin might be different from the original pickup location
                 event.origin = it
+                requestDriverVM.requestCycleParamsReset()
                 findNearByDrivers(event)
             }
         }

@@ -14,7 +14,7 @@ android {
 
     defaultConfig {
         applicationId = "com.okada.rider.android"
-        minSdk = 24
+        minSdk = 26
         targetSdk = 34
         versionCode = 16
         versionName = "1.15"

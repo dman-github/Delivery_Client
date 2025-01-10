@@ -89,6 +89,10 @@ class RequestDriverViewModel(
         directionsUsecase.closeConnection()
     }
 
+    fun requestCycleParamsReset() {
+        _model.resetRequestCycleParams()
+    }
+
 
     fun calculatePath(event: SelectedPlaceEvent) {
         //fetch directions between the 2 points from the Google directions api
@@ -153,8 +157,9 @@ class RequestDriverViewModel(
                 currentRiderLocation.longitude = pt.longitude
                 nearestDrivers.forEach() { driver ->
                     driver.key?.let { driverUID ->
-                        // ignore the drivers that have declined
-                        if (!_model.declinedDrivers.contains(driverUID)) {
+                        // ignore the drivers that have declined or have timed out for this cycle
+                        if (!_model.declinedDrivers.contains(driverUID)
+                            && !_model.timedOutDrivers.contains(driverUID)) {
                             driver.geoLocation?.let { loc ->
                                 val driverLocation = Location("")
                                 driverLocation.latitude = loc.latitude
@@ -173,11 +178,20 @@ class RequestDriverViewModel(
                         sendDriverRequest(selectedJobPositions, driver, uid)
                     }
                 } ?: run {
-                    _showMessage.value = "No drivers have accepted the job!!"
-                    _triggerClose.value = true
+                    // Here we check whether we need to do another cycle
+                    if (_model.shouldRetryRequest()) {
+                        Log.i("App_info", "Retrying!!")
+                        _model.timedOutDrivers = mutableListOf()
+                        _model.declinedDrivers = mutableListOf()
+                        _triggerNearestDrivers.value = true
+                    } else {
+                        _showMessage.value = "No drivers have accepted the job!!"
+                        _triggerClose.value = true
+                    }
                 }
             } else {
                 _showMessage.value = "Drivers not found"
+                _triggerClose.value = true
             }
         }
     }
@@ -263,7 +277,7 @@ class RequestDriverViewModel(
     private fun startRequestTimeoutTimer(driverUid: String) {
         nearestDriverTimeoutHandler = Handler(Looper.getMainLooper())
         nearestDriverTimeoutHandler.postDelayed({
-            _model.declinedDrivers.add(driverUid)
+            _model.timedOutDrivers.add(driverUid)
             _triggerNearestDrivers.value = true
         }, 30000)
     }
