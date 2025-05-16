@@ -21,7 +21,7 @@ class RequestDriverModel {
     var plotDriverToPickup = false
     var plotDriverToDest = false
     private val requestCycleLimit = 3;
-    private val requestCycleDurationLimit = 30;
+    private val requestCycleDurationLimit = 60;
     private var requestCycleCount = 0;
     private var requestCycleStartTime = LocalDateTime.now()
 
