@@ -245,7 +245,10 @@ class HomeViewModel(
                             if (_model.driversSubscribed.containsKey(uid)) {
                                 val marker = _model.mapMarkers[uid]
                                 val oldPosition = _model.driversSubscribed.get(uid)
-
+                                if (oldPosition!!.isRun) {
+                                    // Animation in progress so we must stop it and restart with updated start location
+                                    oldPosition.handler?.removeCallbacksAndMessages(null)
+                                }
                                 val from = StringBuilder()
                                     .append(oldPosition?.geoQueryModel?.l?.get(0))
                                     .append(",")
@@ -283,6 +286,9 @@ class HomeViewModel(
         to: String
     ) {
         if (!newData.isRun) {
+            // Animation is active
+            newData.isRun = true
+            _model.driversSubscribed.put(uid, newData)
             //fetch directions between the 2 points from the Google directions api
             directionsUsecase.getDirections(from, to, _model.apiKey) { result ->
                 result.onSuccess { model ->
@@ -294,7 +300,6 @@ class HomeViewModel(
                         newData.next = 1
                         val runnable = object : Runnable {
                             override fun run() {
-                                //newData.isRun = true // isRun might need to go here
                                 newData.polylineList?.let { list ->
                                     // Takes 2 points at a time
                                     if (list.size > 1) {
@@ -347,17 +352,17 @@ class HomeViewModel(
                                             }
                                         }
                                         if (newData.index < list.size - 2) {
-                                            // Keep running a new animation after 1.5s
+                                            // Keep running a new animation after 1s (the old animation lasts 1s too)
                                             newData.handler!!.postDelayed(this, 1000)
                                         } else if (newData.index < list.size - 1) {
                                             newData.isRun = false
-                                            _model.driversSubscribed.put(uid, newData)
+                                            // We have finished the animating the entire route so we can try another one.
                                         }
                                     }
                                 }
                             }
                         }
-                        newData.handler!!.postDelayed(runnable, 1500)
+                        newData.handler!!.postDelayed(runnable, 0)
                     } catch (e: Exception) {
                         _showSnackbarMessage.value = e.message
                     }
