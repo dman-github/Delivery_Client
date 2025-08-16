@@ -1,38 +1,36 @@
-# Delivery Client App 📱🚚
+# Delivery Client 🚴📦
 
-This is the **Delivery Client** side of a biker pickup and delivery system, built using **Kotlin** for Android. Customers can request item pickups, track their delivery in real time, and get notified when deliveries are completed.
+A mobile client app for managing delivery requests, showing nearby bikers, and tracking the delivery process from pickup to completion.
 
-## 📦 Features
+## 📽 Demo
 
-- 📝 **Create a delivery request**
-- 📍 **Pin pickup and drop-off locations** on a map
-- 🚴 **Track assigned driver’s location**
-- 🔔 **Receive status updates** and notifications
-- 📄 **View delivery history**
+https://github.com/dman-github/Delivery_Client/assets/your-asset-id/moving_bikers.mp4  
 
-## 🎥 Demo Video
-
-Watch the full client-side experience:  
-👉 [Delivery Client App Demo](https://your-link-to-video.com)  
-> Replace with your actual video link (YouTube, Google Drive, etc.)
+*(If GitHub doesn’t autoplay, consider uploading the video to GitHub Releases or YouTube and linking here.)*
 
 ## 📸 Screenshots
 
-| Request Delivery | Map Tracking | Status Updates |
-|------------------|--------------|----------------|
-| ![Request](screenshots/request.png) | ![Map](screenshots/tracking.png) | ![Status](screenshots/status.png) |
+| From Address | To Address | Confirm Pickup |
+|--------------|------------|----------------|
+| ![From Address](assets/screens/1_from_address_picker.png) | ![To Address](assets/screens/2_to_address_picker.png) | ![Confirm Pickup](assets/screens/3_from_and_to_pickup.png) |
 
-> 💡 Add your actual screenshot images to a `screenshots/` folder in the repo and update the filenames.
+| Pickup on the Way | Driver Arrived | On Route to Destination | Complete |
+|-------------------|----------------|--------------------------|----------|
+| ![Pickup](assets/screens/4_pickup_on_the_way.png) | ![Driver Arrived](assets/screens/5_driver_arrived.png) | ![On Route](assets/screens/6_on_route_to_des.png) | ![Complete](assets/screens/7_complete.png) |
 
-## 🛠️ Built With
+## 🚀 Features
+- Live tracking of all bikers near the user’s position  
+- Address picker for delivery origin & destination  
+- Real-time status updates: pickup, en route, arrived, completed  
+- Smooth UI with visual progress steps  
 
-- **Kotlin**
-- **Android Jetpack (ViewModel, LiveData, Navigation)**
-- **Google Maps SDK**
-- **Firebase** (if used)
-- **MVVM architecture**
+## 🛠 Tech Stack
+- Flutter / Android (adjust depending on your tech)
+- Google Maps API (if applicable)
+- Firebase (if applicable)
 
-## 🔗 Related Projects
-
-- [Driver App (Delivery Driver)](https://github.com/dman-github/Delivery_Driver)
-
+## ⚙️ Installation
+```bash
+git clone https://github.com/dman-github/Delivery_Client.git
+cd Delivery_Client
+# Follow setup instructions (Flutter/Gradle/etc.)
