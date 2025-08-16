@@ -2,7 +2,7 @@
 
 A mobile client app for managing delivery requests, showing nearby bikers, and tracking the delivery process from pickup to completion.
 
-## 📸 Screenshots
+## Screenshots
 
 | From Address | To Address | Confirm Pickup |
 |--------------|------------|----------------|
