@@ -12,11 +12,11 @@ https://github.com/dman-github/Delivery_Client/assets/your-asset-id/moving_biker
 
 | From Address | To Address | Confirm Pickup |
 |--------------|------------|----------------|
-| ![From Address](screens/1_from_address_picker.png) | ![To Address](screens/2_to_address_picker.png) | ![Confirm Pickup](screens/3_from_and_to_pickup.png) |
+| ![From Address](assets/screens/1_from_address_picker.png) | ![To Address](assets/screens/2_to_address_picker.png) | ![Confirm Pickup](assets/screens/3_from_and_to_pickup.png) |
 
 | Pickup on the Way | Driver Arrived | On Route to Destination | Complete |
 |-------------------|----------------|--------------------------|----------|
-| ![Pickup](screens/4_pickup_on_the_way.png) | ![Driver Arrived](screens/5_driver_arrived.png) | ![On Route](screens/6_on_route_to_des.png) | ![Complete](screens/7_complete.png) |
+| ![Pickup](assets/screens/4_pickup_on_the_way.png) | ![Driver Arrived](assets/screens/5_driver_arrived.png) | ![On Route](assets/screens/6_on_route_to_des.png) | ![Complete](assets/screens/7_complete.png) |
 
 ## 🚀 Features
 - Live tracking of all bikers near the user’s position  
