@@ -13,14 +13,10 @@ A mobile client app for managing delivery requests, showing nearby bikers, and t
 | ![Pickup](assets/screens/4_pickup_on_the_way.png) | ![Driver Arrived](assets/screens/5_driver_arrived.png) | ![On Route](assets/screens/6_on_route_to_des.png) | ![Complete](assets/screens/7_complete.png) |
 
 ## Features
-- Live tracking of all bikers near the user’s position
-- Address picker for delivery origin & destination  
-- Real-time status updates: pickup, en route, arrived, completed  
-- Smooth UI with visual progress steps
 - **Authentication** for Users
 - **Real-time location tracking** (Google Maps)
 - **View nearby biker positions in real time**
-- **Push notifications when biker arrives and job completes**
+- **Real-time status updates: pickup, en route, arrived, completed via push notifications**
 - **MVVM** + **Services**
 
 <div align="center">
